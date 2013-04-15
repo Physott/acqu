@@ -32,7 +32,13 @@ make || error_exit "Cannot compile CaLib, check previous output"
 cd $acqu
 make AcquRoot || error_exit "Cannot compile acqu_user, check previous output" 
 
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo "SUCCESSFULLY COMPILED"
+echo ""
 echo "You might want to add 'source $acqu_dir/setup.sh' to your ~/.bashrc"
 echo "This automatically sets the appropriate environment variables to run acqu"
 

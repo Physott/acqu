@@ -1,9 +1,7 @@
 # ignore ROOT dictionaries
-root/src/*Dict.*
-data
-data.*/*
-scratch
-scratch/*
-Thread*
+/root/src/*Dict.*
+/data*
+/scratch
+/Thread*.txt
 *.log
-result/*
+/result/
