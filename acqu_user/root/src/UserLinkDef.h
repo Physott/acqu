@@ -31,6 +31,7 @@
 #pragma link C++ class TA2MesonPhysics+;
 #pragma link C++ class TA2AccessSQL+;
 #pragma link C++ class TA2BasePhysics+;
+#pragma link C++ class TA2RootTree+;
 #pragma link C++ class TA2TriggerPhysics+;
 // TA2My... extension classes
 //#pragma link C++ class TA2MyAnalysis+;
@@ -72,5 +73,7 @@
 #pragma link C++ class TA2CentralTrack++;
 #pragma link C++ class TA2TrackLine++;
 #pragma link C++ class TA2MwpcIntersection++;
+
+#pragma link C++ class TA2RootTree+;
 
 #endif

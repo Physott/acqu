@@ -27,6 +27,7 @@
 #include "TA2MesonPhysics.h"
 #include "TA2AccessSQL.h"
 #include "TA2BasePhysics.h"
+#include "TA2RootTree.h"
 #include "TA2TriggerPhysics.h"
 #include "TA2Pi0Compton.h"
 #include "TA2MyCrystalBall.h"
@@ -82,6 +83,7 @@ static const Map_t kKnownChild[] =
   {"TA2MesonPhysics",     EA2MesonPhysics},
   {"TA2AccessSQL",		  EA2AccessSQL},
   {"TA2BasePhysics",      EA2BasePhysics},
+  {"TA2RootTree",  		  EA2RootTree},
   {"TA2TriggerPhysics",   EA2TriggerPhysics},
   {"TA2MyAnalysis",       EA2MyAnalysis},
   {"TA2MyCalibration",    EA2MyCalibration},
@@ -165,6 +167,9 @@ TA2DataManager* TA2UserAnalysis::CreateChild(const char* name, Int_t a)
    case EA2BasePhysics:
     //Base physics class with particle collection and trigger
     return new TA2BasePhysics(name, this);
+   case EA2RootTree:
+    //physics class for TTree Output
+    return new TA2RootTree(name, this);
    case EA2TriggerPhysics:
     //Trigger threshold physics class
     return new TA2TriggerPhysics(name, this);
