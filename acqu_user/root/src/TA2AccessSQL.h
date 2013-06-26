@@ -63,7 +63,6 @@ private:
 	
 	void	LoadDetectors(TA2DataManager* parent, Int_t depth);
 	void 	ApplyCaLib();
-	Int_t	GetRunNumber();
 
 protected:
 	Int_t			fRunNumber;
@@ -86,6 +85,8 @@ public:
     virtual void PostInit();
     virtual void LoadVariable();
     virtual	void Reconstruct();
+    
+    Int_t	GetRunNumber();
     
     ClassDef(TA2AccessSQL, 1)
 };

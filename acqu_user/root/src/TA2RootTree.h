@@ -62,8 +62,6 @@ public:
     virtual void PostInit();                //Initialisation etc.
     virtual void Finish();                //Initialisation etc.
 
-
-
 	ClassDef(TA2RootTree, 1)
 };
 

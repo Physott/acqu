@@ -93,10 +93,13 @@ void    TA2RootTree::PostInit()
     Char_t	strFile[64];
     Char_t	strTree[64];
     
+    if(treeCount)
+		printf("Write trees for RunNumber : %d\n", GetRunNumber());
+    
     for(int i=0; i<treeCount; i++)
     {
-		sprintf(strTree, "%dH_%dP_%dPp", photons[i], protons[i], piPlus[i]);
-		sprintf(strFile, "%s/%s_%s.root", outputFolder, fileName, strTree);
+		sprintf(strTree, "%dG_%dP_%dPp", photons[i], protons[i], piPlus[i]);
+		sprintf(strFile, "%s/%s_%d_%s.root", outputFolder, fileName, GetRunNumber(), strTree);
 		file[i]	= new TFile(strFile,"RECREATE");
 		sprintf(strFile, "tree_%s", strTree);
 		tree[i]	= new TTree(strFile, strTree);
