@@ -61,9 +61,13 @@ void    TA2RootTree::SetConfig(Char_t* line, Int_t key)
     {
     case ERT_OUTPUT_FOLDER:
         strcpy(outputFolder,line);
+        while(outputFolder[strlen(outputFolder)-1]=='\n' || outputFolder[strlen(outputFolder)-1]=='\r')
+			outputFolder[strlen(outputFolder)-1]='\0';
         return;
     case ERT_FILE_NAME:
         strcpy(fileName,line);
+        while(fileName[strlen(fileName)-1]=='\n' || fileName[strlen(fileName)-1]=='\r')
+			fileName[strlen(fileName)-1]='\0';
         return;
     case ERT_PARAMETERS:
         if(treeCount>=(TA2ROOTTREE_MAX_MULTIPLICITY-1))
