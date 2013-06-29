@@ -26,6 +26,7 @@ enum {
     ERT_OUTPUT_FOLDER = 30250,
     ERT_FILE_NAME,
     ERT_PARAMETERS,
+    ERT_MAX_TAGGED,
 };
 
 static const Map_t RootTreeConfigKeys[] = {
@@ -33,6 +34,7 @@ static const Map_t RootTreeConfigKeys[] = {
     {"RootTree-Output-Folder:"       	, ERT_OUTPUT_FOLDER},
     {"RootTree-File-Name:"           	, ERT_FILE_NAME},
     {"RootTree-Parameters:"				, ERT_PARAMETERS},
+    {"RootTree-Max-Tagged:"           	, ERT_MAX_TAGGED},
     // Termination
     {NULL        , -1           }
 };
@@ -50,6 +52,7 @@ private:
     Int_t		photons[TA2ROOTTREE_MAX_MULTIPLICITY];
     Int_t		protons[TA2ROOTTREE_MAX_MULTIPLICITY];
     Int_t		piPlus[TA2ROOTTREE_MAX_MULTIPLICITY];
+    Int_t		maxTaggedSaved;
 
 public:
 	TA2RootTree(const char*, TA2Analysis*);

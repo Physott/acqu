@@ -22,7 +22,8 @@ ClassImp(TA2RootTree)
 TA2RootTree::TA2RootTree(const char* Name, TA2Analysis* Analysis) : TA2BasePhysics(Name, Analysis),
                                                                     file(0),
                                                                     tree(0),
-                                                                    treeCount(0)
+                                                                    treeCount(0),
+                                                                    maxTaggedSaved(16)
 {
     strcpy(outputFolder,"~");
     strcpy(fileName,"TTreeOutput");
@@ -78,6 +79,9 @@ void    TA2RootTree::SetConfig(Char_t* line, Int_t key)
 		sscanf(line, "%d %d %d", &photons[treeCount], &protons[treeCount], &piPlus[treeCount]);
 		treeCount++;
         return;
+	case ERT_MAX_TAGGED:
+        maxTaggedSaved=atoi(line);
+        return;
     default:
         TA2BasePhysics::SetConfig(line, key);
     }
@@ -89,7 +93,7 @@ void    TA2RootTree::PostInit()
     
     printf("Init %d trees\n", treeCount);
     for(int i=0; i<treeCount; i++)
-		printf("\tInit tree with %d Photons, %d Proton and %d charged Pis\n", photons[i], protons[i], piPlus[i]);
+		printf("\tInit tree with %d Photons, %d Proton, %d charged Pis\n", photons[i], protons[i], piPlus[i]);
 
     file	= new TFile*[treeCount];
     tree	= new TTree*[treeCount];
@@ -123,6 +127,15 @@ void    TA2RootTree::PostInit()
 			sprintf(strFile,"PiPlus%d.", k);
 			tree[i]->Branch(strFile,"TLorentzVector",PiPlus[k].GetP4A(),8000,1);
 		}
+		if(maxTaggedSaved > nBeam)
+			maxTaggedSaved = nBeam;
+		printf("Max Number of saved tagged photons is set to %d\n", maxTaggedSaved);
+		tree[i]->Branch("nTagged",&nTagged,"nTagged/I");
+		for(int k=0; k<maxTaggedSaved; k++)
+		{
+			sprintf(strFile,"Beam%d.", k);
+			tree[i]->Branch(strFile,"TLorentzVector",Tagged[k].GetP4A(),8000,1);
+		}
 	}
 
 }
@@ -145,9 +158,11 @@ void    TA2RootTree::Reconstruct()
 	if(multiplicity == -1)
 		return;
 		
-	file[multiplicity]->cd();
+	
+	if(nTagged > maxTaggedSaved)
+		printf("Number of tagged photons is %d, Number of saved tagged photons is %d. Increase >RootTree-Max-Tagged:< in the config file!\n", nTagged, maxTaggedSaved);
+	
 	tree[multiplicity]->Fill();
-	tree[multiplicity]->FlushBaskets();
 }
 
 void    TA2RootTree::Finish()
