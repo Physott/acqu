@@ -27,6 +27,7 @@ enum {
     ERT_FILE_NAME,
     ERT_PARAMETERS,
     ERT_MAX_TAGGED,
+    ERT_TA2PARTICLE,
 };
 
 static const Map_t RootTreeConfigKeys[] = {
@@ -35,6 +36,7 @@ static const Map_t RootTreeConfigKeys[] = {
     {"RootTree-File-Name:"           	, ERT_FILE_NAME},
     {"RootTree-Parameters:"				, ERT_PARAMETERS},
     {"RootTree-Max-Tagged:"           	, ERT_MAX_TAGGED},
+    {"RootTree-TA2Particle:"           	, ERT_TA2PARTICLE},
     // Termination
     {NULL        , -1           }
 };
@@ -52,8 +54,17 @@ private:
     Int_t		photons[TA2ROOTTREE_MAX_MULTIPLICITY];
     Int_t		protons[TA2ROOTTREE_MAX_MULTIPLICITY];
     Int_t		piPlus[TA2ROOTTREE_MAX_MULTIPLICITY];
-    Int_t		maxTaggedSaved;
-
+    
+    Bool_t		ta2Particle;
+    
+    Int_t		nTaggedSave;
+    Double_t*	TaggedEnergy;
+    Double_t*	TaggedTime;
+    
+    
+    void	InitTLorentzVectors(TFile** file, TTree** tree);
+    void	InitTA2Particles(TFile** file, TTree** tree);
+    
 public:
 	TA2RootTree(const char*, TA2Analysis*);
 	~TA2RootTree();

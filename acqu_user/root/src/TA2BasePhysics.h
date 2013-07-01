@@ -14,7 +14,7 @@
 #include "TFile.h"
 
 //Defines the number of separate time windows (for prompt/random hits)
-#define NWINDOW 11
+#define NWINDOW 3
 
 class TA2Apparatus;
 
