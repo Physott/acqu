@@ -210,9 +210,9 @@ void    TA2RootTree::Reconstruct()
 	nTaggedSave	= 0;
 	for(int i=0; i<nTagged; i++)
 	{
-		TaggedEnergy[nTaggedSave]	= Tagger->GetParticles(i).GetE();
+		TaggedEnergy[nTaggedSave]	= fTagger->GetParticles(i).GetE();
 		//printf("%lf\n", Tagger->GetParticles(i).GetE());
-		TaggedTime[nTaggedSave]		= Tagger->GetParticles(i).GetTime();
+		TaggedTime[nTaggedSave]		= fTagger->GetParticles(i).GetTime();
 		nTaggedSave++;
 	}
 	
