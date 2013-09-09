@@ -449,6 +449,33 @@ void TA2MyPhysics::SetConfig(Char_t* line, Int_t key)
             else Info("SetConfig", "Using beam helicity bit: %d (+) and %d (-)", fEBeamBitPos, fEBeamBitNeg);
             break;
         }
+		case EMP_CALIB_CBENERGY_PER_RUN:
+        {  
+			Char_t tmp[128];
+			
+			printf("try to enable CBEnergy correction per Run\n");
+			
+			if (sscanf(line, "%s", tmp) == 1) 
+            {
+				GetRunNumber();
+				FILE*	f = fopen(tmp,"r");
+				Int_t 		num;
+				Double_t 	val[4];
+				while(!feof(f))
+				{
+					if (fscanf(f, "%d %lf %lf %lf %lf\n", &num, &val[0], &val[1], &val[2], &val[3]) == 5) 
+					{
+						if(num == fRunNumber)
+						{
+							CBEnergyPerRunCorrection		= true;
+							CBEnergyPerRunCorrectionFactor	= val[0];
+							printf("CBEnergy correction factor for run %d is %lf with error %lf\n", fRunNumber, CBEnergyPerRunCorrectionFactor, val[1]);
+							break;
+						}
+					}
+				}
+			}
+		}
         default:
         {
             // default main apparatus SetConfig()
@@ -820,6 +847,15 @@ void TA2MyPhysics::PostInit()
         ApplyCaLib();
         fCaLibReader->Deconnect();
     }
+    
+    //CBEnergy Correction per run
+    if(CBEnergyPerRunCorrection)
+	{
+		for(int i=0; i<fNaI->GetNelement(); i++)
+		{
+			fNaI->GetElement(i)->SetA1(CBEnergyPerRunCorrectionFactor * (fNaI->GetElement(i)->GetA1()));
+		}
+	}
 }
 
 //______________________________________________________________________________ 
