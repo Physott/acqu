@@ -126,6 +126,7 @@ private:
     CaLibReader_t* fCaLibReader;                            // CaLib reader
 
     // ------------------------ Utility methods for this class ----------------------- 
+    Int_t ExtrtactRunNumber();
     void LoadDetectors(TA2DataManager* parent, Int_t depth); 
     void UpdateCorrectedScaler(Int_t sc);
     Int_t GetPatternIndex(const Char_t* patternName, TA2BitPattern* pattern);

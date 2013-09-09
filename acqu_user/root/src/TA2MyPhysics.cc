@@ -42,7 +42,7 @@ TA2MyPhysics::TA2MyPhysics(const char* name, TA2Analysis* analysis)
     fMCVertX = 0;
     
     fRunNumber          = 0;
-    if (!fIsMC) sscanf(gAR->GetFileName(), "scratch/CB_%d.dat", &fRunNumber);
+    ExtrtactRunNumber();
     fEventCounter       = 0;
     fEventOffset        = 0;
     fSaveEvent          = 0;
@@ -456,6 +456,31 @@ void TA2MyPhysics::SetConfig(Char_t* line, Int_t key)
             break;
         }
     }
+}
+
+//______________________________________________________________________________
+
+Int_t	TA2MyPhysics::ExtrtactRunNumber()
+{
+	char*	str = new char[64];
+	strcpy(str,gAR->GetFileName());
+	while(strpbrk(str+1,"."))
+		str	= strpbrk(str+1,".");
+	
+	*str	= '\0';
+	str	= str-1;
+	
+	while(*str == '0' || *str == '1' || *str == '2' || *str == '3' || *str == '4' || *str == '5' || *str == '6' || *str == '7' || *str == '8' || *str == '9')
+		str	= str-1;
+	str	= str+1;
+	
+	if(fRunNumber != atoi(str));
+	{
+		fRunNumber = atoi(str);
+		printf("RunNumber : %d\n",fRunNumber);
+	}
+	
+	return fRunNumber;
 }
 
 //______________________________________________________________________________ 

@@ -47,6 +47,15 @@ TA2AccessSQL::TA2AccessSQL(const char* name, TA2Analysis* analysis)	: TA2Physics
 {
     // command-line recognition for SetConfig()
     AddCmdList(AccessSQLConfigKeys);
+    
+    fTagger		= 0;         				// pointer to the Tagger
+    fLadder		= 0;    					// pointer to the Ladder
+    fCB			= 0;   						// pointer to the Crystal Ball
+    fNaI		= 0;       					// pointer to the NaI elements
+	fPID		= 0;           				// pointer to the PID
+    fTAPS		= 0;       					// pointer to TAPS
+    fBaF2PWO	= 0;	       				// pointer to the BaF2 (or the BaF2/PWO) array
+    fVeto		= 0;           				// pointer to the TAPS Vetos
 }
 
 
