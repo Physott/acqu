@@ -265,6 +265,7 @@ void TA2AccessSQL::SetConfig(Char_t* line, Int_t key)
 						}
 					}
 				}
+				fclose(f);
 			}
 		}
 	default:
