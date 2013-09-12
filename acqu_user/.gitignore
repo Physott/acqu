@@ -3,14 +3,7 @@
 # the "data" directory itself 
 # shall only contain 
 # configuration text files!
-/scratch
-/output
-/batch
-/Thread*.txt
+Thread*.txt
 *.log
-/result
-/evgen/
-/simfiles/
-
-# AcquRoot histogram files
-/histograms
+# AcquRoot data link
+/data
