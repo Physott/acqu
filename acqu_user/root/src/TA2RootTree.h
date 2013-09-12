@@ -18,52 +18,47 @@
 #include "TFile.h"
 #include "TTree.h"
 
-#include "TA2BasePhysics.h"
+#include "TA2AccessSQL.h"
 
-#define TA2ROOTTREE_MAX_MULTIPLICITY    8
+#define TA2ROOTTREE_MAX_TAGGER	128
+#define TA2ROOTTREE_MAX_CB		64
 
 enum {
     ERT_OUTPUT_FOLDER = 30250,
     ERT_FILE_NAME,
-    ERT_PARAMETERS,
-    ERT_MAX_TAGGED,
-    ERT_TA2PARTICLE,
 };
 
 static const Map_t RootTreeConfigKeys[] = {
     // General keys
     {"RootTree-Output-Folder:"       	, ERT_OUTPUT_FOLDER},
     {"RootTree-File-Name:"           	, ERT_FILE_NAME},
-    {"RootTree-Parameters:"				, ERT_PARAMETERS},
-    {"RootTree-Max-Tagged:"           	, ERT_MAX_TAGGED},
-    {"RootTree-TA2Particle:"           	, ERT_TA2PARTICLE},
     // Termination
     {NULL        , -1           }
 };
 
 
-class	TA2RootTree	: public TA2BasePhysics
+
+
+
+class	TA2RootTree	: public TA2AccessSQL
 {
 private:
-	TFile**		file;
-	TTree**		tree;
+	TFile*		file;
+	TTree*		tree;
 
     char        outputFolder[256];
     char        fileName[64];
-    Int_t		treeCount;
-    Int_t		photons[TA2ROOTTREE_MAX_MULTIPLICITY];
-    Int_t		protons[TA2ROOTTREE_MAX_MULTIPLICITY];
-    Int_t		piPlus[TA2ROOTTREE_MAX_MULTIPLICITY];
     
-    Bool_t		ta2Particle;
+    Int_t				nTagged;
+    Double_t*			TaggedEnergy;
+    Double_t*			TaggedTime;
     
-    Int_t		nTaggedSave;
-    Double_t*	TaggedEnergy;
-    Double_t*	TaggedTime;
-    
-    
-    void	InitTLorentzVectors(TFile** file, TTree** tree);
-    void	InitTA2Particles(TFile** file, TTree** tree);
+    Int_t				nCBHits;
+    Double_t*			Px;
+    Double_t*			Py;
+    Double_t*			Pz;
+    Double_t*			E;
+    Double_t*			Time;
     
 public:
 	TA2RootTree(const char*, TA2Analysis*);

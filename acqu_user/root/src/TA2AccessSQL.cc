@@ -35,7 +35,7 @@ Int_t	TA2AccessSQL::GetRunNumber()
 	if(fRunNumber != atoi(str));
 	{
 		fRunNumber = atoi(str);
-		printf("RunNumber : %d\n",fRunNumber);
+		//printf("RunNumber : %d\n",fRunNumber);
 	}
 	
 	return fRunNumber;
@@ -398,6 +398,9 @@ void TA2AccessSQL::ApplyCaLib()
 void TA2AccessSQL::PostInit()
 {
 	TA2Physics::PostInit();
+	
+	GetRunNumber();
+	printf("RunNumber : %d\n",fRunNumber);
 	
 	LoadDetectors(fParent, 0);
 	printf("gain at begin:			%lf\n", fNaI->GetElement(10)->GetA1());

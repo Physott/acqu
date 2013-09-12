@@ -19,14 +19,18 @@ ClassImp(TA2RootTree)
 
 
 
-TA2RootTree::TA2RootTree(const char* Name, TA2Analysis* Analysis) : TA2BasePhysics(Name, Analysis),
+TA2RootTree::TA2RootTree(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, Analysis),
                                                                     file(0),
                                                                     tree(0),
-                                                                    treeCount(0),
-                                                                    ta2Particle(false),
-                                                                    nTaggedSave(0),
+                                                                    nTagged(0),
+                                                                    nCBHits(0),
                                                                     TaggedEnergy(0),
-                                                                    TaggedTime(0)
+                                                                    TaggedTime(0),
+                                                                    Px(0),
+                                                                    Py(0),
+                                                                    Pz(0),
+                                                                    E(0),
+                                                                    Time(0)
 {
     strcpy(outputFolder,"~");
     strcpy(fileName,"TTreeOutput");
@@ -38,23 +42,15 @@ TA2RootTree::TA2RootTree(const char* Name, TA2Analysis* Analysis) : TA2BasePhysi
 TA2RootTree::~TA2RootTree()
 {
 	if(tree)
-    {
-		for(int i=0; i<treeCount; i++)
-			delete tree[i];
-		delete[] tree;
-	}
+		delete tree;
     if(file)
-    {
-		for(int i=0; i<treeCount; i++)
-			delete file[i];
-		delete[] file;
-	}
+		delete file;
 }
 
 
 void    TA2RootTree::LoadVariable()
 {
-    TA2BasePhysics::LoadVariable();
+    TA2AccessSQL::LoadVariable();
 }
 
 void    TA2RootTree::SetConfig(Char_t* line, Int_t key)
@@ -71,181 +67,92 @@ void    TA2RootTree::SetConfig(Char_t* line, Int_t key)
         while(fileName[strlen(fileName)-1]=='\n' || fileName[strlen(fileName)-1]=='\r')
 			fileName[strlen(fileName)-1]='\0';
         return;
-    case ERT_PARAMETERS:
-        if(treeCount>=(TA2ROOTTREE_MAX_MULTIPLICITY-1))
-        {
-			printf("ERROR: Max TTree outputs is %d\n", TA2ROOTTREE_MAX_MULTIPLICITY);
-			return;
-		}
-		sscanf(line, "%d %d %d", &photons[treeCount], &protons[treeCount], &piPlus[treeCount]);
-		treeCount++;
-        return;
-    case ERT_TA2PARTICLE:  
-        ta2Particle	= true;
-        return;
     default:
-        TA2BasePhysics::SetConfig(line, key);
+        TA2AccessSQL::SetConfig(line, key);
     }
 }
 
 void    TA2RootTree::PostInit()
 {
-    TA2BasePhysics::PostInit();
+    TA2AccessSQL::PostInit();
     
-    printf("Init %d trees\n", treeCount);
-    for(int i=0; i<treeCount; i++)
-		printf("\tInit tree with %d Photons, %d Proton, %d charged Pis\n", photons[i], protons[i], piPlus[i]);
-
-    file	= new TFile*[treeCount];
-    tree	= new TTree*[treeCount];
+    TaggedEnergy	= new Double_t[TA2ROOTTREE_MAX_TAGGER];
+    TaggedTime		= new Double_t[TA2ROOTTREE_MAX_TAGGER];
     
-    if(treeCount)
-		printf("Write trees for RunNumber : %d\n", GetRunNumber());
-		
-	TaggedEnergy	= new Double_t[nBeam];
-	TaggedTime		= new Double_t[nBeam];
+    Px				= new Double_t[TA2ROOTTREE_MAX_CB];
+    Py				= new Double_t[TA2ROOTTREE_MAX_CB];
+    Pz				= new Double_t[TA2ROOTTREE_MAX_CB];
+    E				= new Double_t[TA2ROOTTREE_MAX_CB];
+    Time			= new Double_t[TA2ROOTTREE_MAX_CB];
+    
+    printf("---------\n");
+    printf("Init Tree\n");
+    printf("---------\n");
+    
+    Char_t	str[256];
+    sprintf(str, "%s/%s_%d.root", outputFolder, fileName, GetRunNumber());
+    file	= new TFile(str,"RECREATE");
+    sprintf(str, "%s_%d", fileName, GetRunNumber());
+	tree	= new TTree(str, str);
+    
+	tree->Branch("nTagged",&nTagged,"nTagged/I");
+	tree->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
+	tree->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
 	
-	
-	if(ta2Particle)
-		InitTA2Particles( file, tree);
-	else
-		InitTLorentzVectors( file, tree);
+	tree->Branch("nCBHits",&nCBHits,"nCBHits/I");
+	tree->Branch("Px", Px, "Px[nCBHits]/D");
+	tree->Branch("Py", Py, "Py[nCBHits]/D");
+	tree->Branch("Pz", Pz, "Pz[nCBHits]/D");
+	tree->Branch("E", E, "E[nCBHits]/D");	
+	tree->Branch("Time", Time, "Time[nCBHits]/D");
 }
 
-void	TA2RootTree::InitTLorentzVectors(TFile** file, TTree** tree)
-{
-	printf("Write TLorentzVectors to tree. (Use keyword 'RootTree-TA2Particle:' in config file for TA2Particles)\n");
-	
-	Char_t	strFile[64];
-    Char_t	strTree[64];
-    
-	for(int i=0; i<treeCount; i++)
-    {
-		sprintf(strTree, "%dG_%dP_%dPp", photons[i], protons[i], piPlus[i]);
-		sprintf(strFile, "%s/%s_%d_%s.root", outputFolder, fileName, GetRunNumber(), strTree);
-		file[i]	= new TFile(strFile,"RECREATE");
-		sprintf(strFile, "tree_%s", strTree);
-		tree[i]	= new TTree(strFile, strTree);
-		
-		for(int k=0; k<photons[i]; k++)
-		{
-			sprintf(strFile,"Photon%d.", k);
-			tree[i]->Branch(strFile,"TLorentzVector",Photon[k].GetP4A(),8000,1);
-		}
-		for(int k=0; k<protons[i]; k++)
-		{
-			sprintf(strFile,"Proton%d.", k);
-			tree[i]->Branch(strFile,"TLorentzVector",Proton[k].GetP4A(),8000,1);
-		}
-		for(int k=0; k<piPlus[i]; k++)
-		{
-			sprintf(strFile,"PiPlus%d.", k);
-			tree[i]->Branch(strFile,"TLorentzVector",PiPlus[k].GetP4A(),8000,1);
-		}
-		tree[i]->Branch("nTagged",&nTagged,"nTagged/I");
-		tree[i]->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
-		tree[i]->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
-	}
-}
-void	TA2RootTree::InitTA2Particles(TFile** file, TTree** tree)
-{
-	printf("Write TA2Particles to tree.\n");
-	
-	Char_t	strFile[64];
-    Char_t	strTree[64];
-    
-	for(int i=0; i<treeCount; i++)
-    {
-		sprintf(strTree, "%dG_%dP_%dPp", photons[i], protons[i], piPlus[i]);
-		sprintf(strFile, "%s/%s_%d_%s.root", outputFolder, fileName, GetRunNumber(), strTree);
-		file[i]	= new TFile(strFile,"RECREATE");
-		sprintf(strFile, "tree_%s", strTree);
-		tree[i]	= new TTree(strFile, strTree);
-		
-		for(int k=0; k<photons[i]; k++)
-		{
-			sprintf(strFile,"Photon%d.", k);
-			tree[i]->Branch(strFile,"TA2Particle",&Photon[k],8000,1);
-		}
-		for(int k=0; k<protons[i]; k++)
-		{
-			sprintf(strFile,"Proton%d.", k);
-			tree[i]->Branch(strFile,"TA2Particle",&Proton[k],8000,1);
-		}
-		for(int k=0; k<piPlus[i]; k++)
-		{
-			sprintf(strFile,"PiPlus%d.", k);
-			tree[i]->Branch(strFile,"TA2Particle",&PiPlus[k],8000,1);
-		}
-		tree[i]->Branch("nTagged",&nTagged,"nTagged/I");
-		tree[i]->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
-		tree[i]->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
-	}
-}
 
 void    TA2RootTree::Reconstruct()
 {
-    TA2BasePhysics::Reconstruct();
-    
-    //static Int_t  aaa=0;
-
-    
-    Int_t	multiplicity=-1;
-    
-    for(int i=0; i<treeCount; i++)
-    {
-		if(nPhoton == photons[i] && nProton == protons[i] && nPiPlus == piPlus[i])
-		{
-			multiplicity=i;
-			break;
-		}
-	}
-	
-	if(multiplicity == -1)
-		return;
-		
-	//printf("Reconstruct:   %d   nTagged: %d\n", aaa, nTagged);
-	//aaa++;
-	
-	nTaggedSave	= 0;
+	// Collect Tagger Hits
+    nTagged	= fTagger->GetNParticle();  
+    //printf("nTagged: %d",nTagged);
 	for(int i=0; i<nTagged; i++)
 	{
-		TaggedEnergy[nTaggedSave]	= fTagger->GetParticles(i).GetE();
-		//printf("%lf\n", Tagger->GetParticles(i).GetE());
-		TaggedTime[nTaggedSave]		= fTagger->GetParticles(i).GetTime();
-		nTaggedSave++;
+		TaggedEnergy[i]	= fTagger->GetParticles(i).GetE();
+		TaggedTime[i]	= fTagger->GetParticles(i).GetTime();
 	}
 	
-	tree[multiplicity]->Fill();
+	// Collect CB Hits
+    nCBHits	= fCB->GetNParticle();      
+    //printf("nCBHits: %d",nCBHits);
+	for(int i=0; i<nCBHits; i++)
+	{
+		Px[i]			= fCB->GetParticles(i).GetPx();
+		Py[i]			= fCB->GetParticles(i).GetPy();
+		Pz[i]			= fCB->GetParticles(i).GetPz();
+		E[i]			= fCB->GetParticles(i).GetE();
+		Time[i]			= fCB->GetParticles(i).GetTime();
+	}
+	
+	tree->Fill();
 }
 
 void    TA2RootTree::Finish()
 {
-	printf("Write trees to files\n");
+	printf("------------------\n");
+	printf("Write Tree to file\n");
+	printf("------------------\n");
 	
-	for(int i=0; i<treeCount; i++)
-    {
-		file[i]->cd();
-		tree[i]->Write();
-	}
+	file->cd();
+	tree->Write();
+	
 	
 	if(tree)
-    {
-		for(int i=0; i<treeCount; i++)
-			delete tree[i];
-		delete[] tree;
-	}
+		delete tree;
     if(file)
-    {
-		for(int i=0; i<treeCount; i++)
-			delete file[i];
-		delete[] file;
-	}
+		delete file;
 	
-	TA2DataManager::Finish();
+	TA2AccessSQL::Finish();
 }
 
 void    TA2RootTree::ParseMisc(char* line)
 {
-	TA2BasePhysics::ParseMisc(line);
+	TA2AccessSQL::ParseMisc(line);
 }
