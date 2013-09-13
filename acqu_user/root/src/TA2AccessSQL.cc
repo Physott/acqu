@@ -249,7 +249,20 @@ void TA2AccessSQL::SetConfig(Char_t* line, Int_t key)
 			if (sscanf(line, "%s", tmp) == 1) 
             {
 				GetRunNumber();
-				FILE*	f = fopen(tmp,"r");
+				FILE*	f = fopen(tmp,"r");	
+				if(!f)
+				{
+					Char_t tmp2[140];
+					sprintf(tmp2,"data/%s",tmp);
+					f = fopen(tmp2,"r");	
+				}
+				if(!f)
+				{
+					printf("\nERROR: could not open %s as calibration per Run file! --> exiting\n", tmp);
+					printf("   correct the filename after the 'Use-CaLib-CBEnergyPerRun:' keyword in the physics class config file\n");
+					printf("   or comment it out. Then no CBEnergy Calibration per Run is done.\n\n");
+					exit(1);
+				}
 				Int_t 		num;
 				Double_t 	val[4];
 				while(!feof(f))
@@ -266,6 +279,7 @@ void TA2AccessSQL::SetConfig(Char_t* line, Int_t key)
 					}
 				}
 				fclose(f);
+				break;
 			}
 		}
 	default:
