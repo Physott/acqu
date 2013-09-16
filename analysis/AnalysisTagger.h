@@ -3,7 +3,7 @@
 #include "ReadRootTree.h"
 
 
-
+#define MASS_PROTON	938.27203
 
 
 class AnalysisTagger	: public ReadRootTree
@@ -23,18 +23,25 @@ private:
 	
 	//cuts
 	Double_t	cutTaggerTime[6];	// prompt, rand1, rand2
+	Double_t	cutMissMass[2];
 	
 	//histogramms
-	TH1I*	hTaggerTimeWindow;
-	TH1I*	hTaggerTimeWindowMulti;
+	TH1I*	hCountTaggerWindow;
+	TH1I*	hCountTaggerWindowMulti;
+	TH1D*	hMissMass[4];
+	TH1D*	hMissMassMulti[3];
 	
 	
 protected:
 	
 	//variables
 	TLorentzVector		beam[3][10];
+	Double_t			missMass[3][10];
 	Int_t				nBeam[3];
 	
+	
+	void	CutMissMass();
+	void	AnalyseTagged();
 	bool	AnalyseEvent(const int index);				// no index checking
 	
 	
@@ -59,7 +66,11 @@ public:
 	const	Double_t	GetCutTaggerTimeRand1Max()	const	{return cutTaggerTime[3];}
 	const	Double_t	GetCutTaggerTimeRand2Min()	const	{return cutTaggerTime[4];}
 	const	Double_t	GetCutTaggerTimeRand2Max()	const	{return cutTaggerTime[5];}
+	const	Double_t*	GetCutMissMass()			const	{return cutMissMass;}
+	const	Double_t	GetCutMissMassMin()			const	{return cutMissMass[0];}
+	const	Double_t	GetCutMissMassMax()			const	{return cutMissMass[1];}
 	
 	void	SetCutTaggerTime(const Double_t promptMin, const Double_t promptMax, const Double_t rand1Min, const Double_t rand1Max, const Double_t rand2Min, const Double_t rand2Max)	{cutTaggerTime[0]=promptMin; cutTaggerTime[1]=promptMax; cutTaggerTime[2]=rand1Min; cutTaggerTime[3]=rand1Max; cutTaggerTime[4]=rand2Min; cutTaggerTime[5]=rand2Max;}
+	void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max}
 		
 };

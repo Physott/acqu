@@ -143,8 +143,7 @@ void	AnalysisEtaP6Gamma::Reconstruct()
 				{
 					if(i==0 && isUniqueWindow())
 						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
-					else
-						canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
 				}
 			}
 		}
@@ -164,8 +163,7 @@ void	AnalysisEtaP6Gamma::Reconstruct()
 				{
 					if(i==0 && isUniqueWindow())
 						canvasTagged[0][3]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
-					else
-						canvasTagged[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+					canvasTagged[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
 				}
 			}
 		}
@@ -185,8 +183,7 @@ void	AnalysisEtaP6Gamma::Reconstruct()
 				{
 					if(i==0 && isUniqueWindow())
 						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
-					else
-						canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
 				}
 			}
 		}
@@ -206,8 +203,7 @@ void	AnalysisEtaP6Gamma::Reconstruct()
 				{
 					if(i==0 && isUniqueWindow())
 						canvasTagged[1][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
-					else
-						canvasTagged[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+					canvasTagged[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
 				}
 			}
 		}

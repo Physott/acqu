@@ -12,9 +12,18 @@ AnalysisTagger::AnalysisTagger(const char* _treeFileName, const char* _treeName)
 		cutTaggerTime[2*i]		= -100000;
 		cutTaggerTime[(2*i)+1]	= 100000;
 	}
+	cutMissMass[0]		= -100000;
+	cutMissMass[1]		= 100000;
 	
-	hTaggerTimeWindow		= new TH1I("TaggerTimeWindow", "TaggerTimeWindow", 5, 0, 5);
-	hTaggerTimeWindowMulti	= new TH1I("TaggerTimeWindowMulti", "TaggerTimeWindowMulti", 3, 0, 3);
+	hCountTaggerWindow		= new TH1I("CountTimeWindow", "CountTimeWindow", 5, 0, 5);
+	hCountTaggerWindowMulti	= new TH1I("CountTimeWindowMulti", "CountTimeWindowMulti", 3, 0, 3);
+	hMissMass[0]			= new TH1D("MissMassPrompt", "MissMassPrompt", 1600, 0, 1600);
+	hMissMass[1]			= new TH1D("MissMassRand1", "MissMassRand1", 1600, 0, 1600);
+	hMissMass[2]			= new TH1D("MissMassRand2", "MissMassRand2", 1600, 0, 1600);
+	hMissMass[3]			= new TH1D("MissMassSinglePrompt", "MissMassSinglePrompt", 1600, 0, 1600);
+	hMissMassMulti[0]		= new TH1D("MissMassMultiPrompt", "MissMassMultiPrompt", 1600, 0, 1600);
+	hMissMassMulti[1]		= new TH1D("MissMassMultiRand1", "MissMassMultiRand1", 1600, 0, 1600);
+	hMissMassMulti[2]		= new TH1D("MissMassMultiRand2", "MissMassMultiRand2", 1600, 0, 1600);
 	
 	Clear();
 }
@@ -27,97 +36,139 @@ void	AnalysisTagger::Clear()
 {
 	ReadRootTree::Clear();
 	
-	hTaggerTimeWindow->Reset("M");
-	hTaggerTimeWindowMulti->Reset("M");
+	hCountTaggerWindow->Reset("M");
+	hCountTaggerWindowMulti->Reset("M");
 	
 	for(int i=0; i<3; i++)
 	{
 		countTaggerWindow[i]		= 0;
 		countTaggerWindowMulti[i]	= 0;
+		hMissMass[i]->Reset("M");
+		hMissMassMulti[i]->Reset("M");
 	}
+	hMissMass[3]->Reset("M");
 	countTaggerWindow[3]		= 0;
 	countTaggerWindow[4]		= 0;
 }
 
+void	AnalysisTagger::CutMissMass()
+{
+	int	index=0;
+	for(int i=0; i<3; i++)
+	{
+		for(int l=nBeam[i]-1; l>-1; l--)
+		{
+			if(missMass[i][l]<=cutMissMass[0] || missMass[i][l]>=cutMissMass[1])
+			{
+				for(int m=l+1; m<nBeam[i]; m++)
+				{
+					beam[i][m-1] = beam[i][m];
+					nBeam[i]--;
+				}
+			}
+		}
+	}
+}
+void	AnalysisTagger::AnalyseTagged()
+{
+	TLorentzVector	res;
+	
+	for(int i=0; i<GetNTagged(); i++)
+	{
+		if(GetTaggedTime(i)>cutTaggerTime[0] && GetTaggedTime(i)<cutTaggerTime[1])
+		{
+			beam[0][nBeam[0]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
+			missMass[0][nBeam[0]]	= ((beam[0][nBeam[0]]) -all).M();
+			nBeam[0]++;
+		}
+		if(GetTaggedTime(i)>cutTaggerTime[2] && GetTaggedTime(i)<cutTaggerTime[3])
+		{
+			beam[1][nBeam[1]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
+			missMass[1][nBeam[1]]	= ((beam[1][nBeam[1]]) -all).M();
+			nBeam[1]++;
+		}
+		if(GetTaggedTime(i)>cutTaggerTime[4] && GetTaggedTime(i)<cutTaggerTime[5])
+		{
+			beam[2][nBeam[2]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
+			missMass[2][nBeam[2]]	= ((beam[2][nBeam[2]]) -all).M();
+			nBeam[2]++;
+		}
+	}
+}
 bool	AnalysisTagger::AnalyseEvent(const int index)
 {	
 	if(ReadRootTree::AnalyseEvent(index))
 	{		
 		countTaggerWindow[4]++;
-		hTaggerTimeWindow->Fill(4);
+		hCountTaggerWindow->Fill(4);
 		nBeam[0]	= 0;
 		nBeam[1]	= 0;
 		nBeam[2]	= 0;
 		untagged	= false;
 		
-		for(int i=0; i<GetNTagged(); i++)
-		{
-			if(GetTaggedTime(i)>cutTaggerTime[0] && GetTaggedTime(i)<cutTaggerTime[1])
-			{
-				beam[0][nBeam[0]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i));
-				nBeam[0]++;
-			}
-			if(GetTaggedTime(i)>cutTaggerTime[2] && GetTaggedTime(i)<cutTaggerTime[3])
-			{
-				beam[1][nBeam[1]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i));
-				nBeam[1]++;
-			}
-			if(GetTaggedTime(i)>cutTaggerTime[4] && GetTaggedTime(i)<cutTaggerTime[5])
-			{
-				beam[2][nBeam[2]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i));
-				nBeam[2]++;
-			}
-		}
+		AnalyseTagged();
+		CutMissMass();
+		
 		if(nBeam[0]>0 || nBeam[1]>0 || nBeam[2]>0)
 		{
 			if(nBeam[0]>1)
 			{
+				for(int i=0; i<nBeam[0]; i++)
+					hMissMassMulti[0]->Fill(missMass[0][i]);
 				countTaggerWindowMulti[0]++;
-				hTaggerTimeWindowMulti->Fill(0);
+				hCountTaggerWindowMulti->Fill(0);
 			}
 			else if(nBeam[0] == 1)
 			{
+				hMissMass[0]->Fill(missMass[0][0]);
 				countTaggerWindow[0]++;
-				hTaggerTimeWindow->Fill(0);
+				hCountTaggerWindow->Fill(0);
 			}
 			
 			if(nBeam[1]>1)
 			{
+				for(int i=0; i<nBeam[1]; i++)
+					hMissMassMulti[1]->Fill(missMass[1][i]);
 				countTaggerWindowMulti[1]++;
-				hTaggerTimeWindowMulti->Fill(1);
+				hCountTaggerWindowMulti->Fill(1);
 			}
 			else if(nBeam[1] == 1)
 			{
+				hMissMass[1]->Fill(missMass[1][0]);
 				countTaggerWindow[1]++;
-				hTaggerTimeWindow->Fill(1);
+				hCountTaggerWindow->Fill(1);
 			}
 				
 			if(nBeam[2]>1)
 			{
+				for(int i=0; i<nBeam[2]; i++)
+					hMissMassMulti[2]->Fill(missMass[2][i]);
 				countTaggerWindowMulti[2]++;
-				hTaggerTimeWindowMulti->Fill(2);
+				hCountTaggerWindowMulti->Fill(2);
 			}
 			else if(nBeam[2] == 1)
 			{
+				hMissMass[2]->Fill(missMass[2][0]);
 				countTaggerWindow[2]++;
-				hTaggerTimeWindow->Fill(2);
+				hCountTaggerWindow->Fill(2);
 			}
 			
-			if((nBeam[0]	== 1) && (nBeam[1]	== 0) && (nBeam[2]	== 0))
+			if(GetNTagged() == 1)
 			{
-				countTaggerWindow[3]++;
-				hTaggerTimeWindow->Fill(3);
+				if(nBeam[0] == 1)
+				{
+					hMissMass[3]->Fill(missMass[0][0]);
+					countTaggerWindow[3]++;
+					hCountTaggerWindow->Fill(3);
+				}
 				uniqueWindow	= true;
 			}
-			else if((nBeam[0]	== 0) && (nBeam[1]	== 1) && (nBeam[2]	== 0))
-				uniqueWindow	= true;
-			else if((nBeam[0]	== 0) && (nBeam[1]	== 0) && (nBeam[2]	== 1))
-				uniqueWindow	= true;
 			else
 				uniqueWindow	= false;
 		}
 		else
 			untagged	= true;
+			
 		return true;
 	}
 	return false;
@@ -157,8 +208,15 @@ void	AnalysisTagger::Draw()
 		canvas	= new TCanvas("AnalysisTaggerCanvas", "AnalysisTagger", 50, 50, 1600, 800);
 	canvas->Clear();
 	
-	canvas->Divide(2, 1, 0.001, 0.001);
+	canvas->Divide(5, 2, 0.001, 0.001);
 	
-	canvas->cd(1);	hTaggerTimeWindow->Draw();
-	canvas->cd(2);	hTaggerTimeWindowMulti->Draw();
+	canvas->cd(1);	hCountTaggerWindow->Draw();
+	canvas->cd(2);	hMissMass[0]->Draw();
+	canvas->cd(3);	hMissMass[1]->Draw();
+	canvas->cd(4);	hMissMass[2]->Draw();
+	canvas->cd(5);	hMissMass[3]->Draw();
+	canvas->cd(6);	hCountTaggerWindowMulti->Draw();
+	canvas->cd(7);	hMissMassMulti[0]->Draw();
+	canvas->cd(8);	hMissMassMulti[1]->Draw();
+	canvas->cd(9);	hMissMassMulti[2]->Draw();
 }
