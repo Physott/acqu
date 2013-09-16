@@ -1,1 +1,65 @@
 
+
+#include "ReadRootTree.h"
+
+
+
+
+
+class AnalysisTagger	: public ReadRootTree
+{
+private:
+
+	//general
+	TCanvas*	canvas;
+	
+	//types
+	bool				untagged;			// untagged
+	bool				uniqueWindow;		// only 1 hit in 1 window
+	
+	//counters
+	Int_t		countTaggerWindow[5];		// prompt, rand1, rand2, prompt(only 1 Hit), checked
+	Int_t		countTaggerWindowMulti[3];	// prompt, rand1, rand2		(filled multi)
+	
+	//cuts
+	Double_t	cutTaggerTime[6];	// prompt, rand1, rand2
+	
+	//histogramms
+	TH1I*	hTaggerTimeWindow;
+	TH1I*	hTaggerTimeWindowMulti;
+	
+	
+protected:
+	
+	//variables
+	TLorentzVector		beam[3][10];
+	Int_t				nBeam[3];
+	
+	bool	AnalyseEvent(const int index);				// no index checking
+	
+	
+public:
+			AnalysisTagger(const char* _treeFileName, const char* _treeName);
+	virtual	~AnalysisTagger();
+	
+	virtual	void	Clear();
+			
+	virtual	void	Analyse(const int min, const int max);
+	
+	virtual	void	PrintCounters();
+	virtual	void	Draw();
+	
+	const	bool	isUntagged()		const	{return untagged;}
+	const	bool	isUniqueWindow()	const	{return uniqueWindow;}
+	
+	const	Double_t*	GetCutTaggerTimes()	const	{return cutTaggerTime;}
+	const	Double_t	GetCutTaggerTimePromptMin()	const	{return cutTaggerTime[0];}
+	const	Double_t	GetCutTaggerTimePromptMax()	const	{return cutTaggerTime[1];}
+	const	Double_t	GetCutTaggerTimeRand1Min()	const	{return cutTaggerTime[2];}
+	const	Double_t	GetCutTaggerTimeRand1Max()	const	{return cutTaggerTime[3];}
+	const	Double_t	GetCutTaggerTimeRand2Min()	const	{return cutTaggerTime[4];}
+	const	Double_t	GetCutTaggerTimeRand2Max()	const	{return cutTaggerTime[5];}
+	
+	void	SetCutTaggerTime(const Double_t promptMin, const Double_t promptMax, const Double_t rand1Min, const Double_t rand1Max, const Double_t rand2Min, const Double_t rand2Max)	{cutTaggerTime[0]=promptMin; cutTaggerTime[1]=promptMax; cutTaggerTime[2]=rand1Min; cutTaggerTime[3]=rand1Max; cutTaggerTime[4]=rand2Min; cutTaggerTime[5]=rand2Max;}
+		
+};
