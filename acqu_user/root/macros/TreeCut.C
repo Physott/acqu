@@ -1,7 +1,36 @@
 
+void	TreeCut(const char* FolderName,const int CBHits,const int CBHits1=-1,const int CBHits2=-1,const int CBHits3=-1,const int CBHits4=-1,const int CBHits5=-1)
+{
+	TSystemDirectory dir(FolderName, FolderName);
+	TList* files = dir.GetListOfFiles();
+	if (files) 
+	{
+		TSystemFile *sfile;
+		TString fname;
+		TString tname;
+		TIter next(files);
+		int	ccc=0;
+		while(sfile=(TSystemFile*)next())
+		{
+			fname = sfile->GetName();
+			ccc++;
+			printf("%d\t%s\t", ccc, fname.Data());
+			if (!sfile->IsDirectory() && fname.EndsWith(".root")) 
+			{
+				tname = fname.Strip(TString::kTrailing,'t');
+				tname.Remove(TString::kTrailing,'o');
+				tname.Remove(TString::kTrailing,'o');
+				tname.Remove(TString::kTrailing,'r');
+				tname.Remove(TString::kTrailing,'.');
+				printf("%s\n", tname.Data());
+				
+				TreeCut(fname.Data(),tname.Data(),CBHits,CBHits1,CBHits2,CBHits3,CBHits4,CBHits5);
+			}
+		}
+	}
+}
 
-
-void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits)
+void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits,const int CBHits1=-1,const int CBHits2=-1,const int CBHits3=-1,const int CBHits4=-1,const int CBHits5=-1)
 {
 	TFile*	file	= new TFile(treeFileName);
 	if(!file)
@@ -17,14 +46,26 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits)
 	}
 	
 	Char_t	str[256];
-	sprintf(str,"cutTree_%d.root",CBHits);
-	TFile*	outFile	= new TFile(str, "RECREATE");
+	Char_t	str2[256];
+	if(CBHits1==-1)
+		sprintf(str,"%s_CUT_%d",treeName,CBHits);
+	else if(CBHits2==-1)
+		sprintf(str,"%s_CUT_%d_%d",treeName,CBHits,CBHits1);
+	else if(CBHits3==-1)
+		sprintf(str,"%s_CUT_%d_%d_%d",treeName,CBHits,CBHits1,CBHits2);
+	else if(CBHits4==-1)
+		sprintf(str,"%s_CUT_%d_%d_%d_%d",treeName,CBHits,CBHits1,CBHits2,CBHits3);
+	else if(CBHits5==-1)
+		sprintf(str,"%s_CUT_%d_%d_%d_%d_%d",treeName,CBHits,CBHits1,CBHits2,CBHits3,CBHits4);
+	else
+		sprintf(str,"%s_CUT_%d_%d_%d_%d_%d_%d",treeName,CBHits,CBHits1,CBHits2,CBHits3,CBHits4,CBHits5);
+	sprintf(str2,"%s.root",str);
+	TFile*	outFile	= new TFile(str2, "RECREATE");
 	if(!outFile)
 	{
 		printf("Could not open file %s\n", str);
 		return;
 	}
-	sprintf(str,"cutTree_%d",CBHits);
 	TTree*	outTree	= new TTree(str,str);
 	if(!outTree)
 	{
@@ -72,7 +113,7 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits)
 	for(int i=0; i<tree->GetEntries(); i++)
 	{
 		tree->GetEntry(i);
-		if(nCBHits==CBHits)
+		if(nCBHits==CBHits || nCBHits==CBHits1 || nCBHits==CBHits2 || nCBHits==CBHits3 || nCBHits==CBHits4 || nCBHits==CBHits5)
 			outTree->Fill();
 	}
 	
