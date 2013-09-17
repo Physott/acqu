@@ -21,6 +21,8 @@ private:
 	Char_t		treeName[64];
 	bool		isOpened;
 	TCanvas*	canvas;
+	int			period;
+	int			nPeriod;
 	
 	//variables
 		

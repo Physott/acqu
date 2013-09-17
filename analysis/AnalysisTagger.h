@@ -30,6 +30,9 @@ private:
 	TH1I*	hCountTaggerWindowMulti;
 	TH1D*	hMissMass[4];
 	TH1D*	hMissMassMulti[3];
+	TH1D*	hMissMassAll[3];
+	TH1D*	hMissMassBackground[3];
+	TH1D*	hMissMassSubstract[3];
 	
 	
 protected:
@@ -71,6 +74,6 @@ public:
 	const	Double_t	GetCutMissMassMax()			const	{return cutMissMass[1];}
 	
 	void	SetCutTaggerTime(const Double_t promptMin, const Double_t promptMax, const Double_t rand1Min, const Double_t rand1Max, const Double_t rand2Min, const Double_t rand2Max)	{cutTaggerTime[0]=promptMin; cutTaggerTime[1]=promptMax; cutTaggerTime[2]=rand1Min; cutTaggerTime[3]=rand1Max; cutTaggerTime[4]=rand2Min; cutTaggerTime[5]=rand2Max;}
-	void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max}
+	void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max;}
 		
 };

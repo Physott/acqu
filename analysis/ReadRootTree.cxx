@@ -1,7 +1,7 @@
 #include "ReadRootTree.h"
 
 
-ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: file(0), tree(0), isOpened(false), canvas(0), countAll(0)
+ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: file(0), tree(0), isOpened(false), canvas(0), period(10000), nPeriod(1), countAll(0)
 {
 	//printf("ReadRootTree created. Parameters %s %s\n", _treeFileName, _treeName);
 	
@@ -64,7 +64,7 @@ bool	ReadRootTree::openTree()
 	tree->SetBranchAddress("E", &E);	
 	tree->SetBranchAddress("Time", &Time);
 	
-	printf("Open file %s and load tree %s successfully\n", treeFileName, treeName);
+	printf("Open file %s and load tree %s successfully.    %d Events at all\n", treeFileName, treeName, tree->GetEntries());
 
 	isOpened = true;
 	return true;
@@ -73,6 +73,12 @@ bool	ReadRootTree::openTree()
 
 bool	ReadRootTree::AnalyseEvent(const int index)
 {	
+	if((index-(nPeriod*period))==0)
+	{
+		printf("%d Events done\n", nPeriod*period);
+		nPeriod++;
+	}
+		
 	countAll++;
 	hCountAll->Fill(1);
 	tree->GetEntry(index);

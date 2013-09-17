@@ -53,10 +53,21 @@ void	AnalysisEtaP6Gamma::Clear()
 	countDecaysAll[2]				= 0;
 	countDecaysUntagged[2]			= 0;
 }
+void	AnalysisEtaP6Gamma::SetMass(const int index, const Double_t mass)
+{
+	Double_t E	= (partSet[index].E() - partSet[index].M()) + mass;
+	Double_t P	= TMath::Sqrt(E*E - mass*mass);
+
+	partSet[index].SetE(E);
+	partSet[index].SetVect(partSet[index].Vect().Unit() * P);
+}
 bool	AnalysisEtaP6Gamma::AnalyseEvent(const int index)
 {	
 	if(AnalysisTagger::AnalyseEvent(index))
 	{
+		if(GetNCBHits()!=6)
+			return false;
+			
 		countDecaysAll[2]++;
 		
 		Reconstruct();
@@ -79,7 +90,9 @@ void	AnalysisEtaP6Gamma::Analyse(const int min, const int max)
 		stop	= GetNEvents();
 		
 	for(int i=start; i<stop; i++)
+	{
 		AnalyseEvent(i);
+	}
 	
 	PrintCounters();
 }
@@ -117,8 +130,11 @@ void	AnalysisEtaP6Gamma::calcEvent()
 		}
 	}
 	
-	partAll	= part[0][0] + part[0][1] + part[0][2];
-	massAll = partAll.M();
+	massAll = all.M();
+	partSet[0]	= part[bestPerm][0];
+	partSet[1]	= part[bestPerm][1];
+	partSet[2]	= part[bestPerm][2];
+	
 }
 void	AnalysisEtaP6Gamma::Reconstruct()
 {
@@ -130,80 +146,108 @@ void	AnalysisEtaP6Gamma::Reconstruct()
 	{
 	case 0:
 		countDecaysAll[0]++;
-		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+		
+		SetMass(0, MASS_ETA);
+		SetMass(1, MASS_PI0);
+		SetMass(2, MASS_PI0);
+		allSet	= partSet[0] + partSet[1] + partSet[2];
+		massSet	= allSet.M();
+		
+		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 		else
 		{
 			for(int i=0; i<3; i++)
 			{
 				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 				else if(nBeam[i] == 1)
 				{
 					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
-					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
+					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 				}
 			}
 		}
 		break;
 	case 1:
 		countDecaysAll[0]++;
-		canvasAll[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+		
+		SetMass(0, MASS_PI0);
+		SetMass(1, MASS_ETA);
+		SetMass(2, MASS_PI0);
+		allSet	= partSet[0] + partSet[1] + partSet[2];
+		massSet	= allSet.M();
+		
+		canvasAll[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+			canvasUntagged[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 		else
 		{
 			for(int i=0; i<3; i++)
 			{
 				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 				else if(nBeam[i] == 1)
 				{
 					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
-					canvasTagged[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+						canvasTagged[0][3]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
+					canvasTagged[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 				}
 			}
 		}
 		break;
 	case 2:
 		countDecaysAll[0]++;
-		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+		
+		SetMass(0, MASS_PI0);
+		SetMass(1, MASS_PI0);
+		SetMass(2, MASS_ETA);
+		allSet	= partSet[0] + partSet[1] + partSet[2];
+		massSet	= allSet.M();
+		
+		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		else
 		{
 			for(int i=0; i<3; i++)
 			{
 				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 				else if(nBeam[i] == 1)
 				{
 					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
-					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
+					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 				}
 			}
 		}
 		break;
 	case 3:
 		countDecaysAll[1]++;
-		canvasAll[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+		
+		SetMass(0, MASS_PI0);
+		SetMass(1, MASS_PI0);
+		SetMass(2, MASS_PI0);
+		allSet	= partSet[0] + partSet[1] + partSet[2];
+		massSet	= allSet.M();
+		
+		canvasAll[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		if(isUntagged())
-			canvasUntagged[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+			canvasUntagged[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		else
 		{
 			for(int i=0; i<3; i++)
 			{
 				if(nBeam[i] > 1)
-					canvasTaggedMulti[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+					canvasTaggedMulti[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 				else if(nBeam[i] == 1)
 				{
 					if(i==0 && isUniqueWindow())
-						canvasTagged[1][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
-					canvasTagged[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+						canvasTagged[1][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
+					canvasTagged[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 				}
 			}
 		}

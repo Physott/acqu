@@ -17,6 +17,8 @@ AnalysisEtaP6GammaCanvas::AnalysisEtaP6GammaCanvas(const Char_t* Name)
 	hInvMassPi0cEta	= new TH1D(str, str, 1600, 0, 1600);
 	sprintf(str, "%s_InvMassAll", name);
 	hInvMassAll	= new TH1D(str, str, 1600, 0, 1600);
+	sprintf(str, "%s_InvMassAllSet", name);
+	hInvMassAllSet	= new TH1D(str, str, 1600, 0, 1600);
 }
 AnalysisEtaP6GammaCanvas::~AnalysisEtaP6GammaCanvas()
 {
@@ -34,6 +36,6 @@ void	AnalysisEtaP6GammaCanvas::Draw()
 	canvas->cd(1);	hInvMassPi0a->Draw();
 	canvas->cd(2);	hInvMassPi0b->Draw();
 	canvas->cd(3);	hInvMassPi0cEta->Draw();
-	canvas->cd(4);	hInvMassAll->Draw();
-	
+	canvas->cd(4);	hInvMassAll->Draw();	
+	canvas->cd(5);	hInvMassAllSet->Draw();
 }

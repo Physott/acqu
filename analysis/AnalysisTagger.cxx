@@ -24,6 +24,12 @@ AnalysisTagger::AnalysisTagger(const char* _treeFileName, const char* _treeName)
 	hMissMassMulti[0]		= new TH1D("MissMassMultiPrompt", "MissMassMultiPrompt", 1600, 0, 1600);
 	hMissMassMulti[1]		= new TH1D("MissMassMultiRand1", "MissMassMultiRand1", 1600, 0, 1600);
 	hMissMassMulti[2]		= new TH1D("MissMassMultiRand2", "MissMassMultiRand2", 1600, 0, 1600);
+	//hMissMassAll[0]			= new TH1D("MissMassAllPrompt", "MissMassAllPrompt", 1600, 0, 1600);
+	//hMissMassAll[1]			= new TH1D("MissMassAllRand1", "MissMassAllRand1", 1600, 0, 1600);
+	//hMissMassAll[2]			= new TH1D("MissMassAllRand2", "MissMassAllRand2", 1600, 0, 1600);
+	//hMissMassSubstract[0]	= new TH1D("MissMassSubstractPrompt", "MissMassSubstractPrompt", 1600, 0, 1600);
+	//hMissMassSubstract[1]	= new TH1D("MissMassSubstractRand1", "MissMassSubstractRand1", 1600, 0, 1600);
+	//hMissMassSubstract[2]	= new TH1D("MissMassSubstractRand2", "MissMassSubstractRand2", 1600, 0, 1600);
 	
 	Clear();
 }
@@ -45,6 +51,8 @@ void	AnalysisTagger::Clear()
 		countTaggerWindowMulti[i]	= 0;
 		hMissMass[i]->Reset("M");
 		hMissMassMulti[i]->Reset("M");
+		//hMissMassAll[i]->Reset("M");
+		//hMissMassSubstract[i]->Reset("M");
 	}
 	hMissMass[3]->Reset("M");
 	countTaggerWindow[3]		= 0;
@@ -53,7 +61,6 @@ void	AnalysisTagger::Clear()
 
 void	AnalysisTagger::CutMissMass()
 {
-	int	index=0;
 	for(int i=0; i<3; i++)
 	{
 		for(int l=nBeam[i]-1; l>-1; l--)
@@ -107,7 +114,7 @@ bool	AnalysisTagger::AnalyseEvent(const int index)
 		untagged	= false;
 		
 		AnalyseTagged();
-		CutMissMass();
+		//CutMissMass();
 		
 		if(nBeam[0]>0 || nBeam[1]>0 || nBeam[2]>0)
 		{
@@ -208,15 +215,59 @@ void	AnalysisTagger::Draw()
 		canvas	= new TCanvas("AnalysisTaggerCanvas", "AnalysisTagger", 50, 50, 1600, 800);
 	canvas->Clear();
 	
-	canvas->Divide(5, 2, 0.001, 0.001);
+	canvas->Divide(7, 3, 0.001, 0.001);
 	
 	canvas->cd(1);	hCountTaggerWindow->Draw();
 	canvas->cd(2);	hMissMass[0]->Draw();
 	canvas->cd(3);	hMissMass[1]->Draw();
 	canvas->cd(4);	hMissMass[2]->Draw();
 	canvas->cd(5);	hMissMass[3]->Draw();
-	canvas->cd(6);	hCountTaggerWindowMulti->Draw();
-	canvas->cd(7);	hMissMassMulti[0]->Draw();
-	canvas->cd(8);	hMissMassMulti[1]->Draw();
-	canvas->cd(9);	hMissMassMulti[2]->Draw();
+	canvas->cd(8);	hCountTaggerWindowMulti->Draw();
+	canvas->cd(9);	hMissMassMulti[0]->Draw();
+	canvas->cd(10);	hMissMassMulti[1]->Draw();
+	canvas->cd(11);	hMissMassMulti[2]->Draw();
+	
+	hMissMassAll[0] = (TH1D*)hMissMass[0]->Clone("MissMassAllPrompt");
+	hMissMassAll[0]->SetTitle("MissMassAllPrompt");
+	hMissMassAll[1] = (TH1D*)hMissMass[1]->Clone("MissMassAllRand1");
+	hMissMassAll[1]->SetTitle("MissMassAllRand1");
+	hMissMassAll[2] = (TH1D*)hMissMass[2]->Clone("MissMassAllRand2");
+	hMissMassAll[2]->SetTitle("MissMassAllRand2");
+	hMissMassAll[0]->Add(hMissMassMulti[0]);
+	hMissMassAll[1]->Add(hMissMassMulti[1]);
+	hMissMassAll[2]->Add(hMissMassMulti[2]);
+	
+	hMissMassBackground[0] = (TH1D*)hMissMass[1]->Clone("MissMassBackground");
+	hMissMassBackground[0]->SetTitle("MissMassBackground");
+	hMissMassBackground[0]->Add(hMissMass[2]);
+	hMissMassBackground[0]->Scale(0.5);
+	hMissMassSubstract[0] = (TH1D*)hMissMass[0]->Clone("MissMassSubstract");
+	hMissMassSubstract[0]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[0]->Add(hMissMassBackground[0], -1);
+	
+	hMissMassBackground[1] = (TH1D*)hMissMassMulti[1]->Clone("MissMassBackground");
+	hMissMassBackground[1]->SetTitle("MissMassBackground");
+	hMissMassBackground[1]->Add(hMissMassMulti[2]);
+	hMissMassBackground[1]->Scale(0.5);
+	hMissMassSubstract[1] = (TH1D*)hMissMassMulti[0]->Clone("MissMassSubstract");
+	hMissMassSubstract[1]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[1]->Add(hMissMassBackground[1], -1);
+	
+	hMissMassBackground[2] = (TH1D*)hMissMassAll[1]->Clone("MissMassBackground");
+	hMissMassBackground[2]->SetTitle("MissMassBackground");
+	hMissMassBackground[2]->Add(hMissMassAll[2]);
+	hMissMassBackground[2]->Scale(0.5);
+	hMissMassSubstract[2] = (TH1D*)hMissMassAll[0]->Clone("MissMassSubstract");
+	hMissMassSubstract[2]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[2]->Add(hMissMassBackground[2], -1);
+	
+	canvas->cd(6);	hMissMassBackground[0]->Draw();
+	canvas->cd(7);	hMissMassSubstract[0]->Draw();
+	canvas->cd(13);	hMissMassBackground[1]->Draw();
+	canvas->cd(14);	hMissMassSubstract[1]->Draw();
+	canvas->cd(16);	hMissMassAll[0]->Draw();
+	canvas->cd(17);	hMissMassAll[1]->Draw();
+	canvas->cd(18);	hMissMassAll[2]->Draw();
+	canvas->cd(20);	hMissMassBackground[2]->Draw();
+	canvas->cd(21);	hMissMassSubstract[2]->Draw();
 }
