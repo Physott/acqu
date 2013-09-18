@@ -52,8 +52,10 @@ private:
 	
 protected:
 
+	//general
+	TFile*	outFile;
+
 	//variables
-	
 	TLorentzVector		vec[10];
 	TLorentzVector		all;
 	
@@ -61,7 +63,8 @@ protected:
 	Int_t		countAll;
 	
 	bool	AnalyseEvent(const int index);				// no index checking
-		
+	bool	OpenOutputFile(const Char_t* outputFileName);
+	void	Save();
 	
 public:
 	
@@ -74,6 +77,7 @@ public:
 	
 	virtual	void	PrintCounters();
 	virtual	void	Draw();
+	virtual	void	Save(const Char_t* outputFileName);
 	
 			Int_t		GetNEvents()								{return tree->GetEntries();}
 	const	Int_t		GetNTagged()						const	{return nTagged;}

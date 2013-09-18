@@ -35,6 +35,9 @@ private:
 	TH1D*	hMissMassSubstract[3];
 	
 	
+	void	CalcHistograms();
+	
+	
 protected:
 	
 	//variables
@@ -46,6 +49,7 @@ protected:
 	void	CutMissMass();
 	void	AnalyseTagged();
 	bool	AnalyseEvent(const int index);				// no index checking
+	void	Save();
 	
 	
 public:
@@ -58,6 +62,7 @@ public:
 	
 	virtual	void	PrintCounters();
 	virtual	void	Draw();
+	virtual	void	Save(const Char_t* outputFileName);
 	
 	const	bool	isUntagged()		const	{return untagged;}
 	const	bool	isUniqueWindow()	const	{return uniqueWindow;}

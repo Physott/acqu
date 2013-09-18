@@ -13,9 +13,10 @@ int	main( int argc, const char* argv[] )
 	
 	c->SetCutTaggerTime(-4,4,-14,-6,6,14);
 	//printf("vor\n");
-	c->Analyse(0,10000);
+	c->Analyse(0,1000);
 	//printf("nach\n");
-	c->Draw();
+	//c->Draw();
+	c->Save("test.root");
 	
 	
 	

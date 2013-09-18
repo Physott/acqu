@@ -64,7 +64,7 @@ bool	ReadRootTree::openTree()
 	tree->SetBranchAddress("E", &E);	
 	tree->SetBranchAddress("Time", &Time);
 	
-	printf("Open file %s and load tree %s successfully.    %d Events at all\n", treeFileName, treeName, tree->GetEntries());
+	printf("Open file %s and load tree %s successfully.    %ld Events at all\n", treeFileName, treeName, (long int)tree->GetEntries());
 
 	isOpened = true;
 	return true;
@@ -173,4 +173,37 @@ void	ReadRootTree::Draw()
 	canvas->cd(3);	hCountAll->Draw();
 	canvas->cd(4);	hNCBHits->Draw();
 	canvas->cd(5);	CBEnergyAll->Draw();
+}
+bool	ReadRootTree::OpenOutputFile(const Char_t* outputFileName)
+{
+	if(outFile)
+	{
+		if(outFile->IsOpen())
+			return true;
+	}
+	outFile	= new TFile(outputFileName, "RECREATE");
+	if(!outFile)
+	{
+		printf("Could not open file %s\n", outputFileName);
+		return false;
+	}
+	return true;
+}
+void	ReadRootTree::Save()
+{
+	outFile->cd();
+	
+	hNTagged->Write();
+	hTaggedTime->Write();
+	hCountAll->Write();
+	hNCBHits->Write();
+	CBEnergyAll->Write();
+}
+void	ReadRootTree::Save(const Char_t* outputFileName)
+{
+	if(OpenOutputFile(outputFileName))
+	{
+		Save();
+		outFile->Close();
+	}
 }

@@ -39,3 +39,12 @@ void	AnalysisEtaP6GammaCanvas::Draw()
 	canvas->cd(4);	hInvMassAll->Draw();	
 	canvas->cd(5);	hInvMassAllSet->Draw();
 }
+
+void	AnalysisEtaP6GammaCanvas::Save()
+{
+	hInvMassPi0a->Write();
+	hInvMassPi0b->Write();
+	hInvMassPi0cEta->Write();
+	hInvMassAll->Write();	
+	hInvMassAllSet->Write();
+}

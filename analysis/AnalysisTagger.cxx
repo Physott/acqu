@@ -227,6 +227,20 @@ void	AnalysisTagger::Draw()
 	canvas->cd(10);	hMissMassMulti[1]->Draw();
 	canvas->cd(11);	hMissMassMulti[2]->Draw();
 	
+	CalcHistograms();
+	
+	canvas->cd(6);	hMissMassBackground[0]->Draw();
+	canvas->cd(7);	hMissMassSubstract[0]->Draw();
+	canvas->cd(13);	hMissMassBackground[1]->Draw();
+	canvas->cd(14);	hMissMassSubstract[1]->Draw();
+	canvas->cd(16);	hMissMassAll[0]->Draw();
+	canvas->cd(17);	hMissMassAll[1]->Draw();
+	canvas->cd(18);	hMissMassAll[2]->Draw();
+	canvas->cd(20);	hMissMassBackground[2]->Draw();
+	canvas->cd(21);	hMissMassSubstract[2]->Draw();
+}
+void	AnalysisTagger::CalcHistograms()
+{
 	hMissMassAll[0] = (TH1D*)hMissMass[0]->Clone("MissMassAllPrompt");
 	hMissMassAll[0]->SetTitle("MissMassAllPrompt");
 	hMissMassAll[1] = (TH1D*)hMissMass[1]->Clone("MissMassAllRand1");
@@ -260,14 +274,40 @@ void	AnalysisTagger::Draw()
 	hMissMassSubstract[2] = (TH1D*)hMissMassAll[0]->Clone("MissMassSubstract");
 	hMissMassSubstract[2]->SetTitle("MissMassSubstract");
 	hMissMassSubstract[2]->Add(hMissMassBackground[2], -1);
+}
+void	AnalysisTagger::Save()
+{
+	outFile->cd();
+		
+	hCountTaggerWindow->Write();
+	hMissMass[0]->Write();
+	hMissMass[1]->Write();
+	hMissMass[2]->Write();
+	hMissMass[3]->Write();
+	hCountTaggerWindowMulti->Write();
+	hMissMassMulti[0]->Write();
+	hMissMassMulti[1]->Write();
+	hMissMassMulti[2]->Write();
 	
-	canvas->cd(6);	hMissMassBackground[0]->Draw();
-	canvas->cd(7);	hMissMassSubstract[0]->Draw();
-	canvas->cd(13);	hMissMassBackground[1]->Draw();
-	canvas->cd(14);	hMissMassSubstract[1]->Draw();
-	canvas->cd(16);	hMissMassAll[0]->Draw();
-	canvas->cd(17);	hMissMassAll[1]->Draw();
-	canvas->cd(18);	hMissMassAll[2]->Draw();
-	canvas->cd(20);	hMissMassBackground[2]->Draw();
-	canvas->cd(21);	hMissMassSubstract[2]->Draw();
+	CalcHistograms();
+	
+	hMissMassBackground[0]->Write();
+	hMissMassSubstract[0]->Write();
+	hMissMassBackground[1]->Write();
+	hMissMassSubstract[1]->Write();
+	hMissMassAll[0]->Write();
+	hMissMassAll[1]->Write();
+	hMissMassAll[2]->Write();
+	hMissMassBackground[2]->Write();
+	hMissMassSubstract[2]->Write();
+}
+void	AnalysisTagger::Save(const Char_t* outputFileName)
+{
+	if(OpenOutputFile(outputFileName))
+	{
+		ReadRootTree::Save();
+		Save();
+		
+		outFile->Close();
+	}
 }

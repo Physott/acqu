@@ -277,6 +277,32 @@ void	AnalysisEtaP6Gamma::Draw()
 		canvasTagged[i][3]->Draw();
 	}
 }
+void	AnalysisEtaP6Gamma::Save()
+{
+	outFile->cd();
+	for(int i=0; i<2; i++)
+	{
+		canvasAll[i]->Save();
+		canvasUntagged[i]->Save();
+		for(int l=0; l<3; l++)
+		{
+			canvasTagged[i][l]->Save();
+			canvasTaggedMulti[i][l]->Save();
+		}
+		canvasTagged[i][3]->Save();
+	}
+}
+void	AnalysisEtaP6Gamma::Save(const Char_t* outputFileName)
+{
+	if(OpenOutputFile(outputFileName))
+	{
+		ReadRootTree::Save();
+		AnalysisTagger::Save();
+		Save();
+			
+		outFile->Close();
+	}
+}
 
 
 int		AnalysisEtaP6Gamma::perm[15][6]=

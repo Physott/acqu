@@ -48,6 +48,7 @@ private:
 protected:
 	
 	bool	AnalyseEvent(const int index);
+	void	Save();
 	
 	
 public:
@@ -60,6 +61,7 @@ public:
 		
 	virtual	void	PrintCounters();
 	virtual	void	Draw();
+	virtual	void	Save(const Char_t* outputFileName);
 	
 	
 	bool		is3Pi0()		{if(bestEta==3) return true; return false;}
