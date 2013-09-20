@@ -10,6 +10,7 @@
 #include "TStyle.h"
 
 
+
 class ReadRootTree
 {
 private:
@@ -79,6 +80,7 @@ public:
 	virtual	void	Draw();
 	virtual	void	Save(const Char_t* outputFileName);
 	
+	const	bool		IsOpened()							const	{return isOpened;}
 			Int_t		GetNEvents()								{return tree->GetEntries();}
 	const	Int_t		GetNTagged()						const	{return nTagged;}
 	const	Int_t		GetNCBHits()						const	{return nCBHits;}

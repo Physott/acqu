@@ -1,19 +1,23 @@
 #include "ReadRootTree.h"
 
 
-ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: file(0), tree(0), isOpened(false), canvas(0), period(10000), nPeriod(1), countAll(0)
+ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: file(0), tree(0), isOpened(false), canvas(0), period(10000), nPeriod(1), countAll(0), outFile(0)
 {
 	//printf("ReadRootTree created. Parameters %s %s\n", _treeFileName, _treeName);
 	
 	strcpy(treeFileName,_treeFileName);
 	strcpy(treeName,_treeName);
 	
-	hNTagged			= new TH1I("NTagged", "NTagged", 16, 0, 16);
-	hNTagged->SetTitle("NTagged");
-	hTaggedTime			= new TH1D("TaggedTime", "TaggedTime", 1000, -250, 250);
-	hCountAll			= new TH1I("CountAll", "CountAll", 3, 0, 3);
-	hNCBHits			= new TH1I("NCBHits", "NCBHits", 16, 0, 16);
-	CBEnergyAll			= new TH1D("CBEnergyAll", "CBEnergyAll", 1600, 0, 1600);
+	if(!(hNTagged		= (TH1I*)gROOT->Get("NTagged")))
+		hNTagged		= new TH1I("NTagged", "NTagged", 16, 0, 16);
+	if(!(hTaggedTime	= (TH1D*)gROOT->Get("TaggedTime")))
+		hTaggedTime		= new TH1D("TaggedTime", "TaggedTime", 1000, -250, 250);
+	if(!(hCountAll		= (TH1I*)gROOT->Get("CountAll")))
+		hCountAll		= new TH1I("CountAll", "CountAll", 3, 0, 3);
+	if(!(hNCBHits		= (TH1I*)gROOT->Get("NCBHits")))
+		hNCBHits		= new TH1I("NCBHits", "NCBHits", 16, 0, 16);
+	if(!(CBEnergyAll	= (TH1D*)gROOT->Get("CBEnergyAll")))
+		CBEnergyAll		= new TH1D("CBEnergyAll", "CBEnergyAll", 1600, 0, 1600);
 	
 	Clear();
 	
@@ -21,6 +25,27 @@ ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: f
 }
 ReadRootTree::~ReadRootTree()
 {
+	/*if(file)
+		delete file;
+	if(tree)
+		delete tree;
+		
+	if(canvas)
+		delete canvas;
+	
+	if(hNTagged)
+		delete hNTagged;
+	if(hTaggedTime)
+		delete hTaggedTime;
+	if(hCountAll)
+		delete hCountAll;
+	if(hNCBHits)
+		delete hNCBHits;
+	if(CBEnergyAll)
+		delete CBEnergyAll;
+		
+	if(outFile)
+		delete outFile;*/
 }
 
 void	ReadRootTree::Clear()
@@ -180,13 +205,16 @@ bool	ReadRootTree::OpenOutputFile(const Char_t* outputFileName)
 	{
 		if(outFile->IsOpen())
 			return true;
+		delete outFile;
 	}
 	outFile	= new TFile(outputFileName, "RECREATE");
 	if(!outFile)
 	{
+		printf("OpenOutputFile 2a\n");
 		printf("Could not open file %s\n", outputFileName);
 		return false;
 	}
+	printf("OpenOutputFile 3\n");
 	return true;
 }
 void	ReadRootTree::Save()
@@ -204,6 +232,6 @@ void	ReadRootTree::Save(const Char_t* outputFileName)
 	if(OpenOutputFile(outputFileName))
 	{
 		Save();
-		outFile->Close();
+		delete outFile;
 	}
 }

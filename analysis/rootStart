@@ -1,6 +1,7 @@
 #include "main.cxx"
-#include "AnalysisEtaP6Gamma.cxx"
-#include "AnalysisEtaP6GammaCanvas.cxx"
-#include "AnalysisTagger.cxx"
 #include "ReadRootTree.cxx"
+#include "AnalysisTagger.cxx"
+#include "AnalysisEtaP6GammaCanvas.cxx"
+#include "AnalysisEtaP6Gamma.cxx"
+
 

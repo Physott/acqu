@@ -26,6 +26,8 @@ public:
 	void	Clear()																																					{hInvMassPi0a->Reset("M"); hInvMassPi0b->Reset("M"); hInvMassPi0cEta->Reset("M"); hInvMassAll->Reset("M");}
 	//void	Fill(const Double_t invMassPi0a, const Double_t invMassPi0b, const Double_t invMassPi0cEta, const Double_t invMassAll)									{hInvMassPi0a->Fill(invMassPi0a); hInvMassPi0b->Fill(invMassPi0b); hInvMassPi0cEta->Fill(invMassPi0cEta); hInvMassAll->Fill(invMassAll);}
 	void	Fill(const Double_t invMassPi0a, const Double_t invMassPi0b, const Double_t invMassPi0cEta, const Double_t invMassAll, const Double_t invMassAllSet)	{hInvMassPi0a->Fill(invMassPi0a); hInvMassPi0b->Fill(invMassPi0b); hInvMassPi0cEta->Fill(invMassPi0cEta); hInvMassAll->Fill(invMassAll); hInvMassAllSet->Fill(invMassAllSet);}
+	void	FillBackground(const AnalysisEtaP6GammaCanvas& rand1, const AnalysisEtaP6GammaCanvas& rand2);
+	void	FillSubstract(const AnalysisEtaP6GammaCanvas& prompt, const AnalysisEtaP6GammaCanvas& background);
 	void	Draw();
 	void	Save();
 };

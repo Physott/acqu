@@ -15,26 +15,52 @@ AnalysisTagger::AnalysisTagger(const char* _treeFileName, const char* _treeName)
 	cutMissMass[0]		= -100000;
 	cutMissMass[1]		= 100000;
 	
-	hCountTaggerWindow		= new TH1I("CountTimeWindow", "CountTimeWindow", 5, 0, 5);
-	hCountTaggerWindowMulti	= new TH1I("CountTimeWindowMulti", "CountTimeWindowMulti", 3, 0, 3);
-	hMissMass[0]			= new TH1D("MissMassPrompt", "MissMassPrompt", 1600, 0, 1600);
-	hMissMass[1]			= new TH1D("MissMassRand1", "MissMassRand1", 1600, 0, 1600);
-	hMissMass[2]			= new TH1D("MissMassRand2", "MissMassRand2", 1600, 0, 1600);
-	hMissMass[3]			= new TH1D("MissMassSinglePrompt", "MissMassSinglePrompt", 1600, 0, 1600);
-	hMissMassMulti[0]		= new TH1D("MissMassMultiPrompt", "MissMassMultiPrompt", 1600, 0, 1600);
-	hMissMassMulti[1]		= new TH1D("MissMassMultiRand1", "MissMassMultiRand1", 1600, 0, 1600);
-	hMissMassMulti[2]		= new TH1D("MissMassMultiRand2", "MissMassMultiRand2", 1600, 0, 1600);
-	//hMissMassAll[0]			= new TH1D("MissMassAllPrompt", "MissMassAllPrompt", 1600, 0, 1600);
-	//hMissMassAll[1]			= new TH1D("MissMassAllRand1", "MissMassAllRand1", 1600, 0, 1600);
-	//hMissMassAll[2]			= new TH1D("MissMassAllRand2", "MissMassAllRand2", 1600, 0, 1600);
-	//hMissMassSubstract[0]	= new TH1D("MissMassSubstractPrompt", "MissMassSubstractPrompt", 1600, 0, 1600);
-	//hMissMassSubstract[1]	= new TH1D("MissMassSubstractRand1", "MissMassSubstractRand1", 1600, 0, 1600);
-	//hMissMassSubstract[2]	= new TH1D("MissMassSubstractRand2", "MissMassSubstractRand2", 1600, 0, 1600);
+	if(!(hCountTaggerWindow		= (TH1I*)gROOT->Get("CountTimeWindow")))
+		hCountTaggerWindow		= new TH1I("CountTimeWindow", "CountTimeWindow", 5, 0, 5);
+	if(!(hCountTaggerWindowMulti= (TH1I*)gROOT->Get("CountTimeWindowMulti")))
+		hCountTaggerWindowMulti	= new TH1I("CountTimeWindowMulti", "CountTimeWindowMulti", 3, 0, 3);
+	if(!(hMissMass[0]			= (TH1D*)gROOT->Get("MissMassPrompt")))
+		hMissMass[0]			= new TH1D("MissMassPrompt", "MissMassPrompt", 1600, 0, 1600);
+	if(!(hMissMass[1]			= (TH1D*)gROOT->Get("MissMassRand1")))
+		hMissMass[1]			= new TH1D("MissMassRand1", "MissMassRand1", 1600, 0, 1600);
+	if(!(hMissMass[2]			= (TH1D*)gROOT->Get("MissMassRand2")))
+		hMissMass[2]			= new TH1D("MissMassRand2", "MissMassRand2", 1600, 0, 1600);
+	if(!(hMissMass[3]			= (TH1D*)gROOT->Get("MissMassSinglePrompt")))
+		hMissMass[3]			= new TH1D("MissMassSinglePrompt", "MissMassSinglePrompt", 1600, 0, 1600);
+	if(!(hMissMassMulti[0]		= (TH1D*)gROOT->Get("MissMassMultiPrompt")))
+		hMissMassMulti[0]		= new TH1D("MissMassMultiPrompt", "MissMassMultiPrompt", 1600, 0, 1600);
+	if(!(hMissMassMulti[1]		= (TH1D*)gROOT->Get("MissMassMultiRand1")))
+		hMissMassMulti[1]		= new TH1D("MissMassMultiRand1", "MissMassMultiRand1", 1600, 0, 1600);
+	if(!(hMissMassMulti[2]		= (TH1D*)gROOT->Get("MissMassMultiRand2")))
+		hMissMassMulti[2]		= new TH1D("MissMassMultiRand2", "MissMassMultiRand2", 1600, 0, 1600);
 	
 	Clear();
 }
 AnalysisTagger::~AnalysisTagger()
 {
+	/*if(canvas)
+		delete canvas;
+	
+	if(hCountTaggerWindow)
+		delete hCountTaggerWindow;
+	if(hCountTaggerWindowMulti)
+		delete hCountTaggerWindowMulti;
+		
+	for(int i=0; i<3; i++)
+	{
+		if(hMissMass[i])
+			delete hMissMass[i];
+		if(hMissMassMulti[i])
+			delete hMissMassMulti[i];
+		if(hMissMassAll[i])
+			delete hMissMassAll[i];
+		if(hMissMassBackground[i])
+			delete hMissMassBackground[i];
+		if(hMissMassBackground[i])
+			delete hMissMassSubstract[i];
+	}
+	if(hMissMass[3])
+			delete hMissMass[3];*/
 }
 
 
@@ -251,28 +277,28 @@ void	AnalysisTagger::CalcHistograms()
 	hMissMassAll[1]->Add(hMissMassMulti[1]);
 	hMissMassAll[2]->Add(hMissMassMulti[2]);
 	
-	hMissMassBackground[0] = (TH1D*)hMissMass[1]->Clone("MissMassBackground");
-	hMissMassBackground[0]->SetTitle("MissMassBackground");
+	hMissMassBackground[0] = (TH1D*)hMissMass[1]->Clone("MissMassBackgroundPrompt");
+	hMissMassBackground[0]->SetTitle("MissMassBackgroundPrompt");
 	hMissMassBackground[0]->Add(hMissMass[2]);
 	hMissMassBackground[0]->Scale(0.5);
-	hMissMassSubstract[0] = (TH1D*)hMissMass[0]->Clone("MissMassSubstract");
-	hMissMassSubstract[0]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[0] = (TH1D*)hMissMass[0]->Clone("MissMassSubstractPrompt");
+	hMissMassSubstract[0]->SetTitle("MissMassSubstractPrompt");
 	hMissMassSubstract[0]->Add(hMissMassBackground[0], -1);
 	
-	hMissMassBackground[1] = (TH1D*)hMissMassMulti[1]->Clone("MissMassBackground");
-	hMissMassBackground[1]->SetTitle("MissMassBackground");
+	hMissMassBackground[1] = (TH1D*)hMissMassMulti[1]->Clone("MissMassBackgroundRand1");
+	hMissMassBackground[1]->SetTitle("MissMassBackgroundRand1");
 	hMissMassBackground[1]->Add(hMissMassMulti[2]);
 	hMissMassBackground[1]->Scale(0.5);
-	hMissMassSubstract[1] = (TH1D*)hMissMassMulti[0]->Clone("MissMassSubstract");
-	hMissMassSubstract[1]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[1] = (TH1D*)hMissMassMulti[0]->Clone("MissMassSubstractRand1");
+	hMissMassSubstract[1]->SetTitle("MissMassSubstractRand1");
 	hMissMassSubstract[1]->Add(hMissMassBackground[1], -1);
 	
-	hMissMassBackground[2] = (TH1D*)hMissMassAll[1]->Clone("MissMassBackground");
-	hMissMassBackground[2]->SetTitle("MissMassBackground");
+	hMissMassBackground[2] = (TH1D*)hMissMassAll[1]->Clone("MissMassBackgroundRand2");
+	hMissMassBackground[2]->SetTitle("MissMassBackgroundRand2");
 	hMissMassBackground[2]->Add(hMissMassAll[2]);
 	hMissMassBackground[2]->Scale(0.5);
-	hMissMassSubstract[2] = (TH1D*)hMissMassAll[0]->Clone("MissMassSubstract");
-	hMissMassSubstract[2]->SetTitle("MissMassSubstract");
+	hMissMassSubstract[2] = (TH1D*)hMissMassAll[0]->Clone("MissMassSubstractRand2");
+	hMissMassSubstract[2]->SetTitle("MissMassSubstractRand2");
 	hMissMassSubstract[2]->Add(hMissMassBackground[2], -1);
 }
 void	AnalysisTagger::Save()
@@ -308,6 +334,6 @@ void	AnalysisTagger::Save(const Char_t* outputFileName)
 		ReadRootTree::Save();
 		Save();
 		
-		outFile->Close();
+		delete outFile;
 	}
 }

@@ -23,6 +23,8 @@ private:
 	AnalysisEtaP6GammaCanvas*	canvasUntagged[2];			// [Eta, 3Pi0]
 	AnalysisEtaP6GammaCanvas*	canvasTagged[2][4];			// [Eta, 3Pi0][promtp, rand1, rand2, singlePrompt]
 	AnalysisEtaP6GammaCanvas*	canvasTaggedMulti[2][3];	// [Eta, 3Pi0][promtp, rand1, rand2]
+	AnalysisEtaP6GammaCanvas*	canvasBackground[2];		// [Eta, 3Pi0]    (rand1 - rand2)/2
+	AnalysisEtaP6GammaCanvas*	canvasSubstract[2];			// [Eta, 3Pi0]    prompt -Background
 	
 	//buffer
 	TLorentzVector	part[15][3];
@@ -43,6 +45,7 @@ private:
 	void	SetMass(const int index, const Double_t mass);
 	void	calcEvent();
 	void	Reconstruct();
+	void	CalcHistograms();
 	
 	
 protected:

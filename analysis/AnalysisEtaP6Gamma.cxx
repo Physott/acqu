@@ -23,6 +23,10 @@ AnalysisEtaP6Gamma::AnalysisEtaP6Gamma(const char* _treeFileName, const char* _t
 	canvasTaggedMulti[1][0]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulPro");
 	canvasTaggedMulti[1][1]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulRan1");
 	canvasTaggedMulti[1][2]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulRan2");
+	canvasBackground[0]		= new AnalysisEtaP6GammaCanvas("EtaP_Background");
+	canvasBackground[1]		= new AnalysisEtaP6GammaCanvas("3Pi0_Background");
+	canvasSubstract[0]		= new AnalysisEtaP6GammaCanvas("EtaP_Substract");
+	canvasSubstract[1]		= new AnalysisEtaP6GammaCanvas("3Pi0_Substract");
 	
 	Clear();
 }
@@ -38,6 +42,8 @@ void	AnalysisEtaP6Gamma::Clear()
 	{
 		canvasAll[i]->Clear();
 		canvasUntagged[i]->Clear();
+		canvasBackground[i]->Clear();
+		canvasSubstract[i]->Clear();
 		countDecaysAll[i] 					= 0;
 		countDecaysUntagged[i]			= 0;
 		for(int l=0; l<3; l++)
@@ -66,7 +72,10 @@ bool	AnalysisEtaP6Gamma::AnalyseEvent(const int index)
 	if(AnalysisTagger::AnalyseEvent(index))
 	{
 		if(GetNCBHits()!=6)
+		{
+			//printf("skip");
 			return false;
+		}
 			
 		countDecaysAll[2]++;
 		
@@ -265,10 +274,14 @@ void	AnalysisEtaP6Gamma::Draw()
 {
 	AnalysisTagger::Draw();
 	
+	CalcHistograms();
+	
 	for(int i=0; i<2; i++)
 	{
 		canvasAll[i]->Draw();
 		canvasUntagged[i]->Draw();
+		canvasBackground[i]->Draw();
+		canvasSubstract[i]->Draw();
 		for(int l=0; l<3; l++)
 		{
 			canvasTagged[i][l]->Draw();
@@ -277,13 +290,25 @@ void	AnalysisEtaP6Gamma::Draw()
 		canvasTagged[i][3]->Draw();
 	}
 }
+void	AnalysisEtaP6Gamma::CalcHistograms()
+{
+	for(int i=0; i<2; i++)
+	{
+		canvasBackground[i]->FillBackground(*canvasTagged[i][1], *canvasTagged[i][2]);
+		canvasSubstract[i]->FillSubstract(*canvasTagged[i][0], *canvasBackground[i]);
+	}
+}
 void	AnalysisEtaP6Gamma::Save()
 {
+	CalcHistograms();
+	
 	outFile->cd();
 	for(int i=0; i<2; i++)
 	{
 		canvasAll[i]->Save();
 		canvasUntagged[i]->Save();
+		canvasBackground[i]->Save();
+		canvasSubstract[i]->Save();
 		for(int l=0; l<3; l++)
 		{
 			canvasTagged[i][l]->Save();
@@ -296,11 +321,12 @@ void	AnalysisEtaP6Gamma::Save(const Char_t* outputFileName)
 {
 	if(OpenOutputFile(outputFileName))
 	{
+		
 		ReadRootTree::Save();
 		AnalysisTagger::Save();
 		Save();
 			
-		outFile->Close();
+		delete outFile;
 	}
 }
 
