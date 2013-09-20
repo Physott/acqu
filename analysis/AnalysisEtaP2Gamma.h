@@ -1,55 +1,41 @@
+#ifndef	_AnalysisEtaP2Gamma_h__
+#define	_AnalysisEtaP2Gamma_h__
 
 
-#include "AnalysisTagger.h"
-#include "AnalysisEtaP6GammaCanvas.h"
-
-#define		MASS_PI0	134.9766
 
 
-class AnalysisEtaP6Gamma	: public AnalysisTagger
+
+#include "AnalysisEtaP.h"
+
+
+class AnalysisEtaP2Gamma
 {
 private:
 	
-	//general
-	static	int		perm[15][6];
+	//general	
+	TCanvas*			canvas;
 	
-	Double_t		ChiSqr[15][4];
-	int				bestPerm;
-	int				bestEta;
+	//histograms
+	TH1D*				hInvMass;
 	
-	AnalysisEtaP6GammaCanvas*	canvasAll;				
-	AnalysisEtaP6GammaCanvas*	canvasUntagged;			
-	AnalysisEtaP6GammaCanvas*	canvasTagged[4];		// [promtp, rand1, rand2, singlePrompt]
-	AnalysisEtaP6GammaCanvas*	canvasTaggedMulti[3];	// [promtp, rand1, rand2]
-	
-	
-	//counters
-	Int_t		countDecaysAll[3];				// [Eta, 3Pi0, checked]
-	Int_t		countDecaysUntagged[3];			// [Eta, 3Pi0, checked]
-	Int_t		countDecaysTagged[2][4];		// [Eta, 3Pi0][promtp, rand1, rand2, singlePrompt]
-	Int_t		countDecaysTaggedMulti[2][3];	// [Eta, 3Pi0][promtp, rand1, rand2]
-	
-	void	calcEvent();
-	void	Reconstruct();
+	//bool	CutInvariantMass(AnalysisEtaP* analysis);
 	
 	
 protected:
 	
-	bool	AnalyseEvent(const int index);
-	
 	
 public:
-			AnalysisEtaP6Gamma(const char* _treeFileName, const char* _treeName);
-	virtual	~AnalysisEtaP6Gamma();
+	AnalysisEtaP2Gamma();
+	~AnalysisEtaP2Gamma();
 	
-	virtual	void	Clear();
+	void	Clear();
 	
-	virtual	void	Analyse(const int min = 0, const int max = -1);
+	bool	Analyse(AnalysisEtaP* analysis);
 		
-	virtual	void	PrintCounters();
-	virtual	void	Draw();
-	
-	
-	bool		is3Pi0()		{if(bestEta==3) return true; return false;}
-	bool		isEta2Pi0()		{if(bestEta==3) return false; return true;}
+	void	Draw();
+	void	Save();
 };
+
+
+
+#endif

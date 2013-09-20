@@ -1,72 +1,85 @@
+#ifndef	_AnalysisEtaP6Gamma_h__
+#define	_AnalysisEtaP6Gamma_h__
 
 
-#include "AnalysisTagger.h"
+
+#include "AnalysisEtaP.h"
 #include "AnalysisEtaP6GammaCanvas.h"
 
-#define		MASS_PI0	134.9766
-#define		MASS_ETA	547.51
-#define		MASS_ETAP	957.78
 
-
-class AnalysisEtaP6Gamma	: public AnalysisTagger
+class AnalysisEtaP6Gamma
 {
 private:
 	
-	//general
+	//general	
 	static	int		perm[15][6];
-	
 	Double_t		ChiSqr[15][4];
 	int				bestPerm;
 	int				bestEta;
 	
-	AnalysisEtaP6GammaCanvas*	canvasAll[2];				// [Eta, 3Pi0]
-	AnalysisEtaP6GammaCanvas*	canvasUntagged[2];			// [Eta, 3Pi0]
-	AnalysisEtaP6GammaCanvas*	canvasTagged[2][4];			// [Eta, 3Pi0][promtp, rand1, rand2, singlePrompt]
-	AnalysisEtaP6GammaCanvas*	canvasTaggedMulti[2][3];	// [Eta, 3Pi0][promtp, rand1, rand2]
-	AnalysisEtaP6GammaCanvas*	canvasBackground[2];		// [Eta, 3Pi0]    (rand1 - rand2)/2
-	AnalysisEtaP6GammaCanvas*	canvasSubstract[2];			// [Eta, 3Pi0]    prompt -Background
+	AnalysisEtaP6GammaCanvas*	result[2];				// [Eta, 3Pi0]
 	
 	//buffer
 	TLorentzVector	part[15][3];
 	Double_t		mass[15][3];
+	Double_t		massPi0[2];
+	Double_t		massPi0Eta;
 	Double_t		massAll;
-	
-	//counters
-	Int_t		countDecaysAll[3];				// [Eta, 3Pi0, checked]
-	Int_t		countDecaysUntagged[3];			// [Eta, 3Pi0, checked]
-	Int_t		countDecaysTagged[2][4];		// [Eta, 3Pi0][promtp, rand1, rand2, singlePrompt]
-	Int_t		countDecaysTaggedMulti[2][3];	// [Eta, 3Pi0][promtp, rand1, rand2]
 	
 	//variables
 	TLorentzVector		partSet[3];
 	TLorentzVector		allSet;
 	Double_t			massSet;
 	
+	//cuts
+	Double_t			cutInvMassPi0[2];
+	Double_t			cutInvMassEta[2];
+	
+	
 	void	SetMass(const int index, const Double_t mass);
-	void	calcEvent();
-	void	Reconstruct();
+	void	calcEvent(AnalysisEtaP* analysis);
 	void	CalcHistograms();
+	bool	CutInvariantMass(AnalysisEtaP* analysis);
 	
 	
 protected:
 	
-	bool	AnalyseEvent(const int index);
-	void	Save();
-	
 	
 public:
-			AnalysisEtaP6Gamma(const char* _treeFileName, const char* _treeName);
-	virtual	~AnalysisEtaP6Gamma();
+	AnalysisEtaP6Gamma();
+	~AnalysisEtaP6Gamma();
 	
-	virtual	void	Clear();
+	void	Clear();
 	
-	virtual	void	Analyse(const int min = 0, const int max = -1);
+	bool	Analyse(AnalysisEtaP* analysis);
 		
-	virtual	void	PrintCounters();
-	virtual	void	Draw();
-	virtual	void	Save(const Char_t* outputFileName);
+	void	Draw();
+	void	Save();
 	
+	void	Fill(Double_t& IMPi0a, Double_t& IMPi0b, Double_t& IMPi0cEta, Double_t& IMAll, Double_t& IMAllSet);
 	
-	bool		is3Pi0()		{if(bestEta==3) return true; return false;}
-	bool		isEta2Pi0()		{if(bestEta==3) return false; return true;}
+	const	bool		Is3Pi0()		const		{if(bestEta==3) return true; return false;}
+	const	bool		IsEta2Pi0()		const		{if(bestEta==3) return false; return true;}
+	
+	const	Double_t*	GetCutInvMassPi0()		const	{return cutInvMassPi0;}
+	const	Double_t	GetCutInvMassPi0Min()	const	{return cutInvMassPi0[0];}
+	const	Double_t	GetCutInvMassPi0Max()	const	{return cutInvMassPi0[1];}
+	const	Double_t*	GetCutInvMassEta()		const	{return cutInvMassEta;}
+	const	Double_t	GetCutInvMassEtaMin()	const	{return cutInvMassEta[0];}
+	const	Double_t	GetCutInvMassEtaMax()	const	{return cutInvMassEta[1];}
+	
+	const	Double_t	GetMassPi0a()		const	{return massPi0[0];}
+	const	Double_t	GetMassPi0b()		const	{return massPi0[1];}
+	const	Double_t	GetMassPi0cEta()	const	{return massPi0Eta;}
+	const	Double_t	GetMassAll()		const	{return massAll;}
+	const	Double_t	GetMassSet()		const	{return massSet;}
+	
+	void	SetCutInvMassPi0(const Double_t min, const Double_t max)	{cutInvMassPi0[0] = min; cutInvMassPi0[1] = max;}
+	void	SetCutInvMassEta(const Double_t min, const Double_t max)	{cutInvMassEta[0] = min; cutInvMassEta[1] = max;}
 };
+
+
+
+
+
+#endif

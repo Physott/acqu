@@ -1,3 +1,7 @@
+#ifndef	_ReadRootTree_h__
+#define	_ReadRootTree_h__
+
+
 #include <stdlib.h>
 
 #include "TROOT.h"
@@ -43,10 +47,11 @@ private:
 	TH1D*		hTaggedTime;
 	TH1I*		hCountAll;
 	TH1I*		hNCBHits;
-	TH1D*		CBEnergyAll;
+	TH1D*		hCBTime;
+	TH1D*		hCBEnergyAll;
 	
-	//counters
-	Int_t		countMultiplicity[21];		// up to M20
+	//cuts
+	Double_t	cutCBTime[2];
 
 	bool	openTree();
 	
@@ -58,10 +63,8 @@ protected:
 
 	//variables
 	TLorentzVector		vec[10];
-	TLorentzVector		all;
+	TLorentzVector		vecAll;
 	
-	//counters
-	Int_t		countAll;
 	
 	bool	AnalyseEvent(const int index);				// no index checking
 	bool	OpenOutputFile(const Char_t* outputFileName);
@@ -76,7 +79,6 @@ public:
 			
 	virtual	void	Analyse(const int min, const int max);
 	
-	virtual	void	PrintCounters();
 	virtual	void	Draw();
 	virtual	void	Save(const Char_t* outputFileName);
 	
@@ -88,7 +90,15 @@ public:
 	const	Double_t	GetTaggedEnergy(const Int_t index)	const	{return TaggedEnergy[index];}
 	const	Double_t*	GetTaggedTime()						const	{return TaggedTime;}
 	const	Double_t	GetTaggedTime(const Int_t index)	const	{return TaggedTime[index];}
+	const	Double_t*	GetCutCBTime()						const	{return cutCBTime;}
+	const	Double_t	GetCutCBTimeMin()					const	{return cutCBTime[0];}
+	const	Double_t	GetCutCBTimeMax()					const	{return cutCBTime[1];}
+	
+	void	SetCutCBTime(const Double_t Min, const Double_t Max)	{cutCBTime[0]=Min; cutCBTime[1]=Max;}
 };
 
 
+
+
+#endif
 

@@ -3,61 +3,64 @@
 
 
 
-AnalysisEtaP6Gamma::AnalysisEtaP6Gamma(const char* _treeFileName, const char* _treeName)	: AnalysisTagger(_treeFileName, _treeName)
+AnalysisEtaP6Gamma::AnalysisEtaP6Gamma()
 {
-	canvasAll[0]			= new AnalysisEtaP6GammaCanvas("EtaP_All");
-	canvasAll[1]			= new AnalysisEtaP6GammaCanvas("3Pi0_All");
-	canvasUntagged[0]		= new AnalysisEtaP6GammaCanvas("EtaP_UnTag");
-	canvasUntagged[1]		= new AnalysisEtaP6GammaCanvas("3Pi0_UnTag");
-	canvasTagged[0][0]		= new AnalysisEtaP6GammaCanvas("EtaP_Pro");
-	canvasTagged[0][1]		= new AnalysisEtaP6GammaCanvas("EtaP_Ran1");
-	canvasTagged[0][2]		= new AnalysisEtaP6GammaCanvas("EtaP_Ran2");
-	canvasTagged[0][3]		= new AnalysisEtaP6GammaCanvas("EtaP_SiPro");
-	canvasTagged[1][0]		= new AnalysisEtaP6GammaCanvas("3Pi0_Pro");
-	canvasTagged[1][1]		= new AnalysisEtaP6GammaCanvas("3Pi0_Ran1");
-	canvasTagged[1][2]		= new AnalysisEtaP6GammaCanvas("3Pi0_Ran2");
-	canvasTagged[1][3]		= new AnalysisEtaP6GammaCanvas("3Pi0_SiPro");
-	canvasTaggedMulti[0][0]	= new AnalysisEtaP6GammaCanvas("EtaP_MulPro");
-	canvasTaggedMulti[0][1]	= new AnalysisEtaP6GammaCanvas("EtaP_MulRan1");
-	canvasTaggedMulti[0][2]	= new AnalysisEtaP6GammaCanvas("EtaP_MulRan2");
-	canvasTaggedMulti[1][0]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulPro");
-	canvasTaggedMulti[1][1]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulRan1");
-	canvasTaggedMulti[1][2]	= new AnalysisEtaP6GammaCanvas("3Pi0_MulRan2");
-	canvasBackground[0]		= new AnalysisEtaP6GammaCanvas("EtaP_Background");
-	canvasBackground[1]		= new AnalysisEtaP6GammaCanvas("3Pi0_Background");
-	canvasSubstract[0]		= new AnalysisEtaP6GammaCanvas("EtaP_Substract");
-	canvasSubstract[1]		= new AnalysisEtaP6GammaCanvas("3Pi0_Substract");
+	result[0]			= new AnalysisEtaP6GammaCanvas("6G_EtaP_All");
+	result[1]			= new AnalysisEtaP6GammaCanvas("6G_3Pi0_All");
 	
 	Clear();
+	
+	cutInvMassPi0[0]	= 120;
+	cutInvMassPi0[1]	= 150;
+	cutInvMassEta[0]	= 517;
+	cutInvMassEta[1]	= 577;
 }
 AnalysisEtaP6Gamma::~AnalysisEtaP6Gamma()
 {
 }
 
+bool	AnalysisEtaP6Gamma::CutInvariantMass(AnalysisEtaP* analysis)
+{
+	if(Is3Pi0())
+	{
+		if(mass[bestPerm][0]<cutInvMassPi0[0] || mass[bestPerm][0]>cutInvMassPi0[1])
+			return false;
+		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][0]);
+		if(mass[bestPerm][1]<cutInvMassPi0[0] || mass[bestPerm][1]>cutInvMassPi0[1])
+			return false;
+		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][1]);
+		if(mass[bestPerm][2]<cutInvMassPi0[0] || mass[bestPerm][2]>cutInvMassPi0[1])
+			return false;
+		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][2]);
+	}
+	else
+	{
+		for(int i=0; i<3; i++)
+		{
+			if(i==bestEta)
+			{
+				if(mass[bestPerm][i]<cutInvMassEta[0] || mass[bestPerm][i]>cutInvMassEta[1])
+					return false;
+				analysis->hCheckInvMassCutEta->Fill(mass[bestPerm][i]);
+			}
+			else
+			{
+				if(mass[bestPerm][i]<cutInvMassPi0[0] || mass[bestPerm][i]>cutInvMassPi0[1])
+					return false;
+				analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][i]);
+			}
+		}
+	}
+	
+	return true;
+}
+
 void	AnalysisEtaP6Gamma::Clear()
 {
-	AnalysisTagger::Clear();
-	
 	for(int i=0; i<2; i++)
 	{
-		canvasAll[i]->Clear();
-		canvasUntagged[i]->Clear();
-		canvasBackground[i]->Clear();
-		canvasSubstract[i]->Clear();
-		countDecaysAll[i] 					= 0;
-		countDecaysUntagged[i]			= 0;
-		for(int l=0; l<3; l++)
-		{
-			canvasTagged[i][l]->Clear();
-			canvasTaggedMulti[i][l]->Clear();
-			countDecaysTagged[i][l]			= 0;
-			countDecaysTaggedMulti[i][l]	= 0;
-		}
-		canvasTagged[i][3]->Clear();
-		countDecaysTagged[i][3]			= 0;
+		result[i]->Clear();
 	}
-	countDecaysAll[2]				= 0;
-	countDecaysUntagged[2]			= 0;
 }
 void	AnalysisEtaP6Gamma::SetMass(const int index, const Double_t mass)
 {
@@ -67,51 +70,15 @@ void	AnalysisEtaP6Gamma::SetMass(const int index, const Double_t mass)
 	partSet[index].SetE(E);
 	partSet[index].SetVect(partSet[index].Vect().Unit() * P);
 }
-bool	AnalysisEtaP6Gamma::AnalyseEvent(const int index)
-{	
-	if(AnalysisTagger::AnalyseEvent(index))
-	{
-		if(GetNCBHits()!=6)
-		{
-			//printf("skip");
-			return false;
-		}
-			
-		countDecaysAll[2]++;
-		
-		Reconstruct();
-		
-		return true;
-	}
-	return false;
-}
-void	AnalysisEtaP6Gamma::Analyse(const int min, const int max)
-{
-	int start=min;
-	if(start < 0)
-		start	= 0;
-	if(start >= GetNEvents())
-		start	= GetNEvents()-1;
-	int stop=max;
-	if(stop < 0)
-		stop	= GetNEvents();
-	if(stop > GetNEvents())
-		stop	= GetNEvents();
-		
-	for(int i=start; i<stop; i++)
-	{
-		AnalyseEvent(i);
-	}
-	
-	PrintCounters();
-}
-void	AnalysisEtaP6Gamma::calcEvent()
+
+
+void	AnalysisEtaP6Gamma::calcEvent(AnalysisEtaP* analysis)
 {
 	for(int i=0; i<15; i++)
 	{
-		part[i][0]	= vec[perm[i][0]] + vec[perm[i][1]];
-		part[i][1]	= vec[perm[i][2]] + vec[perm[i][3]];
-		part[i][2]	= vec[perm[i][4]] + vec[perm[i][5]];
+		part[i][0]	= analysis->vec[perm[i][0]] + analysis->vec[perm[i][1]];
+		part[i][1]	= analysis->vec[perm[i][2]] + analysis->vec[perm[i][3]];
+		part[i][2]	= analysis->vec[perm[i][4]] + analysis->vec[perm[i][5]];
 		
 		mass[i][0]	= part[i][0].M();
 		mass[i][1]	= part[i][1].M();
@@ -139,197 +106,122 @@ void	AnalysisEtaP6Gamma::calcEvent()
 		}
 	}
 	
-	massAll = all.M();
+	massAll = analysis->vecAll.M();
 	partSet[0]	= part[bestPerm][0];
 	partSet[1]	= part[bestPerm][1];
 	partSet[2]	= part[bestPerm][2];
 	
 }
-void	AnalysisEtaP6Gamma::Reconstruct()
-{
-	countDecaysAll[2]++;
-	
-	calcEvent();
+bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
+{	
+	calcEvent(analysis);
 	
 	switch(bestEta)
 	{
 	case 0:
-		countDecaysAll[0]++;
-		
+		massPi0[0]	= mass[bestPerm][1];
+		massPi0[1]	= mass[bestPerm][2];
+		massPi0Eta	= mass[bestPerm][0];
 		SetMass(0, MASS_ETA);
 		SetMass(1, MASS_PI0);
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
-		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
-		else
-		{
-			for(int i=0; i<3; i++)
-			{
-				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
-				else if(nBeam[i] == 1)
-				{
-					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
-					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
-				}
-			}
-		}
+		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
 		break;
 	case 1:
-		countDecaysAll[0]++;
-		
+		massPi0[0]	= mass[bestPerm][0];
+		massPi0[1]	= mass[bestPerm][2];
+		massPi0Eta	= mass[bestPerm][1];
 		SetMass(0, MASS_PI0);
 		SetMass(1, MASS_ETA);
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		canvasAll[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
-		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
-		else
-		{
-			for(int i=0; i<3; i++)
-			{
-				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
-				else if(nBeam[i] == 1)
-				{
-					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
-					canvasTagged[0][i]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
-				}
-			}
-		}
+		result[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
 		break;
 	case 2:
-		countDecaysAll[0]++;
-		
+		massPi0[0]	= mass[bestPerm][0];
+		massPi0[1]	= mass[bestPerm][1];
+		massPi0Eta	= mass[bestPerm][2];
 		SetMass(0, MASS_PI0);
 		SetMass(1, MASS_PI0);
 		SetMass(2, MASS_ETA);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		canvasAll[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-		if(isUntagged())
-			canvasUntagged[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-		else
-		{
-			for(int i=0; i<3; i++)
-			{
-				if(nBeam[i] > 1)
-					canvasTaggedMulti[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-				else if(nBeam[i] == 1)
-				{
-					if(i==0 && isUniqueWindow())
-						canvasTagged[0][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-					canvasTagged[0][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-				}
-			}
-		}
+		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
 		break;
 	case 3:
-		countDecaysAll[1]++;
-		
+		massPi0[0]	= mass[bestPerm][0];
+		massPi0[1]	= mass[bestPerm][1];
+		massPi0Eta	= mass[bestPerm][2];
 		SetMass(0, MASS_PI0);
 		SetMass(1, MASS_PI0);
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		canvasAll[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-		if(isUntagged())
-			canvasUntagged[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-		else
-		{
-			for(int i=0; i<3; i++)
-			{
-				if(nBeam[i] > 1)
-					canvasTaggedMulti[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-				else if(nBeam[i] == 1)
-				{
-					if(i==0 && isUniqueWindow())
-						canvasTagged[1][3]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-					canvasTagged[1][i]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
-				}
-			}
-		}
+		result[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
 		break;
 	}
+	
+	if(CutInvariantMass(analysis))
+	{
+		if(Is3Pi0())
+			result[1]->Fill(massAll, massSet);
+		else
+			result[0]->Fill(massAll, massSet);	
+			
+		return true;
+	}
+	
+	return false;
 }
 
-void	AnalysisEtaP6Gamma::PrintCounters()
-{
-	AnalysisTagger::PrintCounters();
-	
-	printf("\tDecay:\t\t%d events checked.\t\t%d reconstructed as Eta & 2Pi0 (%lf %%).\t%d reconstructed as 3Pi0 (%lf %%)\n", countDecaysAll[2], countDecaysAll[0], 100.0 * double(countDecaysAll[0])/double(countDecaysAll[2]), countDecaysAll[1], 100.0*double(countDecaysAll[1])/double(countDecaysAll[2]));
-}
+
 void	AnalysisEtaP6Gamma::Draw()
-{
-	AnalysisTagger::Draw();
-	
-	CalcHistograms();
-	
+{	
 	for(int i=0; i<2; i++)
 	{
-		canvasAll[i]->Draw();
-		canvasUntagged[i]->Draw();
-		canvasBackground[i]->Draw();
-		canvasSubstract[i]->Draw();
-		for(int l=0; l<3; l++)
-		{
-			canvasTagged[i][l]->Draw();
-			canvasTaggedMulti[i][l]->Draw();
-		}
-		canvasTagged[i][3]->Draw();
-	}
-}
-void	AnalysisEtaP6Gamma::CalcHistograms()
-{
-	for(int i=0; i<2; i++)
-	{
-		canvasBackground[i]->FillBackground(*canvasTagged[i][1], *canvasTagged[i][2]);
-		canvasSubstract[i]->FillSubstract(*canvasTagged[i][0], *canvasBackground[i]);
+		result[i]->Draw();
 	}
 }
 void	AnalysisEtaP6Gamma::Save()
-{
-	CalcHistograms();
-	
-	outFile->cd();
+{	
 	for(int i=0; i<2; i++)
 	{
-		canvasAll[i]->Save();
-		canvasUntagged[i]->Save();
-		canvasBackground[i]->Save();
-		canvasSubstract[i]->Save();
-		for(int l=0; l<3; l++)
-		{
-			canvasTagged[i][l]->Save();
-			canvasTaggedMulti[i][l]->Save();
-		}
-		canvasTagged[i][3]->Save();
-	}
-}
-void	AnalysisEtaP6Gamma::Save(const Char_t* outputFileName)
-{
-	if(OpenOutputFile(outputFileName))
-	{
-		
-		ReadRootTree::Save();
-		AnalysisTagger::Save();
-		Save();
-			
-		delete outFile;
+		result[i]->Save();
 	}
 }
 
+void	AnalysisEtaP6Gamma::Fill(Double_t& IMPi0a, Double_t& IMPi0b, Double_t& IMPi0cEta, Double_t& IMAll, Double_t& IMAllSet)
+{
+	switch(bestEta)
+	{
+		case 0:
+			IMPi0a		= mass[bestPerm][1];
+			IMPi0b		= mass[bestPerm][2];
+			IMPi0cEta	= mass[bestPerm][0];
+			break;
+		case 1:
+			IMPi0a		= mass[bestPerm][0];
+			IMPi0b		= mass[bestPerm][2];
+			IMPi0cEta	= mass[bestPerm][1];
+			break;
+		case 2:
+		case 3:
+			IMPi0a		= mass[bestPerm][0];
+			IMPi0b		= mass[bestPerm][1];
+			IMPi0cEta	= mass[bestPerm][2];
+	}
+	IMAll		= massAll;
+	IMAllSet	= massSet;
+}
+
+	
 
 int		AnalysisEtaP6Gamma::perm[15][6]=
 {

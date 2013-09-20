@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "AnalysisEtaP6Gamma.h"
+#include "Analysis.h"
 
 #include "TSystemDirectory.h"
 //#include "TLorentzVector.h"
@@ -12,18 +12,20 @@ int	main( int argc, const char* argv[] )
 {
 	//printf("OK\n");
 	
-	AnalysisEtaP6Gamma*		c = new AnalysisEtaP6Gamma("TTreeOutput_41940_CUT_2_6_10.root", "TTreeOutput_41940_CUT_2_6_10");
+	Analysis*		c = new Analysis("TTreeOutput_41948_CUT_2_6_10.root", "TTreeOutput_41948_CUT_2_6_10");
 	
-	c->SetCutTaggerTime(-4,4,-14,-6,6,14);
+	c->SetCutCBTime(-13, 40);
+	c->SetCutTaggerTime(-5,5,-18,-8,8,18);
+	c->SetCutMissMass(738,1138);
 	c->Analyse(0,50001);
-	//c->Draw();
-	c->Save("test.root");
+	c->Draw();
+	//c->Save("test.root");
 	
 }
 
 
 
-void	AnalyseFolder(const char* FolderName)
+/*void	AnalyseFolder(const char* FolderName)
 {
 	TSystemDirectory dir(FolderName, FolderName);
 	TList* files = dir.GetListOfFiles();
@@ -63,4 +65,4 @@ void	AnalyseFolder(const char* FolderName)
 			}
 		}
 	}
-}
+}*/

@@ -10,94 +10,29 @@ AnalysisEtaP6GammaCanvas::AnalysisEtaP6GammaCanvas(const Char_t* Name)
 	
 	Char_t	str[128];
 	sprintf(str, "%s_InvMassPi0a", name);
-	hInvMassPi0a	= new TH1D(str, str, 1600, 0, 1600);
+	if(!(hInvMassPi0a		= (TH1D*)gROOT->Get(str)))
+		hInvMassPi0a		= new TH1D(str, str, 1600, 0, 1600);
 	sprintf(str, "%s_InvMassPi0b", name);
-	hInvMassPi0b	= new TH1D(str, str, 1600, 0, 1600);
+	if(!(hInvMassPi0b		= (TH1D*)gROOT->Get(str)))
+		hInvMassPi0b		= new TH1D(str, str, 1600, 0, 1600);
 	sprintf(str, "%s_InvMassPi0cEta", name);
-	hInvMassPi0cEta	= new TH1D(str, str, 1600, 0, 1600);
+	if(!(hInvMassPi0cEta	= (TH1D*)gROOT->Get(str)))
+		hInvMassPi0cEta		= new TH1D(str, str, 1600, 0, 1600);
 	sprintf(str, "%s_InvMassAll", name);
-	hInvMassAll	= new TH1D(str, str, 1600, 0, 1600);
-	sprintf(str, "%s_InvMassAllSet", name);
-	hInvMassAllSet	= new TH1D(str, str, 1600, 0, 1600);
+	if(!(hInvMassAll		= (TH1D*)gROOT->Get(str)))
+		hInvMassAll			= new TH1D(str, str, 1600, 0, 1600);
+	sprintf(str, "%s_InvMassAllCut", name);
+	if(!(hInvMassAllCut		= (TH1D*)gROOT->Get(str)))
+		hInvMassAllCut		= new TH1D(str, str, 1600, 0, 1600);
+	sprintf(str, "%s_InvMassAllCutSet", name);
+	if(!(hInvMassAllCutSet	= (TH1D*)gROOT->Get(str)))
+		hInvMassAllCutSet	= new TH1D(str, str, 1600, 0, 1600);
+		
+	Clear();
 }
 AnalysisEtaP6GammaCanvas::~AnalysisEtaP6GammaCanvas()
 {
 	
-}
-
-void	AnalysisEtaP6GammaCanvas::FillBackground(const AnalysisEtaP6GammaCanvas& rand1, const AnalysisEtaP6GammaCanvas& rand2)
-{	
-	Char_t	str[128];
-	
-	delete hInvMassPi0a;
-	sprintf(str, "%s_InvMassPi0a", name);
-	hInvMassPi0a = (TH1D*)rand1.hInvMassPi0a->Clone(str);	
-	hInvMassPi0a->SetTitle(str);
-	hInvMassPi0a->Add(rand2.hInvMassPi0a);
-	hInvMassPi0a->Scale(0.5);
-	
-	delete hInvMassPi0b;
-	sprintf(str, "%s_InvMassPi0b", name);
-	hInvMassPi0b = (TH1D*)rand1.hInvMassPi0b->Clone(str);	
-	hInvMassPi0b->SetTitle(str);
-	hInvMassPi0b->Add(rand2.hInvMassPi0b);
-	hInvMassPi0b->Scale(0.5);
-	
-	delete hInvMassPi0cEta;
-	sprintf(str, "%s_InvMassPi0cEta", name);
-	hInvMassPi0cEta = (TH1D*)rand1.hInvMassPi0cEta->Clone(str);	
-	hInvMassPi0cEta->SetTitle(str);
-	hInvMassPi0cEta->Add(rand2.hInvMassPi0cEta);
-	hInvMassPi0cEta->Scale(0.5);
-	
-	delete hInvMassAll;
-	sprintf(str, "%s_InvMassAll", name);
-	hInvMassAll = (TH1D*)rand1.hInvMassAll->Clone(str);	
-	hInvMassAll->SetTitle(str);
-	hInvMassAll->Add(rand2.hInvMassAll);
-	hInvMassAll->Scale(0.5);
-	
-	delete hInvMassAllSet;
-	sprintf(str, "%s_InvMassAllSet", name);
-	hInvMassAllSet = (TH1D*)rand1.hInvMassAllSet->Clone(str);	
-	hInvMassAllSet->SetTitle(str);
-	hInvMassAllSet->Add(rand2.hInvMassAllSet);
-	hInvMassAllSet->Scale(0.5);
-}
-
-void	AnalysisEtaP6GammaCanvas::FillSubstract(const AnalysisEtaP6GammaCanvas& prompt, const AnalysisEtaP6GammaCanvas& background)
-{
-	Char_t	str[128];
-	
-	delete hInvMassPi0a;
-	sprintf(str, "%s_InvMassPi0a", name);
-	hInvMassPi0a = (TH1D*)prompt.hInvMassPi0a->Clone(str);
-	hInvMassPi0a->SetTitle(str);
-	hInvMassPi0a->Add(background.hInvMassPi0a, -1);
-	
-	delete hInvMassPi0b;
-	sprintf(str, "%s_InvMassPi0b", name);
-	hInvMassPi0b = (TH1D*)prompt.hInvMassPi0b->Clone(str);
-	hInvMassPi0b->SetTitle(str);
-	hInvMassPi0b->Add(background.hInvMassPi0b, -1);
-	
-	delete hInvMassPi0cEta;
-	sprintf(str, "%s_InvMassPi0cEta", name);
-	hInvMassPi0cEta = (TH1D*)prompt.hInvMassPi0cEta->Clone(str);
-	hInvMassPi0cEta->SetTitle(str);
-	hInvMassPi0cEta->Add(background.hInvMassPi0cEta, -1);
-	
-	delete hInvMassAll;
-	sprintf(str, "%s_InvMassAll", name);
-	hInvMassAll = (TH1D*)prompt.hInvMassAll->Clone(str);
-	hInvMassAll->SetTitle(str);
-	hInvMassAll->Add(background.hInvMassAll, -1);
-	
-	delete hInvMassAllSet;
-	sprintf(str, "%s_InvMassAllSet", name);
-	hInvMassAllSet = (TH1D*)prompt.hInvMassAllSet->Clone(str);
-	hInvMassAllSet->SetTitle(str);
-	hInvMassAllSet->Add(background.hInvMassAllSet, -1);
 }
 	
 void	AnalysisEtaP6GammaCanvas::Draw()
@@ -112,7 +47,8 @@ void	AnalysisEtaP6GammaCanvas::Draw()
 	canvas->cd(2);	hInvMassPi0b->Draw();
 	canvas->cd(3);	hInvMassPi0cEta->Draw();
 	canvas->cd(4);	hInvMassAll->Draw();	
-	canvas->cd(5);	hInvMassAllSet->Draw();
+	canvas->cd(5);	hInvMassAllCut->Draw();
+	canvas->cd(6);	hInvMassAllCutSet->Draw();
 }
 
 void	AnalysisEtaP6GammaCanvas::Save()
@@ -121,5 +57,6 @@ void	AnalysisEtaP6GammaCanvas::Save()
 	hInvMassPi0b->Write();
 	hInvMassPi0cEta->Write();
 	hInvMassAll->Write();	
-	hInvMassAllSet->Write();
+	hInvMassAllCut->Write();	
+	hInvMassAllCutSet->Write();
 }

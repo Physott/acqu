@@ -1,53 +1,47 @@
+#ifndef	_AnalysisTagger_h__
+#define	_AnalysisTagger_h__
 
-
-#include "ReadRootTree.h"
+#include "AnalysisEtaP.h"
+#include "AnalysisEtaP6GammaTaggedCanvas.h"
 
 
 #define MASS_PROTON	938.27203
 
 
-class AnalysisTagger	: public ReadRootTree
+
+class AnalysisTagger	: public AnalysisEtaP
 {
 private:
 
 	//general
 	TCanvas*	canvas;
 	
-	//types
-	bool				untagged;			// untagged
-	bool				uniqueWindow;		// only 1 hit in 1 window
-	
-	//counters
-	Int_t		countTaggerWindow[5];		// prompt, rand1, rand2, prompt(only 1 Hit), checked
-	Int_t		countTaggerWindowMulti[3];	// prompt, rand1, rand2		(filled multi)
+	//histograms
+	TH1D*				hMissMass;
+	TH1D*				hCheckCutMissMass;
+	TH1I*				hCountWindow;
+	TH1I*				hCountWindowAccumulated;
+	TH1I*				hCountWindowN[3];
+	TH1I*				hCountWindowCut;
+	TH1I*				hCountWindowAccumulatedCut;
+	TH1I*				hCountWindowNCut[3];
 	
 	//cuts
-	Double_t	cutTaggerTime[6];	// prompt, rand1, rand2
-	Double_t	cutMissMass[2];
-	
-	//histogramms
-	TH1I*	hCountTaggerWindow;
-	TH1I*	hCountTaggerWindowMulti;
-	TH1D*	hMissMass[4];
-	TH1D*	hMissMassMulti[3];
-	TH1D*	hMissMassAll[3];
-	TH1D*	hMissMassBackground[3];
-	TH1D*	hMissMassSubstract[3];
-	
-	
-	void	CalcHistograms();
-	
+	Double_t			cutTaggerTime[6];
+	Double_t			cutMissMass[2];
 	
 protected:
 	
 	//variables
-	TLorentzVector		beam[3][10];
-	Double_t			missMass[3][10];
+	TLorentzVector		beam[3][32];
+	Double_t			missMass[3][32];
 	Int_t				nBeam[3];
+	TLorentzVector		beamCut[3][16];
+	Double_t			missMassCut[3][16];
+	Int_t				nBeamCut[3];
 	
-	
-	void	CutMissMass();
 	void	AnalyseTagged();
+	void	CutMissMass();
 	bool	AnalyseEvent(const int index);				// no index checking
 	void	Save();
 	
@@ -60,12 +54,8 @@ public:
 			
 	virtual	void	Analyse(const int min, const int max);
 	
-	virtual	void	PrintCounters();
 	virtual	void	Draw();
 	virtual	void	Save(const Char_t* outputFileName);
-	
-	const	bool	isUntagged()		const	{return untagged;}
-	const	bool	isUniqueWindow()	const	{return uniqueWindow;}
 	
 	const	Double_t*	GetCutTaggerTimes()	const	{return cutTaggerTime;}
 	const	Double_t	GetCutTaggerTimePromptMin()	const	{return cutTaggerTime[0];}
@@ -82,3 +72,8 @@ public:
 	void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max;}
 		
 };
+
+
+
+
+#endif
