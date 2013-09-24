@@ -1,5 +1,6 @@
 #include "main.cxx"
 #include "ReadRootTree.cxx"
+#include "ReadRootTreeHist.cxx"
 #include "AnalysisEtaP.cxx"
 #include "AnalysisEtaP2Gamma.cxx"
 #include "AnalysisEtaP6GammaCanvas.cxx"

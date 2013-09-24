@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "Analysis.h"
+#include "ReadRootTree.h"
 
 #include "TSystemDirectory.h"
 //#include "TLorentzVector.h"
@@ -12,11 +12,11 @@ int	main( int argc, const char* argv[] )
 {
 	//printf("OK\n");
 	
-	Analysis*		c = new Analysis("TTreeOutput_41948_CUT_2_6_10.root", "TTreeOutput_41948_CUT_2_6_10");
+	ReadRootTree*		c = new ReadRootTree("TTreeOutput_41948_CUT_2_6_10.root", "TTreeOutput_41948_CUT_2_6_10");
 	
-	c->SetCutCBTime(-13, 40);
-	c->SetCutTaggerTime(-5,5,-18,-8,8,18);
-	c->SetCutMissMass(738,1138);
+	//c->SetCutCBTime(-13, 40);
+	//c->SetCutTaggerTime(-5,5,-18,-8,8,18);
+	//c->SetCutMissMass(738,1138);
 	c->Analyse(0,50001);
 	c->Draw();
 	//c->Save("test.root");

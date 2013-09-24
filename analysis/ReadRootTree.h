@@ -13,6 +13,7 @@
 #include "TLorentzVector.h"
 #include "TStyle.h"
 
+#include "ReadRootTreeHist.h"
 
 
 class ReadRootTree
@@ -20,14 +21,15 @@ class ReadRootTree
 private:
 
 	//general
-	TFile*		file;
-	TTree*		tree;
-	Char_t		treeFileName[256];
-	Char_t		treeName[64];
-	bool		isOpened;
-	TCanvas*	canvas;
-	int			period;
-	int			nPeriod;
+	TFile*				file;
+	TTree*				tree;
+	Char_t				treeFileName[256];
+	Char_t				treeName[64];
+	bool				isOpened;
+	TCanvas*			canvas;
+	ReadRootTreeHist*	hist;
+	int					period;
+	int					nPeriod;
 	
 	//variables
 		
@@ -38,20 +40,10 @@ private:
 	Double_t			E[32];
 	Double_t			Time[32];
 	
-	//histograms
 	Int_t		nTagged;
 	Double_t	TaggedEnergy[64];
 	Double_t	TaggedTime[64];
 	
-	TH1I*		hNTagged;
-	TH1D*		hTaggedTime;
-	TH1I*		hCountAll;
-	TH1I*		hNCBHits;
-	TH1D*		hCBTime;
-	TH1D*		hCBEnergyAll;
-	
-	//cuts
-	Double_t	cutCBTime[2];
 
 	bool	openTree();
 	
@@ -75,7 +67,7 @@ public:
 			ReadRootTree(const char* _treeFileName, const char* _treeName);
 	virtual	~ReadRootTree();
 	
-	virtual	void	Clear();
+	virtual	void	Clear()											{hist->Clear();}
 			
 	virtual	void	Analyse(const int min, const int max);
 	
@@ -90,11 +82,6 @@ public:
 	const	Double_t	GetTaggedEnergy(const Int_t index)	const	{return TaggedEnergy[index];}
 	const	Double_t*	GetTaggedTime()						const	{return TaggedTime;}
 	const	Double_t	GetTaggedTime(const Int_t index)	const	{return TaggedTime[index];}
-	const	Double_t*	GetCutCBTime()						const	{return cutCBTime;}
-	const	Double_t	GetCutCBTimeMin()					const	{return cutCBTime[0];}
-	const	Double_t	GetCutCBTimeMax()					const	{return cutCBTime[1];}
-	
-	void	SetCutCBTime(const Double_t Min, const Double_t Max)	{cutCBTime[0]=Min; cutCBTime[1]=Max;}
 };
 
 
