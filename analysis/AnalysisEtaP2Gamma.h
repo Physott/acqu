@@ -14,11 +14,16 @@ private:
 	
 	//general	
 	TCanvas*			canvas;
+	TCanvas*			cutCanvas;
 	
 	//histograms
 	TH1D*				hInvMass;
+	ReadRootTreeHist*	rawHist;
 	
-	//bool	CutInvariantMass(AnalysisEtaP* analysis);
+	ReadRootTreeHist*	cutRawHist;
+	
+	//cuts
+	Cut1Value*			cutInvMass;
 	
 	
 protected:
@@ -33,7 +38,13 @@ public:
 	bool	Analyse(AnalysisEtaP* analysis);
 		
 	void	Draw();
-	void	Save();
+	void	Save(TFile* outFile, const Char_t* nameParent);
+	
+	const Double_t*	GetCutInvMassEtaP()		const	{return cutInvMass->GetCut();}
+	const Double_t	GetCutInvMassEtaPMin()	const	{return cutInvMass->GetCutMin();}
+	const Double_t	GetCutInvMassEtaPMax()	const	{return cutInvMass->GetCutMax();}
+	
+	void	SetCutInvMassEtaP(const Double_t min, const Double_t max)	{cutInvMass->SetCut(min, max);}
 };
 
 

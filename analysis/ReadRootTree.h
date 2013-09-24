@@ -73,6 +73,8 @@ public:
 	virtual	~ReadRootTree();
 	
 	virtual	void	Clear()											{hist->Clear();}
+	
+			void	Fill(ReadRootTreeHist* h)						{h->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());}
 			
 	virtual	void	Analyse(const int min, const int max);
 	

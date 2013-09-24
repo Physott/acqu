@@ -103,22 +103,22 @@ void	AnalysisEtaP6GammaCanvas::Fill(const Double_t invMassPi0a, const Double_t i
 }
 
 
-void	AnalysisEtaP6GammaCanvas::Draw()
+void	AnalysisEtaP6GammaCanvas::Draw(TCanvas* canvas, const int posInvMassPi0a, const int posInvMassPi0b, const int posInvMassPi0cEta, const int posInvMassPi0aDiced, const int posInvMassPi0bDiced, const int posInvMassPi0cEtaDiced, const int posInvMassAll, const int posInvMassAllSet)
 {
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject(name)))
+	/*if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject(name)))
 		canvas	= new TCanvas(name, name, 50, 50, 1600, 800);
 	canvas->Clear();
 		
-	canvas->Divide(3, 3, 0.001, 0.001);
+	canvas->Divide(3, 3, 0.001, 0.001);*/
 	
-	canvas->cd(1);	hInvMassPi0a[0]->Draw();
-	canvas->cd(2);	hInvMassPi0b[0]->Draw();
-	canvas->cd(3);	hInvMassPi0cEta[0]->Draw();
-	canvas->cd(4);	hInvMassPi0a[1]->Draw();
-	canvas->cd(5);	hInvMassPi0b[1]->Draw();
-	canvas->cd(6);	hInvMassPi0cEta[1]->Draw();
-	canvas->cd(7);	hInvMassAll->Draw();
-	canvas->cd(8);	hInvMassAllSet->Draw();
+	canvas->cd(posInvMassPi0a);	hInvMassPi0a[0]->Draw();
+	canvas->cd(posInvMassPi0b);	hInvMassPi0b[0]->Draw();
+	canvas->cd(posInvMassPi0cEta);	hInvMassPi0cEta[0]->Draw();
+	canvas->cd(posInvMassPi0aDiced);	hInvMassPi0a[1]->Draw();
+	canvas->cd(posInvMassPi0bDiced);	hInvMassPi0b[1]->Draw();
+	canvas->cd(posInvMassPi0cEtaDiced);	hInvMassPi0cEta[1]->Draw();
+	canvas->cd(posInvMassAll);	hInvMassAll->Draw();
+	canvas->cd(posInvMassAllSet);	hInvMassAllSet->Draw();
 }
 
 void	AnalysisEtaP6GammaCanvas::Save()

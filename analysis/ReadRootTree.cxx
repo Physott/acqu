@@ -59,7 +59,7 @@ bool	ReadRootTree::openTree()
 	return true;
 }
 
-
+			
 bool	ReadRootTree::AnalyseEvent(const int index)
 {	
 	if((index-(nPeriod*period))==0)
@@ -75,10 +75,10 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0] ,E[0]);
 		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1] ,E[1]);
 		vecAll	= vec[0] + vec[1];
-		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());
+		Fill(hist);	
 		if(!cutCBTime->Analyse(nCBHits, Time))
 			return false;
-		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		Fill(cutHist);	
 		return true;
 	}
 	if(nCBHits == 6)
@@ -90,10 +90,10 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4] ,E[4]);
 		vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5] ,E[5]);
 		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
-		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		Fill(hist);	
 		if(!cutCBTime->Analyse(nCBHits, Time))
 			return false;
-		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		Fill(cutHist);	
 		return true;
 	}
 	if(nCBHits == 10)
@@ -109,10 +109,10 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[8].SetPxPyPzE(Px[8], Py[8], Pz[8] ,E[8]);
 		vec[9].SetPxPyPzE(Px[9], Py[9], Pz[9] ,E[9]);
 		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5] + vec[6] + vec[7] + vec[8] + vec[9];
-		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		Fill(hist);	
 		if(!cutCBTime->Analyse(nCBHits, Time))
 			return false;
-		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		Fill(cutHist);		
 		return true;
 	}
 	return false;

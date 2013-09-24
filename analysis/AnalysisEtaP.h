@@ -12,19 +12,19 @@
 
 
 class AnalysisEtaP2Gamma;
-//class AnalysisEtaP6Gamma;
+class AnalysisEtaP6Gamma;
 
 
 class	AnalysisEtaP	: public ReadRootTree
 {
 private:
 	//general
-	TCanvas*				canvas;
+	//TCanvas*				canvas;
 	
 protected:
 
 	AnalysisEtaP2Gamma*		analysis2;
-	//AnalysisEtaP6Gamma*		analysis6;
+	AnalysisEtaP6Gamma*		analysis6;
 
 	bool	AnalyseEvent(const int index);				// no index checking
 	void	Save();
@@ -41,10 +41,10 @@ public:
 	virtual	void	Save(const Char_t* outputFileName);
 	
 	const	AnalysisEtaP2Gamma*	GetAnalysis2Gamma()	const		{return analysis2;}
-	//const	AnalysisEtaP6Gamma*	GetAnalysis6Gamma()	const		{return analysis6;}
+	const	AnalysisEtaP6Gamma*	GetAnalysis6Gamma()	const		{return analysis6;}
 	
 	friend class AnalysisEtaP2Gamma;
-	//friend class AnalysisEtaP6Gamma;
+	friend class AnalysisEtaP6Gamma;
 };
 
 

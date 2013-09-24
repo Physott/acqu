@@ -3,52 +3,35 @@
 
 
 
-AnalysisEtaP6Gamma::AnalysisEtaP6Gamma(const char* Name, const char* Title)	: AnalysisDecay(Name, Title)
+AnalysisEtaP6Gamma::AnalysisEtaP6Gamma()
 {
-	result[0]			= new AnalysisEtaP6GammaCanvas("6G_EtaP_All", true);
-	result[1]			= new AnalysisEtaP6GammaCanvas("6G_3Pi0_All", false);
+	if(!(hCountDecay	= (TH1I*)gROOT->Get("6G_CountDecay")))
+		hCountDecay		= new TH1I("6G_CountDecay", "1:All / 2:EtaP / 3:3Pi0", 5, 0, 5);
+	
+	result[0]			= new AnalysisEtaP6GammaCanvas("6G_EtaP", true);
+	result[1]			= new AnalysisEtaP6GammaCanvas("6G_3Pi0", false);
+	
+	rawHist[0]			= new ReadRootTreeHist("6G");
+	rawHist[1]			= new ReadRootTreeHist("6G_EtaP");
+	rawHist[2]			= new ReadRootTreeHist("6G_3Pi0");
+	
+	cutEta		= new Cut1Value("6G_EtaP_CutIMEta", 300, 400, 700);
+	cutEta->SetCut(517, 577);
+	cut2Pi0		= new CutNValues("6G_EtaP_CutIM2Pi0", 2, 300, 0, 300);
+	cut2Pi0->SetCut(120, 150);
+	cut3Pi0		= new CutNValues("6G_3Pi0_CutIM", 3, 300, 0, 300);
+	cut3Pi0->SetCut(120, 150);
+	
+	cutResult[0]		= new AnalysisEtaP6GammaCanvas("6G_EtaP_CutIM", true);
+	cutResult[1]		= new AnalysisEtaP6GammaCanvas("6G_3Pi0_CutIM", false);
+	
+	cutRawHist[0]		= new ReadRootTreeHist("6G_EtaP_CutIM");
+	cutRawHist[1]		= new ReadRootTreeHist("6G_3Pi0_CutIM");
 	
 	Clear();
-	
-	cutInvMassPi0[0]	= 120;
-	cutInvMassPi0[1]	= 150;
-	cutInvMassEta[0]	= 517;
-	cutInvMassEta[1]	= 577;
 }
 AnalysisEtaP6Gamma::~AnalysisEtaP6Gamma()
 {
-}
-
-bool	AnalysisEtaP6Gamma::CutInvariantMass(AnalysisEtaP* analysis)
-{
-	if(IsEtaP())
-	{
-		for(int i=0; i<3; i++)
-		{
-			if(i==bestEta)
-			{
-				if(mass[bestPerm][i]<cutInvMassEta[0] || mass[bestPerm][i]>cutInvMassEta[1])
-					return false;
-			}
-			else
-			{
-				if(mass[bestPerm][i]<cutInvMassPi0[0] || mass[bestPerm][i]>cutInvMassPi0[1])
-					return false;
-			}
-		}
-	}
-	else
-	{
-		if(mass[bestPerm][0]<cutInvMassPi0[0] || mass[bestPerm][0]>cutInvMassPi0[1])
-			return false;
-		if(mass[bestPerm][1]<cutInvMassPi0[0] || mass[bestPerm][1]>cutInvMassPi0[1])
-			return false;
-		if(mass[bestPerm][2]<cutInvMassPi0[0] || mass[bestPerm][2]>cutInvMassPi0[1])
-			return false;
-	}
-	
-	
-	return true;
 }
 
 
@@ -76,7 +59,14 @@ void	AnalysisEtaP6Gamma::Clear()
 	for(int i=0; i<2; i++)
 	{
 		result[i]->Clear();
+		rawHist[i]->Clear();
+		cutResult[i]->Clear();
+		cutRawHist[i]->Clear();
 	}
+	rawHist[2]->Clear();
+	cutEta->Clear();
+	cut2Pi0->Clear();
+	cut3Pi0->Clear();
 }
 void	AnalysisEtaP6Gamma::SetMass(const int index, const Double_t mass)
 {
@@ -132,6 +122,8 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 {	
 	calcEvent(analysis);
 	
+	hCountDecay->Fill(1);
+	
 	switch(bestEta)
 	{
 	case 0:
@@ -143,7 +135,9 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
-		
+		hCountDecay->Fill(2);
+		analysis->Fill(rawHist[0]);
+		analysis->Fill(rawHist[1]);
 		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 		break;
 	case 1:
@@ -155,7 +149,9 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
-		
+		hCountDecay->Fill(2);
+		analysis->Fill(rawHist[0]);
+		analysis->Fill(rawHist[1]);
 		result[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 		break;
 	case 2:
@@ -167,7 +163,9 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		SetMass(2, MASS_ETA);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
-		
+		hCountDecay->Fill(2);
+		analysis->Fill(rawHist[0]);
+		analysis->Fill(rawHist[1]);
 		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		break;
 	case 3:
@@ -179,20 +177,29 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		SetMass(2, MASS_PI0);
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
-		
+		hCountDecay->Fill(3);
+		analysis->Fill(rawHist[0]);
+		analysis->Fill(rawHist[2]);
 		result[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		break;
 	}
 	
-	/*if(CutInvariantMass(analysis))
+	if(IsEtaP())
 	{
-		if(Is3Pi0())
-			result[1]->Fill(massAll, massSet);
-		else
-			result[0]->Fill(massAll, massSet);	
-			
-		return true;
-	}*/
+		if(!cutEta->Analyse(massPi0Eta))
+			return false;
+		if(!cut2Pi0->Analyse(massPi0[0], massPi0[1]))
+			return false;
+		analysis->Fill(cutRawHist[0]);
+		cutResult[0]->Fill(massPi0[0], massPi0[1], massPi0Eta, massAll, massSet);
+	}
+	else
+	{
+		if(!cut3Pi0->Analyse(massPi0[0], massPi0[1], massPi0Eta))
+			return false;
+		analysis->Fill(cutRawHist[1]);
+		cutResult[1]->Fill(massPi0[0], massPi0[1], massPi0Eta, massAll, massSet);
+	}
 	
 	return true;
 }
@@ -200,23 +207,96 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 
 void	AnalysisEtaP6Gamma::Draw()
 {	
-	for(int i=0; i<2; i++)
-	{
-		result[i]->Draw();
-	}
+	if(!(canvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G")))
+		canvas[0]	= new TCanvas("6G", "6G", 50, 50, 1600, 800);
+	canvas[0]->Clear();
+	canvas[0]->Divide(3, 3, 0.001, 0.001);
+	
+	canvas[0]->cd(1);	hCountDecay->Draw();
+	rawHist[0]->Draw(canvas[0], 4, 5, 6, 7, 8, 9);
+	
+	
+	if(!(canvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP")))
+		canvas[1]	= new TCanvas("6G_EtaP", "6G_EtaP", 50, 50, 1600, 800);
+	canvas[1]->Clear();
+	canvas[1]->Divide(3, 5, 0.001, 0.001);
+	
+	result[0]->Draw(canvas[1], 1, 2, 3, 4, 5, 6, 7, 8);
+	rawHist[1]->Draw(canvas[1], 10, 11, 12, 13, 14, 15);
+	
+	
+	if(!(canvas[2]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0")))
+		canvas[2]	= new TCanvas("6G_3Pi0", "6G_3Pi0", 50, 50, 1600, 800);
+	canvas[2]->Clear();
+	canvas[2]->Divide(3, 5, 0.001, 0.001);
+	
+	result[1]->Draw(canvas[2], 1, 2, 3, 4, 5, 6, 7, 8);
+	rawHist[2]->Draw(canvas[2], 10, 11, 12, 13, 14, 15);
+	
+	DrawCut();
 }
-void	AnalysisEtaP6Gamma::Save(TFile* outFile)
+void	AnalysisEtaP6Gamma::DrawCut()
 {	
-	outFile->cd();	
-	outFile->mkdir("6G");
-	outFile->cd("6G");
+	if(!(cutCanvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP_CutIM")))
+		cutCanvas[0]	= new TCanvas("6G_EtaP_CutIM", "6G_EtaP_CutIM", 50, 50, 1600, 800);
+	cutCanvas[0]->Clear();
+	cutCanvas[0]->Divide(9, 4, 0.001, 0.001);
 	
-	for(int i=0; i<2; i++)
-	{
-		result[i]->Save();
-	}
+	cutEta->Draw(cutCanvas[0], 1, 2, 3);
+	cut2Pi0->Draw(cutCanvas[0], 4, 5, 6, 7, 8, 9);
+	cutResult[0]->Draw(cutCanvas[0], 10, 11, 12, 13, 14, 15, 16, 17);
+	cutRawHist[0]->Draw(cutCanvas[0], 19, 20, 21, 22, 23, 24);
 	
-	outFile->cd();	
+	
+	if(!(cutCanvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0_CutIM")))
+		cutCanvas[1]	= new TCanvas("6G_3Pi0_CutIM", "6G_3Pi0_CutIM", 50, 50, 1600, 800);
+	cutCanvas[1]->Clear();
+	cutCanvas[1]->Divide(9, 3, 0.001, 0.001);
+	
+	cut3Pi0->Draw(cutCanvas[1], 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	cutResult[1]->Draw(cutCanvas[1], 10, 11, 12, 13, 14, 15, 16, 17);
+	cutRawHist[1]->Draw(cutCanvas[1], 19, 20, 21, 22, 23, 24);
+}
+void	AnalysisEtaP6Gamma::Save(TFile* outFile, const Char_t* nameParent)
+{	
+	hCountDecay->Write();
+	rawHist[0]->Save();
+	
+	
+	Char_t	str[64];
+	sprintf(str,"%s/EtaP", nameParent);
+	outFile->mkdir(str);
+	outFile->cd(str);
+	
+	result[0]->Save();
+	rawHist[1]->Save();
+	
+	
+	sprintf(str,"%s/3Pi0", nameParent);
+	outFile->mkdir(str);
+	outFile->cd(str);
+	
+	result[1]->Save();
+	rawHist[2]->Save();
+	
+	
+	sprintf(str,"%s/EtaP/CutIM", nameParent);
+	outFile->mkdir(str);
+	outFile->cd(str);
+	
+	cutEta->Save();
+	cut2Pi0->Save();
+	cutResult[0]->Save();
+	cutRawHist[0]->Save();
+	
+	
+	sprintf(str,"%s/3Pi0/CutIM", nameParent);
+	outFile->mkdir(str);
+	outFile->cd(str);
+	
+	cut3Pi0->Save();
+	cutResult[1]->Save();
+	cutRawHist[1]->Save();
 }
 
 	

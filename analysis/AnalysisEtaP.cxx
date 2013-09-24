@@ -1,22 +1,22 @@
 
 #include "AnalysisEtaP.h"
 #include "AnalysisEtaP2Gamma.h"
-//#include "AnalysisEtaP6Gamma.h"
+#include "AnalysisEtaP6Gamma.h"
 
 
 
 AnalysisEtaP::AnalysisEtaP(const char* _treeFileName, const char* _treeName)	: ReadRootTree(_treeFileName, _treeName)
 {
 	analysis2	= new AnalysisEtaP2Gamma();
-	//analysis6	= new AnalysisEtaP6Gamma();
+	analysis6	= new AnalysisEtaP6Gamma();
 	
 }
 AnalysisEtaP::~AnalysisEtaP()
 {
 	if(analysis2)
 		delete analysis2;
-	/*if(analysis6)
-		delete analysis6;*/
+	if(analysis6)
+		delete analysis6;
 }
 
 void	AnalysisEtaP::Clear()
@@ -24,7 +24,7 @@ void	AnalysisEtaP::Clear()
 	ReadRootTree::Clear();
 	
 	analysis2->Clear();
-	//analysis6->Clear();
+	analysis6->Clear();
 }
 
 bool	AnalysisEtaP::AnalyseEvent(const int index)
@@ -37,7 +37,7 @@ bool	AnalysisEtaP::AnalyseEvent(const int index)
 		}
 		else if(GetNCBHits()==6)
 		{
-			//return analysis6->Analyse(this);
+			return analysis6->Analyse(this);
 		}
 	}
 	return false;
@@ -73,7 +73,7 @@ void	AnalysisEtaP::Draw()
 	
 	
 	analysis2->Draw();
-	//analysis6->Draw();
+	analysis6->Draw();
 }
 
 void	AnalysisEtaP::Save()
@@ -81,9 +81,17 @@ void	AnalysisEtaP::Save()
 	outFile->cd();
 	ReadRootTree::Save();
 		
+	outFile->cd();
+	outFile->mkdir("2G");
+	outFile->cd("2G");
+	analysis2->Save(outFile, "2G");
 	
-	analysis2->Save();
-	//analysis6->Save();
+	outFile->cd();
+	outFile->mkdir("6G");
+	outFile->cd("6G");
+	analysis6->Save(outFile, "6G");
+	
+	outFile->cd();
 }
 
 void	AnalysisEtaP::Save(const Char_t* outputFileName)

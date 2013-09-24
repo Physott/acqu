@@ -14,7 +14,7 @@
 class	AnalysisEtaP6GammaCanvas
 {
 private:
-	TCanvas*		canvas;
+	//TCanvas*		canvas;
 	Char_t			name[64];
 	bool			isEta2Pi0;
 	
@@ -30,7 +30,7 @@ public:
 	
 	void	Clear()																													{hInvMassPi0a[0]->Reset("M"); hInvMassPi0b[0]->Reset("M"); hInvMassPi0cEta[0]->Reset("M"); hInvMassPi0a[1]->Reset("M"); hInvMassPi0b[1]->Reset("M"); hInvMassPi0cEta[1]->Reset("M"); hInvMassAll->Reset("M"); hInvMassAllSet->Reset("M");}
 	void	Fill(const Double_t invMassPi0a, const Double_t invMassPi0b, const Double_t invMassPi0cEta, const Double_t invMassAll, const Double_t invMassAllSet);
-	void	Draw();
+	void	Draw(TCanvas* canvas, const int posInvMassPi0a, const int posInvMassPi0b, const int posInvMassPi0cEta, const int posInvMassPi0aDiced, const int posInvMassPi0bDiced, const int posInvMassPi0cEtaDiced, const int posInvMassAll, const int posInvMassAllSet);
 	void	Save();
 };
 
