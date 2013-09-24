@@ -3,11 +3,12 @@
 
 
 
-#include "AnalysisEtaP.h"
+#include "AnalysisDecay.h"
+#include "Cut.h"
 #include "AnalysisEtaP6GammaCanvas.h"
 
 
-class AnalysisEtaP6Gamma
+class AnalysisEtaP6Gamma	: public AnalysisDecay
 {
 private:
 	
@@ -46,7 +47,7 @@ protected:
 	
 	
 public:
-	AnalysisEtaP6Gamma();
+	AnalysisEtaP6Gamma(const char* Name, const char* Title);
 	~AnalysisEtaP6Gamma();
 	
 	void	Clear();
@@ -54,12 +55,11 @@ public:
 	bool	Analyse(AnalysisEtaP* analysis);
 		
 	void	Draw();
-	void	Save();
+	void	Save(TFile* outFile);
 	
-	void	Fill(Double_t& IMPi0a, Double_t& IMPi0b, Double_t& IMPi0cEta, Double_t& IMAll, Double_t& IMAllSet);
+	void	Fill(AnalysisEtaP6GammaCanvas* can);
 	
-	const	bool		Is3Pi0()		const		{if(bestEta==3) return true; return false;}
-	const	bool		IsEta2Pi0()		const		{if(bestEta==3) return false; return true;}
+	virtual	bool		IsEtaP()						{if(bestEta==3) return false; return true;}
 	
 	const	Double_t*	GetCutInvMassPi0()		const	{return cutInvMassPi0;}
 	const	Double_t	GetCutInvMassPi0Min()	const	{return cutInvMassPi0[0];}
