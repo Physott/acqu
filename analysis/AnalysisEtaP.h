@@ -33,8 +33,7 @@ private:
 	EAE_Multiplicity		multiplicity;	
 	
 	//histograms
-	TH1D*			hCheckInvMassCutPi0;
-	TH1D*			hCheckInvMassCutEta;
+	TH1I*			hCountDecay;
 	
 protected:
 

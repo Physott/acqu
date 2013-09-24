@@ -5,15 +5,13 @@
 
 
 
-AnalysisEtaP::AnalysisEtaP(const char* _treeFileName, const char* _treeName)	: ReadRootTree(_treeFileName, _treeName), analysis6(0)
+AnalysisEtaP::AnalysisEtaP(const char* _treeFileName, const char* _treeName)	: ReadRootTree(_treeFileName, _treeName), analysis2(0)
 {
-	analysis2	= new AnalysisEtaP2Gamma();
-	analysis6	= new AnalysisEtaP6Gamma();
+	analysis2	= new AnalysisEtaP2Gamma("2G", "2G");
+	analysis6	= new AnalysisEtaP6Gamma("6G", "6G");
 	
-	if(!(hCheckInvMassCutPi0		= (TH1D*)gROOT->Get("CheckInvMassCutPi0")))
-		hCheckInvMassCutPi0		= new TH1D("CheckInvMassCutPi0", "CheckInvMassCutPi0", 300, 0, 300);
-	if(!(hCheckInvMassCutEta		= (TH1D*)gROOT->Get("CheckInvMassCutEta")))
-		hCheckInvMassCutEta		= new TH1D("CheckInvMassCutEta", "CheckInvMassCutEta", 300, 400, 700);
+	if(!(hCountDecay	= (TH1I*)gROOT->Get("CountDecay")))
+		hCountDecay		= new TH1I("CountDecay", "1:all / 2:EtaP / 3:3Pi0 ", 5, 0, 5);
 }
 AnalysisEtaP::~AnalysisEtaP()
 {
@@ -27,8 +25,7 @@ void	AnalysisEtaP::Clear()
 {
 	ReadRootTree::Clear();
 	
-	hCheckInvMassCutPi0->Reset("M");
-	hCheckInvMassCutEta->Reset("M");
+	hCountDecay->Reset("M");
 	
 	analysis2->Clear();
 	analysis6->Clear();
@@ -38,13 +35,16 @@ bool	AnalysisEtaP::AnalyseEvent(const int index)
 {
 	if(ReadRootTree::AnalyseEvent(index))
 	{
+		hCountDecay->Fill(1);
 		if(GetNCBHits()==2)
 		{
+			hCountDecay->Fill(2);
 			multiplicity	= MULTIPLICITY_2;
 			return analysis2->Analyse(this);
 		}
 		else if(GetNCBHits()==6)
 		{
+			hCountDecay->Fill(3);
 			multiplicity	= MULTIPLICITY_6;
 			return analysis6->Analyse(this);
 		}
@@ -78,10 +78,9 @@ void	AnalysisEtaP::Draw()
 		canvas	= new TCanvas("AnalysisEtaP", "AnalysisEtaP", 50, 50, 1600, 800);
 	canvas->Clear();
 	
-	canvas->Divide(2, 1, 0.001, 0.001);
+	//canvas->Divide(2, 1, 0.001, 0.001);
 	
-	canvas->cd(1);	hCheckInvMassCutPi0->Draw();
-	canvas->cd(2);	hCheckInvMassCutEta->Draw();
+	canvas->cd();	hCountDecay->Draw();
 	
 	analysis2->Draw();
 	analysis6->Draw();
@@ -90,19 +89,22 @@ void	AnalysisEtaP::Draw()
 void	AnalysisEtaP::Save()
 {
 	outFile->cd();
+	ReadRootTree::Save();
 	
-	hCheckInvMassCutPi0->Write();
-	hCheckInvMassCutEta->Write();
+	outFile->mkdir("AnalysisEtaP");
+	outFile->cd("AnalysisEtaP");
 	
-	analysis2->Save();
-	analysis6->Save();
+	hCountDecay->Write();
+	
+	outFile->cd();
+	analysis2->Save(outFile);
+	analysis6->Save(outFile);
 }
 
 void	AnalysisEtaP::Save(const Char_t* outputFileName)
 {
 	if(OpenOutputFile(outputFileName))
 	{
-		ReadRootTree::Save();
 		Save();
 		delete outFile;
 	}

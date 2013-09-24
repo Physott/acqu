@@ -4,36 +4,35 @@
 
 
 
+#include "AnalysisDecay.h"
+#include "Cut.h"
 
-#include "AnalysisEtaP.h"
 
-
-class AnalysisEtaP2Gamma
+class AnalysisEtaP2Gamma	: public AnalysisDecay
 {
 private:
 	
 	//general	
 	TCanvas*			canvas;
+	Cut*				cutInvMass;
 	
 	//histograms
 	TH1D*				hInvMass;
 	
-	//bool	CutInvariantMass(AnalysisEtaP* analysis);
-	
-	
 protected:
 	
-	
 public:
-	AnalysisEtaP2Gamma();
-	~AnalysisEtaP2Gamma();
+			AnalysisEtaP2Gamma(const char* Name, const char* Title);
+	virtual	~AnalysisEtaP2Gamma();
 	
-	void	Clear();
+	virtual	bool	IsEtaP()							{return false;}
 	
-	bool	Analyse(AnalysisEtaP* analysis);
+	virtual	void	Clear()								{hInvMass->Reset("M");}
+	
+	virtual	bool	Analyse(AnalysisEtaP* analysis);
 		
-	void	Draw();
-	void	Save();
+	virtual	void	Draw();
+	virtual	void	Save(TFile* outFile);
 };
 
 

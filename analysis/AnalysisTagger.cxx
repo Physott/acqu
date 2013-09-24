@@ -5,8 +5,28 @@
 
 AnalysisTagger::AnalysisTagger(const char* _treeFileName, const char* _treeName)	: AnalysisEtaP(_treeFileName, _treeName)
 {
-	if(!(hMissMass			= (TH1D*)gROOT->Get("MissingMass")))
-		hMissMass			= new TH1D("MissingMass", "MissingMass", 1600, 0, 1600);
+	Char_t	str[128];
+	Char_t	helpDecay[3][8];
+	sprintf(helpDecay[0], "All");
+	sprintf(helpDecay[1], "EtaP");
+	sprintf(helpDecay[2], "3Pi0");
+	Char_t	helpTagger[3][8];
+	sprintf(helpTagger[0], "Prompt");
+	sprintf(helpTagger[1], "Rand1");
+	sprintf(helpTagger[2], "Rand2");
+	
+	for(int i=0; i<3; i++)
+	{
+		for(int j=0; j<3; j++)
+		{
+			sprintf(str, "MissingMass_%s_%s", helpDecay[i], helpTagger[j]);
+			if(!(hMissMass[i][j]	= (TH1D*)gROOT->Get(str)))
+				hMissMass[i][j]		= new TH1D(str, str, 1600, 0, 1600);
+		}
+		hMissMass[i][3]	= 0;
+		hMissMass[i][4]	= 0;
+	}
+	
 	if(!(hCheckCutMissMass	= (TH1D*)gROOT->Get("CheckCutMissingMass")))
 		hCheckCutMissMass	= new TH1D("CheckCutMissingMass", "CheckCutMissingMass", 1600, 0, 1600);
 	if(!(hCountWindow		= (TH1I*)gROOT->Get("CountTaggerWindow")))
@@ -49,7 +69,11 @@ void	AnalysisTagger::Clear()
 {
 	AnalysisEtaP::Clear();
 
-	hMissMass->Reset("M");
+	for(int i=0; i<3; i++)
+	{
+		for(int j=0; j<3; j++)
+			hMissMass[i][j]->Reset("M");
+	}
 	hCheckCutMissMass->Reset("M");
 	hCountWindow->Reset("M");
 	hCountWindowAccumulated->Reset("M");
@@ -94,7 +118,14 @@ void	AnalysisTagger::AnalyseTagged()
 		{
 			beam[0][nBeam[0]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
 			missMass[0][nBeam[0]]	= ((beam[0][nBeam[0]]) -vecAll).M();
-			hMissMass->Fill(missMass[0][nBeam[0]]);
+			hMissMass[0][0]->Fill(missMass[0][nBeam[0]]);
+			if(GetMultiplicity() == MULTIPLICITY_6)
+			{
+				if(GetAnalysis6Gamma()->Is3Pi0())
+					hMissMass[2][0]->Fill(missMass[0][nBeam[0]]);
+				else
+					hMissMass[1][0]->Fill(missMass[0][nBeam[0]]);
+			}
 			hCountWindowAccumulated->Fill(0);
 			nBeam[0]++;
 		}
@@ -102,7 +133,14 @@ void	AnalysisTagger::AnalyseTagged()
 		{
 			beam[1][nBeam[1]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
 			missMass[1][nBeam[1]]	= ((beam[1][nBeam[1]]) -vecAll).M();
-			hMissMass->Fill(missMass[1][nBeam[1]]);
+			hMissMass[0][1]->Fill(missMass[1][nBeam[1]]);
+			if(GetMultiplicity() == MULTIPLICITY_6)
+			{
+				if(GetAnalysis6Gamma()->Is3Pi0())
+					hMissMass[2][1]->Fill(missMass[1][nBeam[1]]);
+				else
+					hMissMass[1][1]->Fill(missMass[1][nBeam[1]]);
+			}
 			hCountWindowAccumulated->Fill(1);
 			nBeam[1]++;
 		}
@@ -110,7 +148,14 @@ void	AnalysisTagger::AnalyseTagged()
 		{
 			beam[2][nBeam[2]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
 			missMass[2][nBeam[2]]	= ((beam[2][nBeam[2]]) -vecAll).M();
-			hMissMass->Fill(missMass[2][nBeam[2]]);
+			hMissMass[0][2]->Fill(missMass[2][nBeam[2]]);
+			if(GetMultiplicity() == MULTIPLICITY_6)
+			{
+				if(GetAnalysis6Gamma()->Is3Pi0())
+					hMissMass[2][2]->Fill(missMass[2][nBeam[2]]);
+				else
+					hMissMass[1][2]->Fill(missMass[2][nBeam[2]]);
+			}
 			hCountWindowAccumulated->Fill(2);
 			nBeam[2]++;
 		}
@@ -192,37 +237,61 @@ void	AnalysisTagger::Draw()
 {
 	AnalysisEtaP::Draw();
 	
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("AnalysisTaggerCanvas")))
-		canvas	= new TCanvas("AnalysisTaggerCanvas", "AnalysisTagger", 50, 50, 1600, 800);
-	canvas->Clear();
+	if(!(canvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("AnalysisTaggerCanvasWindows")))
+		canvas[0]	= new TCanvas("AnalysisTaggerCanvasWindows", "AnalysisTagger Windows", 50, 50, 1600, 800);
+	canvas[0]->Clear();
 	
-	canvas->Divide(3, 4, 0.001, 0.001);
+	canvas[0]->Divide(3, 4, 0.001, 0.001);
 	
-	canvas->cd(1);	hMissMass->Draw();
-	canvas->cd(2);	hCountWindow->Draw();
-	canvas->cd(3);	hCountWindowAccumulated->Draw();
-	canvas->cd(4);	hCountWindowN[0]->Draw();
-	canvas->cd(5);	hCountWindowN[1]->Draw();
-	canvas->cd(6);	hCountWindowN[2]->Draw();
+	//canvas[0]->cd(1);	hMissMass->Draw();
+	canvas[0]->cd(2);	hCountWindow->Draw();
+	canvas[0]->cd(3);	hCountWindowAccumulated->Draw();
+	canvas[0]->cd(4);	hCountWindowN[0]->Draw();
+	canvas[0]->cd(5);	hCountWindowN[1]->Draw();
+	canvas[0]->cd(6);	hCountWindowN[2]->Draw();
 	
-	canvas->cd(7);	hCheckCutMissMass->Draw();
-	canvas->cd(8);	hCountWindowCut->Draw();
-	canvas->cd(9);	hCountWindowAccumulatedCut->Draw();
-	canvas->cd(10);	hCountWindowNCut[0]->Draw();
-	canvas->cd(11);	hCountWindowNCut[1]->Draw();
-	canvas->cd(12);	hCountWindowNCut[2]->Draw();
+	canvas[0]->cd(7);	hCheckCutMissMass->Draw();
+	canvas[0]->cd(8);	hCountWindowCut->Draw();
+	canvas[0]->cd(9);	hCountWindowAccumulatedCut->Draw();
+	canvas[0]->cd(10);	hCountWindowNCut[0]->Draw();
+	canvas[0]->cd(11);	hCountWindowNCut[1]->Draw();
+	canvas[0]->cd(12);	hCountWindowNCut[2]->Draw();
+	
+	if(!(canvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("AnalysisTaggerCanvasMissMass")))
+		canvas[1]	= new TCanvas("AnalysisTaggerCanvasMissMass", "AnalysisTagger Missing Mass", 50, 50, 1600, 800);
+	canvas[1]->Clear();
+	
+	canvas[1]->Divide(5, 3, 0.001, 0.001);
+	
+	canvas[1]->cd(1);	hMissMass[0][0]->Draw();
+	canvas[1]->cd(2);	hMissMass[0][1]->Draw();
+	canvas[1]->cd(3);	hMissMass[0][2]->Draw();
+	
+	canvas[1]->cd(6);	hMissMass[1][0]->Draw();
+	canvas[1]->cd(7);	hMissMass[1][1]->Draw();
+	canvas[1]->cd(8);	hMissMass[1][2]->Draw();
+	
+	canvas[1]->cd(11);	hMissMass[2][0]->Draw();
+	canvas[1]->cd(12);	hMissMass[2][1]->Draw();
+	canvas[1]->cd(13);	hMissMass[2][2]->Draw();
 }
 void	AnalysisTagger::Save()
 {
 	outFile->cd();
 	
-	hMissMass->Write();
 	hCheckCutMissMass->Write();
 	hCountWindow->Write();
 	hCountWindowAccumulated->Write();
 	hCountWindowN[0]->Write();
 	hCountWindowN[1]->Write();
 	hCountWindowN[2]->Write();
+	
+	for(int i=0; i<3; i++)
+	{
+		for(int j=0; j<3; j++)
+			hMissMass[i][j]->Write();
+	}
+	
 	hCountWindowCut->Write();
 	hCountWindowAccumulatedCut->Write();
 	hCountWindowNCut[0]->Write();

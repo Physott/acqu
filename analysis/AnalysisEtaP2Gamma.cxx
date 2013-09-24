@@ -3,10 +3,18 @@
 
 
 
-AnalysisEtaP2Gamma::AnalysisEtaP2Gamma()
+AnalysisEtaP2Gamma::AnalysisEtaP2Gamma(const char* Name, const char* Title)	: AnalysisDecay(Name, Title)
 {
-	if(!(hInvMass		= (TH1D*)gROOT->Get("2G_InvMass")))
-		hInvMass		= new TH1D("2G_InvMass", "2G_InvMass", 2000, 0, 2000);
+	Char_t	helpName[128];
+	
+	sprintf(helpName, "%s_InvMass", Name);
+	if(!(hInvMass		= (TH1D*)gROOT->Get(helpName)))
+		hInvMass		= new TH1D(helpName, helpName, 2000, 0, 2000);
+	
+	sprintf(helpName, "%s_CutIM", Name);
+	cutInvMass			= new Cut(helpName, 500, 700, 1200, helpName);
+	
+	cutInvMass->SetCut(850, 1050);
 	
 	Clear();
 }
@@ -23,32 +31,44 @@ AnalysisEtaP2Gamma::~AnalysisEtaP2Gamma()
 	return true;
 }*/
 
-void	AnalysisEtaP2Gamma::Clear()
-{
-	hInvMass->Reset("M");
-}
 
 
 bool	AnalysisEtaP2Gamma::Analyse(AnalysisEtaP* analysis)
 {	
 	hInvMass->Fill(analysis->vecAll.M());
 	
-	return true;
+	cutInvMass->Analyse(analysis->vecAll.M());
+	
+	return false;
 }
 
 
 void	AnalysisEtaP2Gamma::Draw()
 {	
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("AnalysisEtaP2Gamma")))
-		canvas	= new TCanvas("AnalysisEtaP2Gamma", "AnalysisEtaP2Gamma", 50, 50, 1600, 800);
+	Char_t	helpName[128];
+	
+	sprintf(helpName, "%s_InvMass", name);
+	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject(name)))
+		canvas	= new TCanvas(name, name, 50, 50, 1600, 800);
 	canvas->Clear();
 	
 	//canvas->Divide(2, 1, 0.001, 0.001);
 	
 	canvas->cd();	hInvMass->Draw();
+	
+	cutInvMass->Draw();
 }
-void	AnalysisEtaP2Gamma::Save()
-{	
-	hInvMass->Write();
+
+
+void	AnalysisEtaP2Gamma::Save(TFile* outFile)
+{
+	outFile->cd();	
+	outFile->mkdir("2G");
+	outFile->cd("2G");
+	
+	hInvMass->Write();	
+	cutInvMass->Save();
+	
+	outFile->cd();
 }
 

@@ -3,10 +3,10 @@
 
 
 
-AnalysisEtaP6Gamma::AnalysisEtaP6Gamma()
+AnalysisEtaP6Gamma::AnalysisEtaP6Gamma(const char* Name, const char* Title)	: AnalysisDecay(Name, Title)
 {
-	result[0]			= new AnalysisEtaP6GammaCanvas("6G_EtaP_All");
-	result[1]			= new AnalysisEtaP6GammaCanvas("6G_3Pi0_All");
+	result[0]			= new AnalysisEtaP6GammaCanvas("6G_EtaP_All", true);
+	result[1]			= new AnalysisEtaP6GammaCanvas("6G_3Pi0_All", false);
 	
 	Clear();
 	
@@ -21,19 +21,7 @@ AnalysisEtaP6Gamma::~AnalysisEtaP6Gamma()
 
 bool	AnalysisEtaP6Gamma::CutInvariantMass(AnalysisEtaP* analysis)
 {
-	if(Is3Pi0())
-	{
-		if(mass[bestPerm][0]<cutInvMassPi0[0] || mass[bestPerm][0]>cutInvMassPi0[1])
-			return false;
-		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][0]);
-		if(mass[bestPerm][1]<cutInvMassPi0[0] || mass[bestPerm][1]>cutInvMassPi0[1])
-			return false;
-		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][1]);
-		if(mass[bestPerm][2]<cutInvMassPi0[0] || mass[bestPerm][2]>cutInvMassPi0[1])
-			return false;
-		analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][2]);
-	}
-	else
+	if(IsEtaP())
 	{
 		for(int i=0; i<3; i++)
 		{
@@ -41,19 +29,47 @@ bool	AnalysisEtaP6Gamma::CutInvariantMass(AnalysisEtaP* analysis)
 			{
 				if(mass[bestPerm][i]<cutInvMassEta[0] || mass[bestPerm][i]>cutInvMassEta[1])
 					return false;
-				analysis->hCheckInvMassCutEta->Fill(mass[bestPerm][i]);
 			}
 			else
 			{
 				if(mass[bestPerm][i]<cutInvMassPi0[0] || mass[bestPerm][i]>cutInvMassPi0[1])
 					return false;
-				analysis->hCheckInvMassCutPi0->Fill(mass[bestPerm][i]);
 			}
 		}
 	}
+	else
+	{
+		if(mass[bestPerm][0]<cutInvMassPi0[0] || mass[bestPerm][0]>cutInvMassPi0[1])
+			return false;
+		if(mass[bestPerm][1]<cutInvMassPi0[0] || mass[bestPerm][1]>cutInvMassPi0[1])
+			return false;
+		if(mass[bestPerm][2]<cutInvMassPi0[0] || mass[bestPerm][2]>cutInvMassPi0[1])
+			return false;
+	}
+	
 	
 	return true;
 }
+
+
+void	AnalysisEtaP6Gamma::Fill(AnalysisEtaP6GammaCanvas* can)
+{
+	switch(bestEta)
+	{
+	case 0:
+		can->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
+		break;
+	case 1:
+		can->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
+		break;
+	case 2:
+	case 3:
+		can->Fill(mass[bestPerm][0], mass[bestPerm][1], mass[bestPerm][2], massAll, massSet);
+		break;
+	}
+}
+	
+	
 
 void	AnalysisEtaP6Gamma::Clear()
 {
@@ -128,7 +144,7 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll);
+		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][2], mass[bestPerm][0], massAll, massSet);
 		break;
 	case 1:
 		massPi0[0]	= mass[bestPerm][0];
@@ -140,7 +156,7 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		result[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll);
+		result[0]->Fill(mass[bestPerm][0], mass[bestPerm][2], mass[bestPerm][1], massAll, massSet);
 		break;
 	case 2:
 		massPi0[0]	= mass[bestPerm][0];
@@ -152,7 +168,7 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+		result[0]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		break;
 	case 3:
 		massPi0[0]	= mass[bestPerm][0];
@@ -164,11 +180,11 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 		allSet	= partSet[0] + partSet[1] + partSet[2];
 		massSet	= allSet.M();
 		
-		result[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll);
+		result[1]->Fill(mass[bestPerm][1], mass[bestPerm][0], mass[bestPerm][2], massAll, massSet);
 		break;
 	}
 	
-	if(CutInvariantMass(analysis))
+	/*if(CutInvariantMass(analysis))
 	{
 		if(Is3Pi0())
 			result[1]->Fill(massAll, massSet);
@@ -176,9 +192,9 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 			result[0]->Fill(massAll, massSet);	
 			
 		return true;
-	}
+	}*/
 	
-	return false;
+	return true;
 }
 
 
@@ -189,36 +205,18 @@ void	AnalysisEtaP6Gamma::Draw()
 		result[i]->Draw();
 	}
 }
-void	AnalysisEtaP6Gamma::Save()
+void	AnalysisEtaP6Gamma::Save(TFile* outFile)
 {	
+	outFile->cd();	
+	outFile->mkdir("6G");
+	outFile->cd("6G");
+	
 	for(int i=0; i<2; i++)
 	{
 		result[i]->Save();
 	}
-}
-
-void	AnalysisEtaP6Gamma::Fill(Double_t& IMPi0a, Double_t& IMPi0b, Double_t& IMPi0cEta, Double_t& IMAll, Double_t& IMAllSet)
-{
-	switch(bestEta)
-	{
-		case 0:
-			IMPi0a		= mass[bestPerm][1];
-			IMPi0b		= mass[bestPerm][2];
-			IMPi0cEta	= mass[bestPerm][0];
-			break;
-		case 1:
-			IMPi0a		= mass[bestPerm][0];
-			IMPi0b		= mass[bestPerm][2];
-			IMPi0cEta	= mass[bestPerm][1];
-			break;
-		case 2:
-		case 3:
-			IMPi0a		= mass[bestPerm][0];
-			IMPi0b		= mass[bestPerm][1];
-			IMPi0cEta	= mass[bestPerm][2];
-	}
-	IMAll		= massAll;
-	IMAllSet	= massSet;
+	
+	outFile->cd();	
 }
 
 	

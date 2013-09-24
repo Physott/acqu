@@ -14,10 +14,10 @@ class AnalysisTagger	: public AnalysisEtaP
 private:
 
 	//general
-	TCanvas*	canvas;
+	TCanvas*	canvas[2];
 	
 	//histograms
-	TH1D*				hMissMass;
+	TH1D*				hMissMass[3][5];				//	[All, EtaP, 3Pi0], [Prompt, Rand1, Rand2, BG, Res]
 	TH1D*				hCheckCutMissMass;
 	TH1I*				hCountWindow;
 	TH1I*				hCountWindowAccumulated;

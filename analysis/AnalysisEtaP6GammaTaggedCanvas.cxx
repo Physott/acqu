@@ -207,5 +207,6 @@ void	AnalysisEtaP6GammaTaggedCanvas::Save()
 		hInvMassPi0cEta[i]->Write();
 		hInvMassAll[i]->Write();	
 		hInvMassAllSet[i]->Write();
+		hMissingMass[i]->Write();
 	}
 }
