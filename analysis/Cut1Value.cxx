@@ -1,19 +1,18 @@
 #include "Cut1Value.h"
 
-Cut1Value::Cut1Value(const Char_t* Name, const Double_t xBins, const Double_t xMin, const Double_t xMax, const Char_t* Title)	: canvas(0)
+Cut1Value::Cut1Value(const Char_t* Name, const Double_t xBins, const Double_t xMin, const Double_t xMax)	
 {
 	strcpy(name, Name);
-	strcpy(title, Title);
 	
 	Char_t	helpName[128];
 	
 	sprintf(helpName, "%s_Cut", Name);
 	if(!(hValue		= (TH1D*)gROOT->Get(helpName)))
 		hValue		= new TH1D(helpName, helpName, xBins, xMin, xMax);
-	sprintf(helpName, "%s_checkCut", Name);
+	sprintf(helpName, "%s_CutCheck", Name);
 	if(!(hValueCut	= (TH1D*)gROOT->Get(helpName)))
 		hValueCut	= new TH1D(helpName, helpName, xBins, xMin, xMax);
-	sprintf(helpName, "%s_count", Name);
+	sprintf(helpName, "%s_CutCount", Name);
 	if(!(hCount		= (TH1I*)gROOT->Get(helpName)))
 		hCount		= new TH1I(helpName, "1:All / 2:Passed", 4, 0, 4);
 		
@@ -24,8 +23,6 @@ Cut1Value::Cut1Value(const Char_t* Name, const Double_t xBins, const Double_t xM
 }
 Cut1Value::~Cut1Value()
 {
-	if(canvas)
-		delete	canvas;
 }
 
 
@@ -56,19 +53,11 @@ bool	Cut1Value::Analyse(const Double_t lengthArray, const Double_t* valArray)
 }
 	
 
-void	Cut1Value::Draw(TCanvas* canvas)
+void	Cut1Value::Draw(TCanvas* canvas, const int posValue, const int posValueCut, const int posCount)
 {
-	Char_t	helpName[128];
-	
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject(name)))
-		canvas	= new TCanvas(name, title, 50, 50, 1600, 800);
-	canvas->Clear();
-		
-	canvas->Divide(3, 1, 0.001, 0.001);
-	
-	canvas->cd(1);	hValue->Draw();
-	canvas->cd(2);	hValueCut->Draw();
-	canvas->cd(3);	hCount->Draw();
+	canvas->cd(posValue);	hValue->Draw();
+	canvas->cd(posValueCut);	hValueCut->Draw();
+	canvas->cd(posCount);	hCount->Draw();
 }
 void	Cut1Value::Save()
 {

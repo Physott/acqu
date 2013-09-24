@@ -10,11 +10,16 @@ ReadRootTree::ReadRootTree(const char* _treeFileName, const char* _treeName)	: f
 	
 	hist	= new ReadRootTreeHist("RawData");
 	
+	cutCBTime	= new Cut1Value("CutCBTime",400,-200,200);
+	cutHist		= new ReadRootTreeHist("CutCBTime");
+	
 	openTree();
 }
 ReadRootTree::~ReadRootTree()
 {
 	if(canvas)
+		delete	canvas;
+	if(cutCanvas)
 		delete	canvas;
 }
 
@@ -71,6 +76,9 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1] ,E[1]);
 		vecAll	= vec[0] + vec[1];
 		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());
+		if(!cutCBTime->Analyse(nCBHits, Time))
+			return false;
+		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
 		return true;
 	}
 	if(nCBHits == 6)
@@ -83,6 +91,9 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5] ,E[5]);
 		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
 		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		if(!cutCBTime->Analyse(nCBHits, Time))
+			return false;
+		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
 		return true;
 	}
 	if(nCBHits == 10)
@@ -99,6 +110,9 @@ bool	ReadRootTree::AnalyseEvent(const int index)
 		vec[9].SetPxPyPzE(Px[9], Py[9], Pz[9] ,E[9]);
 		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5] + vec[6] + vec[7] + vec[8] + vec[9];
 		hist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
+		if(!cutCBTime->Analyse(nCBHits, Time))
+			return false;
+		cutHist->Fill(nTagged, TaggedTime, TaggedEnergy, nCBHits, Time, vecAll.E());	
 		return true;
 	}
 	return false;
@@ -125,13 +139,23 @@ void	ReadRootTree::Analyse(const int min, const int max)
 void	ReadRootTree::Draw()
 {
 	//printf("%ld\n",(TCanvas*)gROOT->GetListOfCanvases()->FindObject("ReadRootTreeHist"));
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("ReadRootTreeHist")))
-		canvas	= new TCanvas("ReadRootTreeHist", "ReadRootTree", 50, 50, 1600, 800);
+	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("RawData")))
+		canvas	= new TCanvas("RawData", "RawData", 50, 50, 1600, 800);
 	canvas->Clear();
 		
 	canvas->Divide(3, 2, 0.001, 0.001);
 	
 	hist->Draw(canvas);
+	
+	
+	if(!(cutCanvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("CutCBTime")))
+		cutCanvas	= new TCanvas("CutCBTime", "CutCBTime", 50, 50, 1600, 800);
+	cutCanvas->Clear();
+		
+	cutCanvas->Divide(3, 3, 0.001, 0.001);
+	
+	cutHist->Draw(cutCanvas, 4, 5, 6, 7, 8, 9);
+	cutCBTime->Draw(cutCanvas, 1, 2, 3);
 }
 bool	ReadRootTree::OpenOutputFile(const Char_t* outputFileName)
 {
@@ -144,11 +168,9 @@ bool	ReadRootTree::OpenOutputFile(const Char_t* outputFileName)
 	outFile	= new TFile(outputFileName, "RECREATE");
 	if(!outFile)
 	{
-		printf("OpenOutputFile 2a\n");
-		printf("Could not open file %s\n", outputFileName);
+		printf("ERROR:!!!\n\tCould not open file %s\n", outputFileName);
 		return false;
 	}
-	printf("OpenOutputFile 3\n");
 	return true;
 }
 void	ReadRootTree::Save()
@@ -158,6 +180,13 @@ void	ReadRootTree::Save()
 	outFile->cd("RawData");
 	
 	hist->Save();
+	
+	outFile->cd();
+	outFile->mkdir("CutCBTime");
+	outFile->cd("CutCBTime");
+	
+	cutCBTime->Save();
+	cutHist->Save();
 	
 	outFile->cd();
 }

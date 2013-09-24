@@ -12,16 +12,7 @@
 
 
 class AnalysisEtaP2Gamma;
-class AnalysisEtaP6Gamma;
-
-
-
-enum	EAE_Multiplicity
-{
-	MULTIPLICITY_2	= 0,
-	MULTIPLICITY_6,
-	MULTIPLICITY_10
-};
+//class AnalysisEtaP6Gamma;
 
 
 class	AnalysisEtaP	: public ReadRootTree
@@ -30,16 +21,10 @@ private:
 	//general
 	TCanvas*				canvas;
 	
-	EAE_Multiplicity		multiplicity;	
-	
-	//histograms
-	TH1D*			hCheckInvMassCutPi0;
-	TH1D*			hCheckInvMassCutEta;
-	
 protected:
 
 	AnalysisEtaP2Gamma*		analysis2;
-	AnalysisEtaP6Gamma*		analysis6;
+	//AnalysisEtaP6Gamma*		analysis6;
 
 	bool	AnalyseEvent(const int index);				// no index checking
 	void	Save();
@@ -55,12 +40,11 @@ public:
 	virtual	void	Draw();
 	virtual	void	Save(const Char_t* outputFileName);
 	
-	const	EAE_Multiplicity	GetMultiplicity()	const		{return multiplicity;}
 	const	AnalysisEtaP2Gamma*	GetAnalysis2Gamma()	const		{return analysis2;}
-	const	AnalysisEtaP6Gamma*	GetAnalysis6Gamma()	const		{return analysis6;}
+	//const	AnalysisEtaP6Gamma*	GetAnalysis6Gamma()	const		{return analysis6;}
 	
 	friend class AnalysisEtaP2Gamma;
-	friend class AnalysisEtaP6Gamma;
+	//friend class AnalysisEtaP6Gamma;
 };
 
 

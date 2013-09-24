@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall `root-config --cflags`
 LDFLAGS=`root-config --glibs`
-SOURCES=main.cxx ReadRootTree.cxx ReadRootTreeHist.cxx 
+SOURCES=main.cxx ReadRootTree.cxx ReadRootTreeHist.cxx Cut1Value.cxx AnalysisEtaP.cxx AnalysisEtaP2Gamma.cxx
 OBJECTS=$(SOURCES:.cxx=.o)
 EXECUTABLE=Analysis
 

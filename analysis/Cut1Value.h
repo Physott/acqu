@@ -16,8 +16,6 @@ private:
 
 	//general
 	Char_t	 	name[128];
-	Char_t	 	title[512];
-	TCanvas*	canvas;
 	
 	//histograms
 		
@@ -32,7 +30,7 @@ protected:
 
 public:
 	
-	Cut1Value(const Char_t* Name, const Double_t xBins, const Double_t xMin, const Double_t xMax, const Char_t* Title = "");
+	Cut1Value(const Char_t* Name, const Double_t xBins, const Double_t xMin, const Double_t xMax);
 	~Cut1Value();
 	
 	const	Double_t*	GetCut()	const		{return cut;}
@@ -46,7 +44,7 @@ public:
 	
 	void	Clear()			{hValue->Reset("M"); hValueCut->Reset("M"); hCount->Reset("M");}
 	
-	void	Draw();
+	void	Draw(TCanvas* canvas, const int posValue, const int posValueCut, const int posCount);
 	void	Save();
 };
 

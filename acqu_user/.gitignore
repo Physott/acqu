@@ -4,6 +4,8 @@
 # shall only contain 
 # configuration text files!
 Thread*.txt
+Thread*Config.dat
+Thread*Server.dat
 *.log
 # AcquRoot data link
 /data
