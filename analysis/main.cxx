@@ -17,7 +17,7 @@ int	main( int argc, const char* argv[] )
 	c->SetCutCBTime(-13, 40);
 	c->SetCut(-5,5,-18,-8,8,18);
 	//c->SetCutMissMass(738,1138);
-	c->Analyse(0,50001);
+	c->Analyse(0,5001);
 	c->Draw();
 	c->Save("test.root");
 	

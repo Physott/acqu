@@ -85,6 +85,7 @@ public:
 			Int_t		GetNEvents()								{return tree->GetEntries();}
 	const	Int_t		GetNTagged()						const	{return nTagged;}
 	const	Int_t		GetNCBHits()						const	{return nCBHits;}
+	const	Double_t*	GetCBTime()							const	{return Time;}
 	const	Double_t*	GetTaggedEnergy()					const	{return TaggedEnergy;}
 	const	Double_t	GetTaggedEnergy(const Int_t index)	const	{return TaggedEnergy[index];}
 	const	Double_t*	GetTaggedTime()						const	{return TaggedTime;}

@@ -35,6 +35,8 @@ private:
 protected:
 	
 	//variables
+	Double_t			beamEnergy[3][32];
+	Double_t			beamTime[3][32];
 	TLorentzVector		beam[3][32];
 	Double_t			missMass[3][32];
 	Int_t				nBeam[3];
@@ -42,6 +44,9 @@ protected:
 	Double_t			missMassCut[3][16];
 	Int_t				nBeamCut[3];
 	
+	
+	void	FillTaggedWindows(const int window, ReadRootTreeHist* h)	{h->Fill(nBeam[window], beamTime[window], beamEnergy[window], GetNCBHits(), GetCBTime(), vecAll.E());}
+			
 	void	SetBeam(const int window, const int index);
 	//void	CutMissMass();
 	bool	AnalyseEvent(const int index);				// no index checking

@@ -233,8 +233,8 @@ bool	AnalysisEtaP6Gamma::Analyse(AnalysisEtaP* analysis)
 
 void	AnalysisEtaP6Gamma::Draw()
 {	
-	if(!(canvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G")))
-		canvas[0]	= new TCanvas("6G", "6G", 50, 50, 1600, 800);
+	if(!(canvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("_6G")))
+		canvas[0]	= new TCanvas("_6G", "6G", 50, 50, 1600, 800);
 	canvas[0]->Clear();
 	canvas[0]->Divide(3, 3, 0.001, 0.001);
 	
@@ -242,8 +242,8 @@ void	AnalysisEtaP6Gamma::Draw()
 	rawHist[0]->Draw(canvas[0], 4, 5, 6, 7, 8, 9);
 	
 	
-	if(!(canvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP")))
-		canvas[1]	= new TCanvas("6G_EtaP", "6G_EtaP", 50, 50, 1600, 800);
+	if(!(canvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("_6G_EtaP")))
+		canvas[1]	= new TCanvas("_6G_EtaP", "6G_EtaP", 50, 50, 1600, 800);
 	canvas[1]->Clear();
 	canvas[1]->Divide(3, 5, 0.001, 0.001);
 	
@@ -251,8 +251,8 @@ void	AnalysisEtaP6Gamma::Draw()
 	rawHist[1]->Draw(canvas[1], 10, 11, 12, 13, 14, 15);
 	
 	
-	if(!(canvas[2]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0")))
-		canvas[2]	= new TCanvas("6G_3Pi0", "6G_3Pi0", 50, 50, 1600, 800);
+	if(!(canvas[2]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("_6G_3Pi0")))
+		canvas[2]	= new TCanvas("_6G_3Pi0", "6G_3Pi0", 50, 50, 1600, 800);
 	canvas[2]->Clear();
 	canvas[2]->Divide(3, 5, 0.001, 0.001);
 	
@@ -263,8 +263,8 @@ void	AnalysisEtaP6Gamma::Draw()
 }
 void	AnalysisEtaP6Gamma::DrawCut()
 {	
-	if(!(cutCanvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP_CutIM")))
-		cutCanvas[0]	= new TCanvas("6G_EtaP_CutIM", "6G_EtaP_CutIM", 50, 50, 1600, 800);
+	if(!(cutCanvas[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("_6G_EtaP_CutIM")))
+		cutCanvas[0]	= new TCanvas("_6G_EtaP_CutIM", "6G_EtaP_CutIM", 50, 50, 1600, 800);
 	cutCanvas[0]->Clear();
 	cutCanvas[0]->Divide(9, 4, 0.001, 0.001);
 	
@@ -275,7 +275,7 @@ void	AnalysisEtaP6Gamma::DrawCut()
 	
 	
 	if(!(cutCanvas[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0_CutIM")))
-		cutCanvas[1]	= new TCanvas("6G_3Pi0_CutIM", "6G_3Pi0_CutIM", 50, 50, 1600, 800);
+		cutCanvas[1]	= new TCanvas("_6G_3Pi0_CutIM", "6G_3Pi0_CutIM", 50, 50, 1600, 800);
 	cutCanvas[1]->Clear();
 	cutCanvas[1]->Divide(9, 3, 0.001, 0.001);
 	
@@ -291,7 +291,8 @@ void	AnalysisEtaP6Gamma::Save(TFile* outFile, const Char_t* nameParent)
 	
 	Char_t	str[64];
 	sprintf(str,"%s/EtaP", nameParent);
-	outFile->mkdir(str);
+	outFile->cd(nameParent);
+	gDirectory->mkdir("EtaP");
 	outFile->cd(str);
 	
 	result[0]->Save();
@@ -299,7 +300,8 @@ void	AnalysisEtaP6Gamma::Save(TFile* outFile, const Char_t* nameParent)
 	
 	
 	sprintf(str,"%s/3Pi0", nameParent);
-	outFile->mkdir(str);
+	outFile->cd(nameParent);
+	gDirectory->mkdir("3Pi0");
 	outFile->cd(str);
 	
 	result[1]->Save();
@@ -307,7 +309,10 @@ void	AnalysisEtaP6Gamma::Save(TFile* outFile, const Char_t* nameParent)
 	
 	
 	sprintf(str,"%s/EtaP/CutIM", nameParent);
-	outFile->mkdir(str);
+	sprintf(str,"%s/EtaP", nameParent);
+	outFile->cd(str);
+	gDirectory->mkdir("CutIM");
+	sprintf(str,"%s/EtaP/CutIM", nameParent);
 	outFile->cd(str);
 	
 	cutEta->Save();
@@ -315,9 +320,10 @@ void	AnalysisEtaP6Gamma::Save(TFile* outFile, const Char_t* nameParent)
 	cutResult[0]->Save();
 	cutRawHist[0]->Save();
 	
-	
+	sprintf(str,"%s/3Pi0", nameParent);
+	outFile->cd(str);
+	gDirectory->mkdir("CutIM");
 	sprintf(str,"%s/3Pi0/CutIM", nameParent);
-	outFile->mkdir(str);
 	outFile->cd(str);
 	
 	cut3Pi0->Save();

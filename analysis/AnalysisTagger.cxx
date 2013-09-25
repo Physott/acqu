@@ -71,7 +71,9 @@ AnalysisTagger::~AnalysisTagger()
 
 void	AnalysisTagger::SetBeam(const int window, const int index)
 {
+	beamEnergy[window][nBeam[window]] = GetTaggedEnergy(index);
 	beam[window][nBeam[window]].SetPxPyPzE(GetTaggedEnergy(index), 0.0, 0.0, GetTaggedEnergy(index) + MASS_PROTON);
+	beamTime[window][nBeam[window]] = GetTaggedTime(index);
 	missMass[window][nBeam[window]]	= ((beam[window][nBeam[window]]) -vecAll).M();
 	nBeam[window]++;
 }
@@ -82,12 +84,25 @@ void	AnalysisTagger::Clear()
 	AnalysisEtaP::Clear();
 
 	cutWindows2Gamma->Clear();
-	cutWindows6Gamma[0]->Clear();
-	cutWindows6Gamma[1]->Clear();
-	
 	cutMissMass2Gamma->Clear();
-	cutMissMass6Gamma[0]->Clear();
-	cutMissMass6Gamma[1]->Clear();
+	
+	for(int i=0; i<2; i++)
+	{	
+		cutWindows6Gamma[i]->Clear();
+		cutMissMass6Gamma[i]->Clear();
+	}
+			
+	for(int i=0; i<3; i++)
+	{
+		cutWinRaw2Gamma[i]->Clear();
+		cutWinInvMass2Gamma[i]->Reset("M");			
+		
+		for(int l=0; l<2; l++)
+		{
+			cutWinRaw6Gamma[l][i]->Clear();
+			cutWinAnalysis6Gamma[l][i]->Clear();
+		}
+	}
 }
 /*
 void	AnalysisTagger::CutMissMass()
@@ -125,9 +140,9 @@ bool	AnalysisTagger::AnalyseEvent(const int index)
 			{
 				for(int i=0; i<3; i++)
 				{
+					FillTaggedWindows(i, cutWinRaw2Gamma[i]);
 					for(int l=0; l<nBeam[i]; l++)
 					{
-						Fill(cutWinRaw2Gamma[i]);
 						cutWinInvMass2Gamma[i]->Fill(vecAll.M());
 					}
 				}
@@ -137,9 +152,35 @@ bool	AnalysisTagger::AnalyseEvent(const int index)
 		else if(GetNCBHits()==6)
 		{
 			if(GetAnalysis6Gamma()->IsEtaP())
-				return cutWindows6Gamma[0]->Analyse(this);		
+			{		
+				if(cutWindows6Gamma[0]->Analyse(this))
+				{
+					for(int i=0; i<3; i++)
+					{
+						FillTaggedWindows(i, cutWinRaw6Gamma[0][i]);
+						for(int l=0; l<nBeam[i]; l++)
+						{
+							analysis6->Fill(cutWinAnalysis6Gamma[0][i]);
+						}
+					}
+					return true;
+				}
+			}
 			else
-				return cutWindows6Gamma[1]->Analyse(this);
+			{
+				if(cutWindows6Gamma[1]->Analyse(this))
+				{
+					for(int i=0; i<3; i++)
+					{
+						FillTaggedWindows(i, cutWinRaw6Gamma[1][i]);
+						for(int l=0; l<nBeam[i]; l++)
+						{
+							analysis6->Fill(cutWinAnalysis6Gamma[1][i]);
+						}
+					}
+					return true;
+				}
+			}
 		}
 	}
 	return false;
@@ -192,29 +233,58 @@ void	AnalysisTagger::Draw()
 	if(!(cutWinCanvas2Gamma	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("2G_CutIM_CutWinRes")))
 		cutWinCanvas2Gamma	= new TCanvas("2G_CutIM_CutWinRes", "2G_CutIM_CutWinRes", 50, 50, 1600, 800);
 	cutWinCanvas2Gamma->Clear();
-	cutWinCanvas2Gamma->Divide(5, 3, 0.001, 0.001);
+	cutWinCanvas2Gamma->Divide(7, 5, 0.001, 0.001);
 	
 	cutWinCanvas2Gamma->cd(1);	cutWinInvMass2Gamma[0]->Draw();
-	cutWinCanvas2Gamma->cd(2);	cutWinInvMass2Gamma[1]->Draw();
-	cutWinCanvas2Gamma->cd(3);	cutWinInvMass2Gamma[2]->Draw();
-	cutWinRaw2Gamma[0]->Draw(cutWinCanvas2Gamma, 6, 7, 8, 11, 12, 13);
+	cutWinRaw2Gamma[0]->Draw(cutWinCanvas2Gamma, 2, 3, 4, 5, 6, 7);
+	cutWinCanvas2Gamma->cd(8);	cutWinInvMass2Gamma[1]->Draw();
+	cutWinRaw2Gamma[1]->Draw(cutWinCanvas2Gamma, 9, 10, 11, 12, 13, 14);
+	cutWinCanvas2Gamma->cd(15);	cutWinInvMass2Gamma[2]->Draw();
+	cutWinRaw2Gamma[2]->Draw(cutWinCanvas2Gamma, 16, 17, 18, 19, 20, 21);
+	
+	
+	if(!(cutWinCanvas6Gamma[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP_CutIM_CutWinRes")))
+		cutWinCanvas6Gamma[0]	= new TCanvas("6G_EtaP_CutIM_CutWinRes", "6G_EtaP_CutIM_CutWinRes", 50, 50, 1600, 800);
+	cutWinCanvas6Gamma[0]->Clear();
+	cutWinCanvas6Gamma[0]->Divide(11, 5, 0.001, 0.001);
+	
+	cutWinAnalysis6Gamma[0][0]->Draw(cutWinCanvas6Gamma[0], 1, 2, 3, 1, 2, 3, 4, 5);
+	cutWinRaw6Gamma[0][0]->Draw(cutWinCanvas6Gamma[0], 6, 7, 8, 9, 10, 11);
+	cutWinAnalysis6Gamma[0][1]->Draw(cutWinCanvas6Gamma[0], 12, 13, 14, 12, 13, 14, 15, 16);
+	cutWinRaw6Gamma[0][1]->Draw(cutWinCanvas6Gamma[0], 17, 18, 19, 20, 21, 22);
+	cutWinAnalysis6Gamma[0][1]->Draw(cutWinCanvas6Gamma[0], 23, 24, 25, 23, 24, 25, 26, 27);
+	cutWinRaw6Gamma[0][2]->Draw(cutWinCanvas6Gamma[0], 28, 29, 30, 31, 32, 33);
+	
+	
+	if(!(cutWinCanvas6Gamma[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0_CutIM_CutWinRes")))
+		cutWinCanvas6Gamma[1]	= new TCanvas("6G_3Pi0_CutIM_CutWinRes", "6G_3Pi0_CutIM_CutWinRes", 50, 50, 1600, 800);
+	cutWinCanvas6Gamma[1]->Clear();
+	cutWinCanvas6Gamma[1]->Divide(11, 5, 0.001, 0.001);
+	
+	cutWinAnalysis6Gamma[1][0]->Draw(cutWinCanvas6Gamma[1], 1, 2, 3, 1, 2, 3, 4, 5);
+	cutWinRaw6Gamma[1][0]->Draw(cutWinCanvas6Gamma[1], 6, 7, 8, 9, 10, 11);
+	cutWinAnalysis6Gamma[1][1]->Draw(cutWinCanvas6Gamma[1], 12, 13, 14, 12, 13, 14, 15, 16);
+	cutWinRaw6Gamma[1][1]->Draw(cutWinCanvas6Gamma[1], 17, 18, 19, 20, 21, 22);
+	cutWinAnalysis6Gamma[1][1]->Draw(cutWinCanvas6Gamma[1], 23, 24, 25, 23, 24, 25, 26, 27);
+	cutWinRaw6Gamma[1][2]->Draw(cutWinCanvas6Gamma[1], 28, 29, 30, 31, 32, 33);
 }
 void	AnalysisTagger::Save()
 {
 	AnalysisEtaP::Save();
 	
-	outFile->cd();
-	outFile->mkdir("2G/CutIM/CutWin");
+	outFile->cd("2G/CutIM");
+	gDirectory->mkdir("CutWin");
 	outFile->cd("2G/CutIM/CutWin");
 	cutWindows2Gamma->Save();
 	
-	outFile->cd();
-	outFile->mkdir("6G/EtaP/CutIM/CutWin");
+	
+	outFile->cd("6G/EtaP/CutIM");
+	gDirectory->mkdir("CutWin");
 	outFile->cd("6G/EtaP/CutIM/CutWin");
 	cutWindows6Gamma[0]->Save();
 	
-	outFile->cd();
-	outFile->mkdir("6G/3Pi0/CutIM/CutWin");
+	outFile->cd("6G/3Pi0/CutIM");
+	gDirectory->mkdir("CutWin");
 	outFile->cd("6G/3Pi0/CutIM/CutWin");
 	cutWindows6Gamma[1]->Save();
 }

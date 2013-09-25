@@ -86,7 +86,8 @@ void	AnalysisEtaP2Gamma::Save(TFile* outFile, const Char_t* nameParent)
 	
 	Char_t	str[64];
 	sprintf(str,"%s/CutIM", nameParent);
-	outFile->mkdir(str);
+	outFile->cd(nameParent);
+	gDirectory->mkdir("CutIM");
 	outFile->cd(str);
 	
 	cutInvMass->Save();
