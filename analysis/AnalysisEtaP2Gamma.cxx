@@ -18,6 +18,12 @@ AnalysisEtaP2Gamma::AnalysisEtaP2Gamma()
 }
 AnalysisEtaP2Gamma::~AnalysisEtaP2Gamma()
 {
+	if(rawHist)
+		delete	rawHist;
+	if(cutRawHist)
+		delete	cutRawHist;
+	if(cutInvMass)
+		delete	cutInvMass;
 }
 
 /*bool	AnalysisEtaP2Gamma::CutInvariantMass(AnalysisEtaP* analysis)

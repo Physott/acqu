@@ -69,7 +69,7 @@ public:
 	
 	void	Fill(AnalysisEtaP6GammaCanvas* can);
 	
-	virtual	bool		IsEtaP()						{if(bestEta==3) return false; return true;}
+	virtual	const	bool		IsEtaP()	const		{if(bestEta==3) return false; return true;}
 	
 	const	Double_t*	GetCutInvMassPi0()		const	{return cut2Pi0->GetCut();}
 	const	Double_t	GetCutInvMassPi0Min()	const	{return cut2Pi0->GetCutMin();}

@@ -24,7 +24,7 @@ ReadRootTreeHist::ReadRootTreeHist(const Char_t* Name)
 		hNCBHits		= new TH1I(helpName, "NCBHits", 16, 0, 16);
 	sprintf(helpName, "%s_CBTime", Name);
 	if(!(hCBTime	= (TH1D*)gROOT->Get(helpName)))
-		hCBTime		= new TH1D(helpName, "CBTime", 400, -200, 200);
+		hCBTime		= new TH1D(helpName, "CBTime", 400, -100, 100);
 	sprintf(helpName, "%s_CBEnergyAll", Name);
 	if(!(hCBEnergyAll	= (TH1D*)gROOT->Get(helpName)))
 		hCBEnergyAll		= new TH1D(helpName, "CBEnergyAll", 1600, 0, 1600);

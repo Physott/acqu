@@ -5,64 +5,91 @@
 
 AnalysisTagger::AnalysisTagger(const char* _treeFileName, const char* _treeName)	: AnalysisEtaP(_treeFileName, _treeName)
 {
-	if(!(hMissMass			= (TH1D*)gROOT->Get("MissingMass")))
-		hMissMass			= new TH1D("MissingMass", "MissingMass", 1600, 0, 1600);
-	if(!(hCheckCutMissMass	= (TH1D*)gROOT->Get("CheckCutMissingMass")))
-		hCheckCutMissMass	= new TH1D("CheckCutMissingMass", "CheckCutMissingMass", 1600, 0, 1600);
-	if(!(hCountWindow		= (TH1I*)gROOT->Get("CountTaggerWindow")))
-		hCountWindow		= new TH1I("CountTaggerWindow", "CountTaggerWindow", 5, 0, 5);
-	if(!(hCountWindowAccumulated	= (TH1I*)gROOT->Get("CountTaggerWindowAccumulated")))
-		hCountWindowAccumulated		= new TH1I("CountTaggerWindowAccumulated", "CountTaggerWindowAccumulated", 5, 0, 5);
-	if(!(hCountWindowN[0]	= (TH1I*)gROOT->Get("CountTaggerWindowNPrompt")))
-		hCountWindowN[0]	= new TH1I("CountTaggerWindowNPrompt", "CountTaggerWindowNPrompt", 5, 0, 5);
-	if(!(hCountWindowN[1]	= (TH1I*)gROOT->Get("CountTaggerWindowNRand1")))
-		hCountWindowN[1]	= new TH1I("CountTaggerWindowNRand1", "CountTaggerWindowNRand1", 5, 0, 5);
-	if(!(hCountWindowN[2]	= (TH1I*)gROOT->Get("CountTaggerWindowNRand2")))
-		hCountWindowN[2]	= new TH1I("CountTaggerWindowNRand2", "CountTaggerWindowNRand2", 5, 0, 5);
-	if(!(hCountWindowCut	= (TH1I*)gROOT->Get("CountTaggerWindowCut")))
-		hCountWindowCut		= new TH1I("CountTaggerWindowCut", "CountTaggerWindowCut", 5, 0, 5);
-	if(!(hCountWindowAccumulatedCut	= (TH1I*)gROOT->Get("CountTaggerWindowAccumulatedCut")))
-		hCountWindowAccumulatedCut	= new TH1I("CountTaggerWindowAccumulatedCut", "CountTaggerWindowAccumulatedCut", 5, 0, 5);
-	if(!(hCountWindowNCut[0]	= (TH1I*)gROOT->Get("CountTaggerWindowNCutPrompt")))
-		hCountWindowNCut[0]	= new TH1I("CountTaggerWindowNCutPrompt", "CountTaggerWindowNCutPrompt", 5, 0, 5);
-	if(!(hCountWindowNCut[1]	= (TH1I*)gROOT->Get("CountTaggerWindowNCutRand1")))
-		hCountWindowNCut[1]	= new TH1I("CountTaggerWindowNCutRand1", "CountTaggerWindowNCutRand1", 5, 0, 5);
-	if(!(hCountWindowNCut[2]	= (TH1I*)gROOT->Get("CountTaggerWindowNCutRand2")))
-		hCountWindowNCut[2]	= new TH1I("CountTaggerWindowNCutRand2", "CountTaggerWindowNCutRand2", 5, 0, 5);
-		
-	Clear();
+	cutWinRaw2Gamma[0]			= new ReadRootTreeHist("2G_CutIM_CutPrompt");
+	cutWinRaw2Gamma[1]			= new ReadRootTreeHist("2G_CutIM_CutRand1");
+	cutWinRaw2Gamma[2]			= new ReadRootTreeHist("2G_CutIM_CutRand2");
+	cutWinInvMass2Gamma[0]		= new TH1D("2G_CutIM_CutPrompt_InvMass", "2G_CutIM_CutPrompt_InvMass", 1600, 0, 1600);
+	cutWinInvMass2Gamma[1]		= new TH1D("2G_CutIM_CutRand1_InvMass", "2G_CutIM_CutRand1_InvMass", 1600, 0, 1600);
+	cutWinInvMass2Gamma[2]		= new TH1D("2G_CutIM_CutRand2_InvMass", "2G_CutIM_CutRand2_InvMass", 1600, 0, 1600);
+	cutWinRaw6Gamma[0][0]		= new ReadRootTreeHist("6G_EtaP_CutIM_CutPrompt");
+	cutWinRaw6Gamma[0][1]		= new ReadRootTreeHist("6G_EtaP_CutIM_CutRand1");
+	cutWinRaw6Gamma[0][2]		= new ReadRootTreeHist("6G_EtaP_CutIM_CutRand2");
+	cutWinRaw6Gamma[1][0]		= new ReadRootTreeHist("6G_3Pi0_CutIM_CutPrompt");
+	cutWinRaw6Gamma[1][1]		= new ReadRootTreeHist("6G_3Pi0_CutIM_CutRand1");
+	cutWinRaw6Gamma[1][2]		= new ReadRootTreeHist("6G_3Pi0_CutIM_CutRand2");
+	cutWinAnalysis6Gamma[0][0]		= new AnalysisEtaP6GammaCanvas("6G_EtaP_CutIM_CutPrompt", true);
+	cutWinAnalysis6Gamma[0][1]		= new AnalysisEtaP6GammaCanvas("6G_EtaP_CutIM_CutRand1", true);
+	cutWinAnalysis6Gamma[0][2]		= new AnalysisEtaP6GammaCanvas("6G_EtaP_CutIM_CutRand2", true);
+	cutWinAnalysis6Gamma[1][0]		= new AnalysisEtaP6GammaCanvas("6G_3Pi0_CutIM_CutPrompt", false);
+	cutWinAnalysis6Gamma[1][1]		= new AnalysisEtaP6GammaCanvas("6G_3Pi0_CutIM_CutRand1", false);
+	cutWinAnalysis6Gamma[1][2]		= new AnalysisEtaP6GammaCanvas("6G_3Pi0_CutIM_CutRand2", false);
 	
-	for(int i=0; i<3; i++)
-	{
-		cutTaggerTime[2*i]		= -100000;
-		cutTaggerTime[(2*i)+1]	= 100000;
-	}
-	cutMissMass[0]		= -100000;
-	cutMissMass[1]		= 100000;
+	cutWindows2Gamma	= new CutWindows("2G_CutIM_CutWin", -6, 6);
+	cutWindows6Gamma[0]	= new CutWindows("6G_EtaP_CutIM_CutWin", -6, 6);
+	cutWindows6Gamma[1]	= new CutWindows("6G_3Pi0_CutIM_CutWin", -6, 6);
+	
+	cutMissMass2Gamma		= new Cut1Value("2G_CutIM_CutWin_CutMM", 1600, 0, 1600);
+	cutMissMass6Gamma[0]	= new Cut1Value("6G_EtaP_CutIM_CutWin_CutMM", 1600, 0, 1600);
+	cutMissMass6Gamma[1]	= new Cut1Value("6G_3Pi0_CutIM_CutWin_CutMM", 1600, 0, 1600);
+	
+	Clear();
 }
 AnalysisTagger::~AnalysisTagger()
 {
+	if(cutWindows2Gamma)
+		delete	cutWindows2Gamma;
+	if(cutMissMass2Gamma)
+		delete	cutMissMass2Gamma;
+			
+			
+	for(int i=0; i<2; i++)
+	{	
+		if(cutWindows6Gamma[i])
+			delete	cutWindows6Gamma[i];
+		if(cutMissMass6Gamma[i])
+			delete	cutMissMass6Gamma[i];
+	}
+			
+			
+	for(int i=0; i<4; i++)
+	{
+		if(cutWinRaw2Gamma[i])
+			delete	cutWinRaw2Gamma[i];
+		if(cutWinInvMass2Gamma[i])
+			delete	cutWinInvMass2Gamma[i];
+			
+		
+		for(int l=0; l<2; l++)
+		{
+			if(cutWinRaw6Gamma[l][i])
+				delete	cutWinRaw6Gamma[l][i];
+			if(cutWinAnalysis6Gamma[l][i])
+				delete	cutWinAnalysis6Gamma[l][i];
+		}
+	}
 }
 
+void	AnalysisTagger::SetBeam(const int window, const int index)
+{
+	beam[window][nBeam[window]].SetPxPyPzE(GetTaggedEnergy(index), 0.0, 0.0, GetTaggedEnergy(index) + MASS_PROTON);
+	missMass[window][nBeam[window]]	= ((beam[window][nBeam[window]]) -vecAll).M();
+	nBeam[window]++;
+}
+	
 
 void	AnalysisTagger::Clear()
 {
 	AnalysisEtaP::Clear();
 
-	hMissMass->Reset("M");
-	hCheckCutMissMass->Reset("M");
-	hCountWindow->Reset("M");
-	hCountWindowAccumulated->Reset("M");
-	hCountWindowN[0]->Reset("M");
-	hCountWindowN[1]->Reset("M");
-	hCountWindowN[2]->Reset("M");
-	hCountWindowCut->Reset("M");
-	hCountWindowAccumulatedCut->Reset("M");
-	hCountWindowNCut[0]->Reset("M");
-	hCountWindowNCut[1]->Reset("M");
-	hCountWindowNCut[2]->Reset("M");
+	cutWindows2Gamma->Clear();
+	cutWindows6Gamma[0]->Clear();
+	cutWindows6Gamma[1]->Clear();
+	
+	cutMissMass2Gamma->Clear();
+	cutMissMass6Gamma[0]->Clear();
+	cutMissMass6Gamma[1]->Clear();
 }
-
+/*
 void	AnalysisTagger::CutMissMass()
 {
 	nBeamCut[0]	= 0;
@@ -83,39 +110,7 @@ void	AnalysisTagger::CutMissMass()
 			}
 		}
 	}
-}
-void	AnalysisTagger::AnalyseTagged()
-{	
-	for(int i=0; i<GetNTagged(); i++)
-	{
-		//printf("%d",i);
-		//printf("%d\n",GetTaggedTime(i));
-		if(GetTaggedTime(i)>=cutTaggerTime[0] && GetTaggedTime(i)<=cutTaggerTime[1])
-		{
-			beam[0][nBeam[0]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
-			missMass[0][nBeam[0]]	= ((beam[0][nBeam[0]]) -vecAll).M();
-			hMissMass->Fill(missMass[0][nBeam[0]]);
-			hCountWindowAccumulated->Fill(0);
-			nBeam[0]++;
-		}
-		if(GetTaggedTime(i)>=cutTaggerTime[2] && GetTaggedTime(i)<=cutTaggerTime[3])
-		{
-			beam[1][nBeam[1]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
-			missMass[1][nBeam[1]]	= ((beam[1][nBeam[1]]) -vecAll).M();
-			hMissMass->Fill(missMass[1][nBeam[1]]);
-			hCountWindowAccumulated->Fill(1);
-			nBeam[1]++;
-		}
-		if(GetTaggedTime(i)>=cutTaggerTime[4] && GetTaggedTime(i)<=cutTaggerTime[5])
-		{
-			beam[2][nBeam[2]].SetPxPyPzE(GetTaggedEnergy(i), 0.0, 0.0, GetTaggedEnergy(i) + MASS_PROTON);
-			missMass[2][nBeam[2]]	= ((beam[2][nBeam[2]]) -vecAll).M();
-			hMissMass->Fill(missMass[2][nBeam[2]]);
-			hCountWindowAccumulated->Fill(2);
-			nBeam[2]++;
-		}
-	}
-}
+}*/
 bool	AnalysisTagger::AnalyseEvent(const int index)
 {	
 	if(AnalysisEtaP::AnalyseEvent(index))
@@ -124,51 +119,28 @@ bool	AnalysisTagger::AnalyseEvent(const int index)
 		nBeam[1]	= 0;
 		nBeam[2]	= 0;
 		
-		hCountWindow->Fill(4);
-		
-		AnalyseTagged();
-		
-		//printf("%d\t%d\t%d\n",nBeam[0],nBeam[1],nBeam[2]);
-		
-		if(nBeam[0]>0)
+		if(GetNCBHits()==2)
 		{
-			hCountWindow->Fill(0);
-			hCountWindowN[0]->Fill(nBeam[0]);
+			if(cutWindows2Gamma->Analyse(this))
+			{
+				for(int i=0; i<3; i++)
+				{
+					for(int l=0; l<nBeam[i]; l++)
+					{
+						Fill(cutWinRaw2Gamma[i]);
+						cutWinInvMass2Gamma[i]->Fill(vecAll.M());
+					}
+				}
+				return true;
+			}
 		}
-		if(nBeam[1]>0)
+		else if(GetNCBHits()==6)
 		{
-			hCountWindow->Fill(1);
-			hCountWindowN[1]->Fill(nBeam[1]);
+			if(GetAnalysis6Gamma()->IsEtaP())
+				return cutWindows6Gamma[0]->Analyse(this);		
+			else
+				return cutWindows6Gamma[1]->Analyse(this);
 		}
-		if(nBeam[2]>0)
-		{
-			hCountWindow->Fill(2);
-			hCountWindowN[2]->Fill(nBeam[2]);
-		}
-			
-		CutMissMass();
-		
-		bool ret	= false;
-		
-		if(nBeamCut[0]>0)
-		{
-			hCountWindowCut->Fill(0);
-			hCountWindowNCut[0]->Fill(nBeamCut[0]);
-			ret	= true;
-		}
-		if(nBeamCut[1]>0)
-		{
-			hCountWindowCut->Fill(1);
-			hCountWindowNCut[1]->Fill(nBeamCut[1]);
-			ret	= true;
-		}
-		if(nBeamCut[2]>0)
-		{
-			hCountWindowCut->Fill(2);
-			hCountWindowNCut[2]->Fill(nBeamCut[2]);
-			ret	= true;
-		}
-		return ret;
 	}
 	return false;
 }
@@ -192,51 +164,65 @@ void	AnalysisTagger::Draw()
 {
 	AnalysisEtaP::Draw();
 	
-	if(!(canvas	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("AnalysisTaggerCanvas")))
-		canvas	= new TCanvas("AnalysisTaggerCanvas", "AnalysisTagger", 50, 50, 1600, 800);
-	canvas->Clear();
+	if(!(canvas2Gamma	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("2G_CutIM_CutWin")))
+		canvas2Gamma	= new TCanvas("2G_CutIM_CutWin", "2G_CutIM_CutWin", 50, 50, 1600, 800);
+	canvas2Gamma->Clear();
+	canvas2Gamma->Divide(3, 3, 0.001, 0.001);
 	
-	canvas->Divide(3, 4, 0.001, 0.001);
+	cutWindows2Gamma->Draw(canvas2Gamma, 1, 4, 5, 6, 2, 3, 7, 8, 9);
 	
-	canvas->cd(1);	hMissMass->Draw();
-	canvas->cd(2);	hCountWindow->Draw();
-	canvas->cd(3);	hCountWindowAccumulated->Draw();
-	canvas->cd(4);	hCountWindowN[0]->Draw();
-	canvas->cd(5);	hCountWindowN[1]->Draw();
-	canvas->cd(6);	hCountWindowN[2]->Draw();
 	
-	canvas->cd(7);	hCheckCutMissMass->Draw();
-	canvas->cd(8);	hCountWindowCut->Draw();
-	canvas->cd(9);	hCountWindowAccumulatedCut->Draw();
-	canvas->cd(10);	hCountWindowNCut[0]->Draw();
-	canvas->cd(11);	hCountWindowNCut[1]->Draw();
-	canvas->cd(12);	hCountWindowNCut[2]->Draw();
+	if(!(canvas6Gamma[0]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_EtaP_CutIM_CutWin")))
+		canvas6Gamma[0]	= new TCanvas("6G_EtaP_CutIM_CutWin", "6G_EtaP_CutIM_CutWin", 50, 50, 1600, 800);
+	canvas6Gamma[0]->Clear();
+	canvas6Gamma[0]->Divide(3, 3, 0.001, 0.001);
+	
+	cutWindows6Gamma[0]->Draw(canvas6Gamma[0], 1, 4, 5, 6, 2, 3, 7, 8, 9);
+	
+	
+	if(!(canvas6Gamma[1]	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("6G_3Pi0_CutIM_CutWin")))
+		canvas6Gamma[1]	= new TCanvas("6G_3Pi0_CutIM_CutWin", "6G_3Pi0_CutIM_CutWin", 50, 50, 1600, 800);
+	canvas6Gamma[1]->Clear();
+	canvas6Gamma[1]->Divide(3, 3, 0.001, 0.001);
+	
+	cutWindows6Gamma[1]->Draw(canvas6Gamma[1], 1, 4, 5, 6, 2, 3, 7, 8, 9);
+	
+	
+	
+	if(!(cutWinCanvas2Gamma	= (TCanvas*)gROOT->GetListOfCanvases()->FindObject("2G_CutIM_CutWinRes")))
+		cutWinCanvas2Gamma	= new TCanvas("2G_CutIM_CutWinRes", "2G_CutIM_CutWinRes", 50, 50, 1600, 800);
+	cutWinCanvas2Gamma->Clear();
+	cutWinCanvas2Gamma->Divide(5, 3, 0.001, 0.001);
+	
+	cutWinCanvas2Gamma->cd(1);	cutWinInvMass2Gamma[0]->Draw();
+	cutWinCanvas2Gamma->cd(2);	cutWinInvMass2Gamma[1]->Draw();
+	cutWinCanvas2Gamma->cd(3);	cutWinInvMass2Gamma[2]->Draw();
+	cutWinRaw2Gamma[0]->Draw(cutWinCanvas2Gamma, 6, 7, 8, 11, 12, 13);
 }
 void	AnalysisTagger::Save()
 {
-	outFile->cd();
+	AnalysisEtaP::Save();
 	
-	hMissMass->Write();
-	hCheckCutMissMass->Write();
-	hCountWindow->Write();
-	hCountWindowAccumulated->Write();
-	hCountWindowN[0]->Write();
-	hCountWindowN[1]->Write();
-	hCountWindowN[2]->Write();
-	hCountWindowCut->Write();
-	hCountWindowAccumulatedCut->Write();
-	hCountWindowNCut[0]->Write();
-	hCountWindowNCut[1]->Write();
-	hCountWindowNCut[2]->Write();
+	outFile->cd();
+	outFile->mkdir("2G/CutIM/CutWin");
+	outFile->cd("2G/CutIM/CutWin");
+	cutWindows2Gamma->Save();
+	
+	outFile->cd();
+	outFile->mkdir("6G/EtaP/CutIM/CutWin");
+	outFile->cd("6G/EtaP/CutIM/CutWin");
+	cutWindows6Gamma[0]->Save();
+	
+	outFile->cd();
+	outFile->mkdir("6G/3Pi0/CutIM/CutWin");
+	outFile->cd("6G/3Pi0/CutIM/CutWin");
+	cutWindows6Gamma[1]->Save();
 }
 void	AnalysisTagger::Save(const Char_t* outputFileName)
 {
 	if(OpenOutputFile(outputFileName))
 	{
-		ReadRootTree::Save();
-		AnalysisEtaP::Save();
 		Save();
-		
 		delete outFile;
 	}
 }

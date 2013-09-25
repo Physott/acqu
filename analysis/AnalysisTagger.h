@@ -2,7 +2,8 @@
 #define	_AnalysisTagger_h__
 
 #include "AnalysisEtaP.h"
-#include "AnalysisEtaP6GammaTaggedCanvas.h"
+#include "CutWindows.h"
+#include "AnalysisEtaP6Gamma.h"
 
 
 #define MASS_PROTON	938.27203
@@ -14,21 +15,22 @@ class AnalysisTagger	: public AnalysisEtaP
 private:
 
 	//general
-	TCanvas*	canvas;
+	TCanvas*		canvas2Gamma;					
+	TCanvas*		canvas6Gamma[2];			// [Eta, 3Pi0]
+	TCanvas*		cutWinCanvas2Gamma;					
+	TCanvas*		cutWinCanvas6Gamma[2];		// [Eta, 3Pi0]								
 	
 	//histograms
-	TH1D*				hMissMass;
-	TH1D*				hCheckCutMissMass;
-	TH1I*				hCountWindow;
-	TH1I*				hCountWindowAccumulated;
-	TH1I*				hCountWindowN[3];
-	TH1I*				hCountWindowCut;
-	TH1I*				hCountWindowAccumulatedCut;
-	TH1I*				hCountWindowNCut[3];
+	ReadRootTreeHist*			cutWinRaw2Gamma[4];				// [Prompt, Rand1, Rand2, (All)]
+	TH1D*						cutWinInvMass2Gamma[4];
+	ReadRootTreeHist*			cutWinRaw6Gamma[2][4];			// [Eta, 3Pi0][Prompt, Rand1, Rand2, (All)]
+	AnalysisEtaP6GammaCanvas*	cutWinAnalysis6Gamma[2][4];		// [Eta, 3Pi0][Prompt, Rand1, Rand2, (All)]
 	
 	//cuts
-	Double_t			cutTaggerTime[6];
-	Double_t			cutMissMass[2];
+	CutWindows*		cutWindows2Gamma;
+	CutWindows*		cutWindows6Gamma[2];		// [Eta, 3Pi0]
+	Cut1Value*		cutMissMass2Gamma;
+	Cut1Value*		cutMissMass6Gamma[2];		// [Eta, 3Pi0]
 	
 protected:
 	
@@ -40,8 +42,8 @@ protected:
 	Double_t			missMassCut[3][16];
 	Int_t				nBeamCut[3];
 	
-	void	AnalyseTagged();
-	void	CutMissMass();
+	void	SetBeam(const int window, const int index);
+	//void	CutMissMass();
 	bool	AnalyseEvent(const int index);				// no index checking
 	void	Save();
 	
@@ -57,20 +59,24 @@ public:
 	virtual	void	Draw();
 	virtual	void	Save(const Char_t* outputFileName);
 	
-	const	Double_t*	GetCutTaggerTimes()	const	{return cutTaggerTime;}
-	const	Double_t	GetCutTaggerTimePromptMin()	const	{return cutTaggerTime[0];}
-	const	Double_t	GetCutTaggerTimePromptMax()	const	{return cutTaggerTime[1];}
-	const	Double_t	GetCutTaggerTimeRand1Min()	const	{return cutTaggerTime[2];}
-	const	Double_t	GetCutTaggerTimeRand1Max()	const	{return cutTaggerTime[3];}
-	const	Double_t	GetCutTaggerTimeRand2Min()	const	{return cutTaggerTime[4];}
-	const	Double_t	GetCutTaggerTimeRand2Max()	const	{return cutTaggerTime[5];}
-	const	Double_t*	GetCutMissMass()			const	{return cutMissMass;}
-	const	Double_t	GetCutMissMassMin()			const	{return cutMissMass[0];}
-	const	Double_t	GetCutMissMassMax()			const	{return cutMissMass[1];}
+	//const	Double_t*	GetCut()			const	{return cutWindows->GetCut();}
+	//const	Double_t	GetCutPromptMin()	const	{return cutWindows->GetCutPromptMin();}
+	//const	Double_t	GetCutPromptMax()	const	{return cutWindows->GetCutPromptMax();}
+	//const	Double_t	GetCutRand1Min()	const	{return cutWindows->GetCutRand1Min();}
+	//const	Double_t	GetCutRand1Max()	const	{return cutWindows->GetCutRand1Max();}
+	//const	Double_t	GetCutRand2Min()	const	{return cutWindows->GetCutRand2Min();}
+	//const	Double_t	GetCutRand2Max()	const	{return cutWindows->GetCutRand2Max();}
+	//const	Double_t*	GetCutMissMass()			const	{return cutMissMass;}
+	//const	Double_t	GetCutMissMassMin()			const	{return cutMissMass[0];}
+	//const	Double_t	GetCutMissMassMax()			const	{return cutMissMass[1];}
 	
-	void	SetCutTaggerTime(const Double_t promptMin, const Double_t promptMax, const Double_t rand1Min, const Double_t rand1Max, const Double_t rand2Min, const Double_t rand2Max)	{cutTaggerTime[0]=promptMin; cutTaggerTime[1]=promptMax; cutTaggerTime[2]=rand1Min; cutTaggerTime[3]=rand1Max; cutTaggerTime[4]=rand2Min; cutTaggerTime[5]=rand2Max;}
-	void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max;}
+	void	SetCutPrompt(const Double_t min, const Double_t max)	{cutWindows2Gamma->SetCutPrompt(min, max); cutWindows6Gamma[0]->SetCutPrompt(min, max); cutWindows6Gamma[1]->SetCutPrompt(min, max);}
+	void	SetCutRand1(const Double_t min, const Double_t max)		{cutWindows2Gamma->SetCutRand1(min, max); cutWindows6Gamma[0]->SetCutRand1(min, max); cutWindows6Gamma[1]->SetCutRand1(min, max);}
+	void	SetCutRand2(const Double_t min, const Double_t max)		{cutWindows2Gamma->SetCutRand2(min, max); cutWindows6Gamma[0]->SetCutRand2(min, max); cutWindows6Gamma[1]->SetCutRand2(min, max);}
+	void	SetCut(const Double_t promptMin, const Double_t promptMax, const Double_t rand1Min, const Double_t rand1Max, const Double_t rand2Min, const Double_t rand2Max)	{SetCutPrompt(promptMin, promptMax); SetCutRand1(rand1Min, rand1Max); SetCutRand2(rand2Min, rand2Max);}
+	//void	SetCutMissMass(const Double_t Min, const Double_t Max)	{cutMissMass[0]=Min; cutMissMass[1]=Max;}
 		
+	friend	class	CutWindows;
 };
 
 

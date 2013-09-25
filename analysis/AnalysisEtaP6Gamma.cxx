@@ -32,6 +32,32 @@ AnalysisEtaP6Gamma::AnalysisEtaP6Gamma()
 }
 AnalysisEtaP6Gamma::~AnalysisEtaP6Gamma()
 {
+	if(result[0])
+		delete result[0];
+	if(result[1])
+		delete result[1];
+	if(rawHist[0])
+		delete rawHist[0];
+	if(rawHist[1])
+		delete rawHist[1];
+	if(rawHist[2])
+		delete rawHist[2];
+		
+	if(cutEta)
+		delete cutEta;
+	if(cut2Pi0)
+		delete cut2Pi0;
+	if(cut3Pi0)
+		delete cut3Pi0;
+		
+	if(cutResult[0])
+		delete cutResult[0];
+	if(cutResult[1])
+		delete cutResult[1];
+	if(cutRawHist[0])
+		delete cutRawHist[0];
+	if(cutRawHist[1])
+		delete cutRawHist[1];
 }
 
 
