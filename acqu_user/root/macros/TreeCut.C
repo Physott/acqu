@@ -24,8 +24,7 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits)
 		printf("Could not open file %s\n", str);
 		return;
 	}
-	sprintf(str,"cutTree_%d",CBHits);
-	TTree*	outTree	= new TTree(str,str);
+	TTree*	outTree	= new TTree("tree","tree");
 	if(!outTree)
 	{
 		printf("Could not create outputtree %s", str);
@@ -65,7 +64,7 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits)
 	outTree->Branch("Py", Py, "Py[nCBHits]/D");
 	outTree->Branch("Pz", Pz, "Pz[nCBHits]/D");
 	outTree->Branch("E", E, "E[nCBHits]/D");	
-	outTree->Branch("Time", Time, "Time[nCBHits]/D");
+	outTree->Branch("CBTime", Time, "CBTime[nCBHits]/D");
 	
 	printf("Number of Entries in origin:\t%d\n",tree->GetEntries());
 	
