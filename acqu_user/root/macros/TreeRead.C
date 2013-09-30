@@ -96,11 +96,17 @@ Bool_t	TreeRead::Open()
 		printf("Could not open file %s\n", str);
 		return false;
 	}
+	bool	oldVersion = false;
 	tree	= (TTree*)file->Get("tree");
 	if(!tree)
 	{
-		printf("Could not open tree in file %s\n", str);
-		return false;
+		tree	= (TTree*)file->Get(fileName);
+		if(!tree)
+		{
+			printf("Could not open tree in file %s\n", str);
+			return false;
+		}
+		oldVersion = true;
 	}
 	
 	tree->SetBranchAddress("nTagged",&nTagged);
@@ -112,7 +118,10 @@ Bool_t	TreeRead::Open()
 	tree->SetBranchAddress("Py", &Py);
 	tree->SetBranchAddress("Pz", &Pz);
 	tree->SetBranchAddress("E", &E);	
-	tree->SetBranchAddress("CBTime", &CBTime);
+	if(oldVersion)
+		tree->SetBranchAddress("Time", &CBTime);
+	else
+		tree->SetBranchAddress("CBTime", &CBTime);
 	
 	printf("Open file %s and load tree successfully.    %ld Events at all\n", str, (long int)tree->GetEntries());
 

@@ -3,10 +3,17 @@
 
 #define MASS_PROTON	938.27203
 
+enum	ETA2G
+{
+	ETA2G_EtaP	= 0,
+	ETA2G_Eta,
+	ETA2G_Pi0
+};
 
-class	TreeAnalyseEtaP2GammaTagg	: public TreeRead
+class	TreeAnalyse2GammaTagg	: public TreeRead
 {
 private:
+	ETA2G		type;
 	TFile*		outFile[3];
 	TTree*		outTree[3];
 	
@@ -28,8 +35,8 @@ protected:
 	bool	AnalyseEvent(const Int_t i);
 
 public:
-	TreeAnalyseEtaP2GammaTagg(const Char_t* FileName);
-	~TreeAnalyseEtaP2GammaTagg();
+	TreeAnalyse2GammaTagg(const Char_t* FileName, const ETA2G Type = ETA2G_EtaP);
+	~TreeAnalyse2GammaTagg();
 	
 			void	Clear()													{hCutTagg->Reset("M"); hCutCheck[0]->Reset("M"); hCutCheck[1]->Reset("M"); hCutCheck[2]->Reset("M"); hIM[0]->Reset("M"); hIM[1]->Reset("M"); hIM[2]->Reset("M");}
 	virtual	bool	Open();
@@ -54,9 +61,9 @@ public:
 			void		SetCutTaggRand2(const Double_t Min, const Double_t Max)		{cutTagg[2][0] = Min; cutTagg[2][1] = Max;}
 	
 	
-	static	TreeAnalyseEtaP2GammaTagg*	test()
+	static	TreeAnalyse2GammaTagg*	test()
 	{
-		TreeAnalyseEtaP2GammaTagg* c = new TreeAnalyseEtaP2GammaTagg("tree_2g.root");
+		TreeAnalyse2GammaTagg* c = new TreeAnalyse2GammaTagg("tree_2g.root");
 		c->Open();
 		c->Analyse();
 		c->Save();
@@ -69,7 +76,7 @@ public:
 
 
 
-TreeAnalyseEtaP2GammaTagg::TreeAnalyseEtaP2GammaTagg(const Char_t* FileName)	: TreeRead(FileName)
+TreeAnalyse2GammaTagg::TreeAnalyse2GammaTagg(const Char_t* FileName, const ETA2G Type)	: TreeRead(FileName), type(Type)
 {	
 	for(int i=0; i<3; i++)
 	{
@@ -92,16 +99,34 @@ TreeAnalyseEtaP2GammaTagg::TreeAnalyseEtaP2GammaTagg(const Char_t* FileName)	: T
 		hCutCheck[1]	= new TH1D("2G_Rand1_CutCheck", "2G_Rand1_CutCheck", 200, -100, 100);
 	if(!(hCutCheck[2]	= (TH1D*)gROOT->Get("2G_Rand2_CutCheck")))
 		hCutCheck[2]	= new TH1D("2G_Rand2_CutCheck", "2G_Rand2_CutCheck", 200, -100, 100);
-	if(!(hIM[0]	= (TH1D*)gROOT->Get("2G_Prompt_IM")))
-		hIM[0]	= new TH1D("2G_Prompt_IM", "2G_Prompt_IM", 300, 800, 1100);
-	if(!(hIM[1]	= (TH1D*)gROOT->Get("2G_Rand1_IM")))
-		hIM[1]	= new TH1D("2G_Rand1_IM", "2G_Rand1_IM", 300, 800, 1100);
-	if(!(hIM[2]	= (TH1D*)gROOT->Get("2G_Rand2_IM")))
-		hIM[2]	= new TH1D("2G_Rand2_IM", "2G_Rand2_IM", 300, 800, 1100);
+	
+	Double_t	min	= 800;
+	Double_t	max	= 1100;	
+	if(type == ETA2G_Eta)
+	{
+		min	= 400;
+		max	= 700;
+	}
+	else if(type == ETA2G_Pi0)
+	{
+		min	= 0;
+		max	= 300;
+	}
+	
+	if((hIM[0]	= (TH1D*)gROOT->Get("2G_IM_Prompt")))
+		hIM[0]->Delete();
+	hIM[0]	= new TH1D("2G_IM_Prompt", "2G_IM_Prompt", max-min, min, max);
+		
+	if((hIM[1]	= (TH1D*)gROOT->Get("2G_IM_Rand1")))
+		hIM[1]->Delete();
+	hIM[1]	= new TH1D("2G_IM_Rand1", "2G_IM_Rand1", max-min, min, max);
+	if((hIM[2]	= (TH1D*)gROOT->Get("2G_IM_Rand2")))
+		hIM[2]->Delete();
+	hIM[2]	= new TH1D("2G_IM_Rand2", "2G_IM_Rand2", max-min, min, max);
 		
 	Clear();
 }
-TreeAnalyseEtaP2GammaTagg::~TreeAnalyseEtaP2GammaTagg()
+TreeAnalyse2GammaTagg::~TreeAnalyse2GammaTagg()
 {
 	for(int i=0; i<3; i++)
 	{
@@ -113,20 +138,21 @@ TreeAnalyseEtaP2GammaTagg::~TreeAnalyseEtaP2GammaTagg()
 }
 
 
-void	TreeAnalyseEtaP2GammaTagg::Open()
+void	TreeAnalyse2GammaTagg::Open()
 {
-	//printf("TreeAnalyseEtaP2GammaTagg::Open()\n");
+	//printf("TreeAnalyse2GammaTagg::Open()\n");
 	TreeRead::Open();
-	//printf("TreeAnalyseEtaP2GammaTagg::Open 2()\n");
+	//printf("TreeAnalyse2GammaTagg::Open 2()\n");
 	
 	Char_t	str[128];
-	sprintf(str, "%s_2g_Prompt.root", GetFileName());
+	//printf("GetFileName: %s\n", GetFileName());
+	sprintf(str, "%s_Prompt.root", GetFileName());
 	outFile[0]	= new TFile(str, "RECREATE");
 	outTree[0]	= new TTree("tree", "tree");
-	sprintf(str, "%s_2g_Rand1.root", GetFileName());
+	sprintf(str, "%s_Rand1.root", GetFileName());
 	outFile[1]	= new TFile(str, "RECREATE");
 	outTree[1]	= new TTree("tree", "tree");
-	sprintf(str, "%s_2g_Rand2.root", GetFileName());
+	sprintf(str, "%s_Rand2.root", GetFileName());
 	outFile[2]	= new TFile(str, "RECREATE");
 	outTree[2]	= new TTree("tree", "tree");
 		
@@ -145,7 +171,7 @@ void	TreeAnalyseEtaP2GammaTagg::Open()
 	}
 }
 
-bool	TreeAnalyseEtaP2GammaTagg::AnalyseEvent(const Int_t i)
+bool	TreeAnalyse2GammaTagg::AnalyseEvent(const Int_t i)
 {
 	TreeRead::AnalyseEvent(i);
 	
@@ -203,7 +229,7 @@ bool	TreeAnalyseEtaP2GammaTagg::AnalyseEvent(const Int_t i)
 	}
 	return ret;
 }
-void	TreeAnalyseEtaP2GammaTagg::Analyse(const Int_t Min, const Int_t Max)
+void	TreeAnalyse2GammaTagg::Analyse(const Int_t Min, const Int_t Max)
 {
 	Double_t	min = Min;
 	Double_t	max = Max;
@@ -217,7 +243,7 @@ void	TreeAnalyseEtaP2GammaTagg::Analyse(const Int_t Min, const Int_t Max)
 	for(int i=min; i<max; i++)
 		AnalyseEvent(i);
 }
-bool	TreeAnalyseEtaP2GammaTagg::Save()
+bool	TreeAnalyse2GammaTagg::Save()
 {
 	outFile[0]->cd();
 	outTree[0]->Write();
@@ -238,7 +264,7 @@ bool	TreeAnalyseEtaP2GammaTagg::Save()
 			res->Add(BG, -1);
 	
 	Char_t	str[128];
-	sprintf(str, "%s_hist_2g_Tagg.root", GetFileName());
+	sprintf(str, "hist_%s_Tagg.root", GetFileName()+5);
 	TFile*	result	= new TFile(str, "RECREATE");
 	if(!result)
 		return false;

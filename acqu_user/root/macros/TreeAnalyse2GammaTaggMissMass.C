@@ -4,10 +4,18 @@
 #define MASS_PROTON	938.27203
 
 
+enum	ETA2G
+{
+	ETA2G_EtaP	= 0,
+	ETA2G_Eta,
+	ETA2G_Pi0
+};
+
+
 class	TreeAnalyseEtaP2GammaTaggMissMass	: public TreeRead
 {
 private:
-	char		strTaggMarker[16];
+	ETA2G		type;
 	TFile*		outFile;
 	TTree*		outTree;
 	
@@ -31,7 +39,7 @@ protected:
 	bool	AnalyseEvent(const Int_t i);
 
 public:
-	TreeAnalyseEtaP2GammaTaggMissMass(const Char_t* FileName);
+	TreeAnalyseEtaP2GammaTaggMissMass(const Char_t* FileName, const ETA2G Type = ETA2G_EtaP);
 	~TreeAnalyseEtaP2GammaTaggMissMass();
 	
 			void	Clear()													{hCutCount->Reset("M"); hCut->Reset("M"); hCutCheck->Reset("M"); hIM->Reset("M");}
@@ -71,7 +79,7 @@ public:
 
 
 
-TreeAnalyseEtaP2GammaTaggMissMass::TreeAnalyseEtaP2GammaTaggMissMass(const Char_t* FileName)	: TreeRead(FileName), outTree(0), outFile(0)
+TreeAnalyseEtaP2GammaTaggMissMass::TreeAnalyseEtaP2GammaTaggMissMass(const Char_t* FileName, const ETA2G Type)	: TreeRead(FileName), type(Type), outTree(0), outFile(0)
 {	
 	cut[0]	= 750;
 	cut[1]	= 1100;
@@ -82,30 +90,40 @@ TreeAnalyseEtaP2GammaTaggMissMass::TreeAnalyseEtaP2GammaTaggMissMass(const Char_
 		hCut		= new TH1D("2G_MM_Cut", "2G_MM_Cut", 3200, -1600, 1600);
 	if(!(hCutCheck	= (TH1D*)gROOT->Get("2G_MM_CutCheck")))
 		hCutCheck	= new TH1D("2G_MM_CutCheck", "2G_MM_CutCheck", 450, 700, 1150);
-	if(!(hIM	= (TH1D*)gROOT->Get("2G_IM")))
-		hIM		= new TH1D("2G_IM", "2G_IM", 300, 800, 1100);
+	
+	Double_t	min	= 800;
+	Double_t	max	= 1100;	
+	if(type == ETA2G_Eta)
+	{
+		min	= 400;
+		max	= 700;
+	}
+	else if(type == ETA2G_Pi0)
+	{
+		min	= 0;
+		max	= 300;
+	}	
+	if((hIM	= (TH1D*)gROOT->Get("2G_IM")))
+		hIM->Delete();
+	hIM		= new TH1D("2G_IM", "2G_IM", max-min, min, max);
 		
-	TString	str(FileName);
+	/*TString	str(FileName);
 	if(str.EndsWith("_Prompt.root"))
 	{
-		sprintf(strTaggMarker, "_Prompt.root");
 		printf("TaggMarker found: Prompt data\n");
 	}
 	else if(str.EndsWith("_Rand1.root"))
 	{
-		sprintf(strTaggMarker, "_Rand1.root");
 		printf("TaggMarker found: Rand1 data\n");
 	}
 	else if(str.EndsWith("_Rand2.root"))
 	{
-		sprintf(strTaggMarker, "_Rand2.root");
 		printf("TaggMarker found: Rand2 data\n");
 	}
 	else
 	{
-		sprintf(strTaggMarker, "");
 		printf("ERROR: No TaggMarker found in Filename (_Prompt.root, _Rand1.root, _Rand2.root)\n");
-	}
+	}*/
 	
 	Clear();
 }
@@ -125,13 +143,7 @@ void	TreeAnalyseEtaP2GammaTaggMissMass::Open()
 	//printf("TreeAnalyseEtaP2GammaTaggMissMass::Open 2()\n");
 	
 	Char_t	str[128];
-	sprintf(str, "%s_2g_Prompt.root", GetFileName());
-	if(!strcmp(strTaggMarker, "_Prompt.root"))
-		sprintf(str, "%s_2g_Prompt_MM.root", GetFileName());
-	if(!strcmp(strTaggMarker, "_Rand1.root"))
-		sprintf(str, "%s_2g_Rand1_MM.root", GetFileName());
-	if(!strcmp(strTaggMarker, "_Rand2.root"))
-		sprintf(str, "%s_2g_Rand2_MM.root", GetFileName());
+	sprintf(str, "%s_MM.root", GetFileName());
 	
 	outFile	= new TFile(str, "RECREATE");
 	outTree	= new TTree("tree", "tree");
@@ -207,12 +219,7 @@ bool	TreeAnalyseEtaP2GammaTaggMissMass::Save()
 	outFile->Flush();
 	
 	Char_t	str[128];
-	if(!strcmp(strTaggMarker, "_Prompt.root"))
-		sprintf(str, "%s_hist_2g_Prompt.root", GetFileName());
-	else if(!strcmp(strTaggMarker, "_Rand1.root"))
-		sprintf(str, "%s_hist_2g_Rand1.root", GetFileName());
-	else if(!strcmp(strTaggMarker, "_Rand2.root"))
-		sprintf(str, "%s_hist_2g_Rand2.root", GetFileName());
+	sprintf(str, "hist_%s_MM.root", GetFileName()+5);
 		
 	TFile*	result	= new TFile(str, "RECREATE");
 	if(!result)
