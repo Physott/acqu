@@ -83,7 +83,7 @@ TreeRead::~TreeRead()
 		delete	file;
 }
 
-Bool_t	TreeRead::Open()
+bool	TreeRead::Open()
 {
 	if(isOpen)
 		return true;
@@ -91,7 +91,7 @@ Bool_t	TreeRead::Open()
 	Char_t	str[128];
 	sprintf(str, "%s.root", fileName);
 	file	= new TFile(str);
-	if(!file)
+	if(!file )//|| file.IsZombie())
 	{
 		printf("Could not open file %s\n", str);
 		return false;
