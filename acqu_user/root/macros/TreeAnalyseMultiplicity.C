@@ -1,37 +1,31 @@
 #include "TreeRead.C"
-
+#include "TreeHistGeneral.C"
 
 class	TreeAnalyseMultiplicity	: public TreeRead
 {
 private:
-	TFile*		outFile2g[3];
-	TTree*		out2g[3];
-	TFile*		outFile6g;
-	TTree*		out6g;
+	TFile*		outFile[3];
+	TTree*		outTree[3];
 	
 	Double_t	cutCBTime[2];
-	Double_t	cutIMPi0[2];
-	Double_t	cutIMEta[2];
-	Double_t	cutIMEtaP[2];
 	
-	TLorentzVector	vec[6];
+	TLorentzVector	vec[10];
 	TLorentzVector	vecAll;
-	Double_t		massAll;
 	
-	TH1D*	hIM;
-	TH1D*	hIMCut[3];
-	TH1D*	hIM6g;
+	TH1I*			hCutCount;
+	TH1D*			hCutCheck;
+	TreeHistGeneral	hist[3];
 	
 	bool	CutCBTime();
 
 protected:
-	bool	AnalyseEvent(const Int_t i);
+	void	AnalyseEvent(const Int_t i);
 
 public:
 	TreeAnalyseMultiplicity(const Char_t* FileName);
 	~TreeAnalyseMultiplicity();
 	
-			void	Clear()													{hIM->Reset("M"); hIMCut[0]->Reset("M"); hIMCut[1]->Reset("M"); hIMCut[2]->Reset("M"); hIM6g->Reset("M");}
+			void	Clear();
 	virtual	bool	Open();
 			void	AnalyseEvent(const Int_t Min, const Int_t Max);
 	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
@@ -67,7 +61,7 @@ public:
 	}		*/
 	static	TreeAnalyseMultiplicity*	test()
 	{
-		TreeAnalyseMultiplicity* c = new TreeAnalyseMultiplicity("TTreeOutput_41948.root");
+		TreeAnalyseMultiplicity* c = new TreeAnalyseMultiplicity("TTreeOutput_41941");
 		c->Open();
 		c->SetCutCBTime(-50, 50);
 		c->Analyse();
@@ -82,58 +76,87 @@ public:
 
 bool	TreeAnalyseMultiplicity::CutCBTime()
 {
+	hCutCount->Fill(1);
 	for(int i=0; i<nCBHits; i++)
 	{
 		if(CBTime[i] < cutCBTime[0] || CBTime[i] > cutCBTime[1])
 			return false;
+		hCutCheck->Fill(CBTime[i]);
 	}
+	hCutCount->Fill(2);
 	return true;
 }
 
 
 
-TreeAnalyseMultiplicity::TreeAnalyseMultiplicity(const Char_t* FileName)	: TreeRead(FileName), out2g(0), outFile2g(0)
+TreeAnalyseMultiplicity::TreeAnalyseMultiplicity(const Char_t* FileName)	: TreeRead(FileName)
 {	
 	//printf("TreeAnalyseMultiplicity constructor\n");
 	cutCBTime[0]	= -100000;
 	cutCBTime[1]	= 100000;
-	cutIMPi0[0]		= 120;
-	cutIMPi0[1]		= 150;
-	cutIMEta[0]		= 517;
-	cutIMEta[1]		= 577;
-	cutIMEtaP[0]	= 850;
-	cutIMEtaP[1]	= 1050;
 	
-	if(!(hIM		= (TH1D*)gROOT->Get("2G_IM")))
-		hIM			= new TH1D("2G_IM", "2G_IM", 1600, 0, 1600);
-	if(!(hIMCut[0]	= (TH1D*)gROOT->Get("2G_IM_CutPi0")))
-		hIMCut[0]	= new TH1D("2G_IM_CutPi0", "2G_IM_CutPi0", 300, 0, 300);
-	if(!(hIMCut[1]	= (TH1D*)gROOT->Get("2G_IM_CutEta")))
-		hIMCut[1]	= new TH1D("2G_IM_CutEta", "2G_IM_CutEta", 300, 400, 700);
-	if(!(hIMCut[2]	= (TH1D*)gROOT->Get("2G_IM_CutEtaP")))
-		hIMCut[2]	= new TH1D("2G_IM_CutEtaP", "2G_IM_CutEtaP", 300, 800, 1100);
-	if(!(hIM6g		= (TH1D*)gROOT->Get("6G_IM")))
-		hIM6g		= new TH1D("6G_IM", "6G_IM", 1600, 0, 1600);
-		
+	if(!(hCutCount	= (TH1I*)gROOT->Get("CBTimeCutCount")))
+		hCutCount	= new TH1I("CBTimeCutCount", "1:All/2:Passed", 4, 0, 4);
+	if(!(hCutCheck	= (TH1D*)gROOT->Get("CBTimeCutCheck")))
+		hCutCheck	= new TH1D("CBTimeCutCheck", "CBTimeCutCheck", 2000, -100, 100);
+	
+	TString	BaseName[9];
+	BaseName[0]	= "NTagged";
+	BaseName[1]	= "TaggedEnergy";
+	BaseName[2]	= "TaggedTime";
+	BaseName[3]	= "Multiplicity";
+	BaseName[4]	= "CBTime";
+	BaseName[5]	= "CBEnergyAll";
+	BaseName[6]	= "IMAll";
+	BaseName[7]	= "ThetaAll";
+	BaseName[8]	= "PhiAll";
+	Int_t		NBin[9]	=	{32,  200, 2000, 16, 2000, 2000, 2000,  180,  360};
+	Double_t	Min[9]	=	{ 0, 1400, -100,  0, -100,    0,    0,    0, -180};
+	Double_t	Max[9]	=	{32, 1600,  100, 16,  100, 2000, 2000,  180,  180};
+	TString	Name[9];
+	
+	for(int i=0; i<9; i++)
+		Name[i]	= BaseName[i];
+	for(int i=0; i<9; i++)
+		Name[i].Prepend("2g_");
+	hist[0].Init(Name, Name, NBin, Min, Max);
+	
+	for(int i=0; i<9; i++)
+		Name[i]	= BaseName[i];
+	for(int i=0; i<9; i++)
+		Name[i].Prepend("6g_");
+	hist[1].Init(Name, Name, NBin, Min, Max);
+	
+	for(int i=0; i<9; i++)
+		Name[i]	= BaseName[i];
+	for(int i=0; i<9; i++)
+		Name[i].Prepend("10g_");
+	hist[2].Init(Name, Name, NBin, Min, Max);
+	
 	Clear();
 }
 TreeAnalyseMultiplicity::~TreeAnalyseMultiplicity()
 {
 	for(int i=0; i<3; i++)
 	{
-		if(out2g[i])
-			delete	out2g[i];
-		if(outFile2g[i])
-			delete	outFile2g[i];
+		if(outTree[i])
+			delete	outTree[i];
+		if(outFile[i])
+			delete	outFile[i];
 	}
-	
-	if(out6g)
-		delete	out6g;
-	if(outFile6g)
-		delete	outFile6g;
 }
 
-
+inline	void	TreeAnalyseMultiplicity::Clear()	
+{
+	hCutCount->Reset("M");
+	hCutCheck->Reset("M");
+	
+	for(int i=0; i<3; i++)
+	{
+		hist[i].Clear(); 
+	}
+}
+	
 void	TreeAnalyseMultiplicity::Open()
 {
 	//printf("TreeAnalyseMultiplicity::Open()\n");
@@ -144,48 +167,33 @@ void	TreeAnalyseMultiplicity::Open()
 	for(int i=0; i<3; i++)
 	{
 		if(i==0)
-			sprintf(str, "tree_%s_2g_IMPi0.root", GetFileName());
+			sprintf(str, "tree_%s_2g.root", GetFileName());
 		else if(i==1)
-			sprintf(str, "tree_%s_2g_IMEta.root", GetFileName());
+			sprintf(str, "tree_%s_6g.root", GetFileName());
 		else if(i==2)
-			sprintf(str, "tree_%s_2g_IMEtaP.root", GetFileName());
+			sprintf(str, "tree_%s_10g.root", GetFileName());
 			
-		outFile2g[i]		= new TFile(str, "RECREATE");
-		out2g[i]			= new TTree("tree", "tree");
+		outFile[i]		= new TFile(str, "RECREATE");
+		outTree[i]		= new TTree("tree", "tree");
 		
-		out2g[i]->Branch("nTagged",&nTagged,"nTagged/I");
-		out2g[i]->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
-		out2g[i]->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
+		outTree[i]->Branch("nTagged",&nTagged,"nTagged/I");
+		outTree[i]->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
+		outTree[i]->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
 		
-		out2g[i]->Branch("nCBHits",&nCBHits,"nCBHits/I");
-		out2g[i]->Branch("Px", Px, "Px[nCBHits]/D");
-		out2g[i]->Branch("Py", Py, "Py[nCBHits]/D");
-		out2g[i]->Branch("Pz", Pz, "Pz[nCBHits]/D");
-		out2g[i]->Branch("E", E, "E[nCBHits]/D");	
-		out2g[i]->Branch("CBTime", CBTime, "CBTime[nCBHits]/D");
+		outTree[i]->Branch("nCBHits",&nCBHits,"nCBHits/I");
+		outTree[i]->Branch("Px", Px, "Px[nCBHits]/D");
+		outTree[i]->Branch("Py", Py, "Py[nCBHits]/D");
+		outTree[i]->Branch("Pz", Pz, "Pz[nCBHits]/D");
+		outTree[i]->Branch("E", E, "E[nCBHits]/D");	
+		outTree[i]->Branch("CBTime", CBTime, "CBTime[nCBHits]/D");
 	}
-	
-	sprintf(str, "tree_%s_6g.root", GetFileName());
-			
-	outFile6g		= new TFile(str, "RECREATE");
-	out6g			= new TTree("tree", "tree");
-		
-	out6g->Branch("nTagged",&nTagged,"nTagged/I");
-	out6g->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
-	out6g->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
-		
-	out6g->Branch("nCBHits",&nCBHits,"nCBHits/I");
-	out6g->Branch("Px", Px, "Px[nCBHits]/D");
-	out6g->Branch("Py", Py, "Py[nCBHits]/D");
-	out6g->Branch("Pz", Pz, "Pz[nCBHits]/D");
-	out6g->Branch("E", E, "E[nCBHits]/D");	
-	out6g->Branch("CBTime", CBTime, "CBTime[nCBHits]/D");
 		
 	//printf("TreeAnalyseMultiplicity::Open 2()\n");
 }
 
-bool	TreeAnalyseMultiplicity::AnalyseEvent(const Int_t i)
+void	TreeAnalyseMultiplicity::AnalyseEvent(const Int_t i)
 {
+	//printf("%d\n",i);
 	TreeRead::AnalyseEvent(i);
 	
 	if(nCBHits == 2)
@@ -195,37 +203,43 @@ bool	TreeAnalyseMultiplicity::AnalyseEvent(const Int_t i)
 			vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
 			vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
 			vecAll	= vec[0] + vec[1];
-			massAll	= vecAll.M();
-			hIM->Fill(massAll);
-			if(massAll >= cutIMPi0[0] && massAll <= cutIMPi0[1])
-			{
-				out2g[0]->Fill();
-				hIMCut[0]->Fill(massAll);
-			}
-			else if(massAll >= cutIMEta[0] && massAll <= cutIMEta[1])
-			{
-				out2g[1]->Fill();
-				hIMCut[1]->Fill(massAll);
-			}
-			else if(massAll >= cutIMEtaP[0] && massAll <= cutIMEtaP[1])
-			{
-				out2g[2]->Fill();
-				hIMCut[2]->Fill(massAll);
-			}
+			outTree[0]->Fill();
+			hist[0].Fill(nTagged, TaggedEnergy, TaggedTime, nCBHits, CBTime, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 		}
 	}	
 	else if(nCBHits == 6)
 	{
-		vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-		vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
-		vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
-		vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
-		vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
-		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
-		massAll	= vecAll.M();
-		hIM6g->Fill(massAll);
-		out6g->Fill();
+		if(CutCBTime())
+		{
+			vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
+			vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
+			vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
+			vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
+			vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
+			vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
+			vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
+			outTree[1]->Fill();
+			hist[1].Fill(nTagged, TaggedEnergy, TaggedTime, nCBHits, CBTime, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		}
+	}
+	else if(nCBHits == 10)
+	{
+		if(CutCBTime())
+		{
+			vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
+			vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
+			vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
+			vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
+			vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
+			vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
+			vec[6].SetPxPyPzE(Px[6], Py[6], Pz[6], E[6]);
+			vec[7].SetPxPyPzE(Px[7], Py[7], Pz[7], E[7]);
+			vec[8].SetPxPyPzE(Px[8], Py[8], Pz[8], E[8]);
+			vec[9].SetPxPyPzE(Px[9], Py[9], Pz[9], E[9]);
+			vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5] + vec[6] + vec[7] + vec[8] + vec[9];
+			outTree[2]->Fill();
+			hist[2].Fill(nTagged, TaggedEnergy, TaggedTime, nCBHits, CBTime, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		}
 	}
 }
 void	TreeAnalyseMultiplicity::Analyse(const Int_t Min, const Int_t Max)
@@ -246,25 +260,38 @@ bool	TreeAnalyseMultiplicity::Save()
 {
 	for(int i=0; i<3; i++)
 	{
-		outFile2g[i]->cd();
-		out2g[i]->Write();
-		outFile2g[i]->Flush();
+		outFile[i]->cd();
+		outTree[i]->Write();
+		outFile[i]->Flush();
 	}
-	outFile6g->cd();
-	out6g->Write();
-	outFile6g->Flush();
 	
 	Char_t	str[128];
 	sprintf(str, "hist_%s_Multiplicity.root", GetFileName());
 	TFile*		result	= new TFile(str, "RECREATE");
 	if(!result)
 		return false;
+	
+	TreeHistGeneral	histAll;
+	TString	BaseName[9];
+	BaseName[0]	= "NTagged";
+	BaseName[1]	= "TaggedEnergy";
+	BaseName[2]	= "TaggedTime";
+	BaseName[3]	= "Multiplicity";
+	BaseName[4]	= "CBTime";
+	BaseName[5]	= "CBEnergyAll";
+	BaseName[6]	= "IMAll";
+	BaseName[7]	= "ThetaAll";
+	BaseName[8]	= "PhiAll";
+	histAll.Init(hist[0], BaseName);
+	histAll.Add(hist[1]);
+	histAll.Add(hist[2]);
 	result->cd();
-	hIM->Write();
-	hIMCut[0]->Write();
-	hIMCut[1]->Write();
-	hIMCut[2]->Write();
-	hIM6g->Write();
+	histAll.Save();
+	hCutCount->Write();
+	hCutCheck->Write();
+	hist[0].Save();
+	hist[1].Save();
+	hist[2].Save();
 	result->Close();
 	delete result;
 }

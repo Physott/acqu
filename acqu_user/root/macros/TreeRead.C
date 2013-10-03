@@ -32,7 +32,7 @@ public:
 	~TreeRead();
 	
 	virtual	bool	Open();
-			bool	AnalyseEvent(const Int_t i)		{tree->GetEntry(i);}
+			void	AnalyseEvent(const Int_t i)		{tree->GetEntry(i);}
 	virtual	void	Print();
 	
 	const	Bool_t	IsOpen()		const	{return isOpen;}
@@ -52,16 +52,22 @@ public:
 void	TreeRead::FindName(const Char_t* FileName, Char_t* Name)
 {
 	TString	str(FileName);
-	if(!str.EndsWith(".root"))
+	if(str.EndsWith(".root"))
 	{
-		printf("Could not extract name and runnumber from file %s. Need to end on '.root'!", FileName);
-		exit(1);
+		str.Remove(TString::kTrailing,'t');
+		str.Remove(TString::kTrailing,'o');
+		str.Remove(TString::kTrailing,'o');
+		str.Remove(TString::kTrailing,'r');
+		str.Remove(TString::kTrailing,'.');
 	}
-	str.Remove(TString::kTrailing,'t');
-	str.Remove(TString::kTrailing,'o');
-	str.Remove(TString::kTrailing,'o');
-	str.Remove(TString::kTrailing,'r');
-	str.Remove(TString::kTrailing,'.');
+	if(str.BeginsWith("tree_"))
+	{
+		str.Remove(TString::kLeading,'t');
+		str.Remove(TString::kLeading,'r');
+		str.Remove(TString::kLeading,'e');
+		str.Remove(TString::kLeading,'e');
+		str.Remove(TString::kLeading,'_');
+	}
 	
 	strcpy(Name, str.Data());
 }
@@ -90,11 +96,16 @@ bool	TreeRead::Open()
 	
 	Char_t	str[128];
 	sprintf(str, "%s.root", fileName);
-	file	= new TFile(str);
-	if(!file )//|| file.IsZombie())
+	file	= TFile::Open(str);
+	if(!file )
 	{
-		printf("Could not open file %s\n", str);
-		return false;
+		sprintf(str, "tree_%s.root", fileName);
+		file	= TFile::Open(str);
+		if(!file )
+		{
+			printf("Could not open file %s\n", str);
+			return false;
+		}
 	}
 	bool	oldVersion = false;
 	tree	= (TTree*)file->Get("tree");
