@@ -6,6 +6,9 @@
 class	TreeAnalyse2Gamma	: public TreeReadTagged
 {
 private:	
+	TFile*		outFile[3];
+	TTree*		outTree[3];
+	
 	Double_t	cutIMPi0[2];
 	Double_t	cutIMEta[2];
 	Double_t	cutIMEtaP[2];
@@ -27,6 +30,7 @@ public:
 	~TreeAnalyse2Gamma();
 	
 			void	Clear();
+	virtual	bool	Open();
 			void	AnalyseEvent(const Int_t Min, const Int_t Max);
 	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
 	virtual	bool	Save();
@@ -148,7 +152,13 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 }
 TreeAnalyse2Gamma::~TreeAnalyse2Gamma()
 {
-	
+	for(int i=0; i<3; i++)
+	{
+		if(outTree[i])
+			delete	outTree[i];
+		if(outFile[i])
+			delete	outFile[i];
+	}
 }
 
 inline	void	TreeAnalyse2Gamma::Clear()	
@@ -159,6 +169,45 @@ inline	void	TreeAnalyse2Gamma::Clear()
 		hIM[i].Clear();
 }
 
+void	TreeAnalyse2Gamma::Open()
+{
+	//printf("TreeAnalyseMultiplicity::Open()\n");
+	TreeReadTagged::Open();
+	//printf("TreeAnalyseMultiplicity::Open 2()\n");
+	
+	Char_t	str[128];
+	for(int i=0; i<3; i++)
+	{
+		if(i==0)
+			sprintf(str, "tree_%s_IMPi0.root", GetFileName());
+		else if(i==1)
+			sprintf(str, "tree_%s_IMEta.root", GetFileName());
+		else if(i==2)
+			sprintf(str, "tree_%s_IMEtaP.root", GetFileName());
+			
+		outFile[i]		= new TFile(str, "RECREATE");
+		outTree[i]		= new TTree("tree", "tree");
+		
+		outTree[i]->Branch("nPrompt",&nTagged[0],"nPrompt/I");
+		outTree[i]->Branch("PromptEnergy", TaggedEnergy[0], "PromptEnergy[nPrompt]/D");
+		outTree[i]->Branch("PromptTime", TaggedTime[0], "PromptTime[nPrompt]/D");
+		outTree[i]->Branch("nRand1",&nTagged[1],"nRand1/I");
+		outTree[i]->Branch("Rand1Energy", TaggedEnergy[1], "Rand1Energy[nRand1]/D");
+		outTree[i]->Branch("Rand1Time", TaggedTime[1], "Rand1Time[nRand1]/D");
+		outTree[i]->Branch("nRand2",&nTagged[2],"nRand2/I");
+		outTree[i]->Branch("Rand2Energy", TaggedEnergy[2], "Rand2Energy[nRand2]/D");
+		outTree[i]->Branch("Rand2Time", TaggedTime[2], "Rand2Time[nRand2]/D");
+		
+		outTree[i]->Branch("nCBHits",&nCBHits,"nCBHits/I");
+		outTree[i]->Branch("Px", Px, "Px[nCBHits]/D");
+		outTree[i]->Branch("Py", Py, "Py[nCBHits]/D");
+		outTree[i]->Branch("Pz", Pz, "Pz[nCBHits]/D");
+		outTree[i]->Branch("E", E, "E[nCBHits]/D");	
+		outTree[i]->Branch("CBTime", CBTime, "CBTime[nCBHits]/D");
+	}
+		
+	//printf("TreeAnalyseMultiplicity::Open 2()\n");
+}
 
 /*bool	TreeAnalyse2Gamma::CutMissMass(const Int_t type)
 {
@@ -215,18 +264,21 @@ bool	TreeAnalyse2Gamma::AnalyseEvent(const Int_t i)
 	{
 		hCutIMCount->Fill(2);
 		hIM[0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		outTree[0]->Fill();
 		return true;
 	}
 	else if(massAll >= cutIMEta[0] && massAll <= cutIMEta[1])
 	{
 		hCutIMCount->Fill(3);
 		hIM[1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		outTree[1]->Fill();
 		return true;
 	}
 	else if(massAll >= cutIMEtaP[0] && massAll <= cutIMEtaP[1])
 	{
 		hCutIMCount->Fill(4);
 		hIM[2].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		outTree[2]->Fill();
 		return true;
 	}
 	
@@ -248,6 +300,13 @@ void	TreeAnalyse2Gamma::Analyse(const Int_t Min, const Int_t Max)
 }
 bool	TreeAnalyse2Gamma::Save()
 {
+	for(int i=0; i<3; i++)
+	{
+		outFile[i]->cd();
+		outTree[i]->Write();
+		outFile[i]->Flush();
+	}
+	
 	TString	BaseName[10];
 	BaseName[0]		= "BG_TaggedEnergy";
 	BaseName[1]		= "Result_TaggedEnergy";
