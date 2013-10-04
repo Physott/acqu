@@ -76,10 +76,9 @@ void	TreeReadTagged::FindName(const Char_t* FileName, Char_t* Name)
 
 TreeReadTagged::TreeReadTagged(const Char_t* FileName)	: file(0), tree(0), isOpen(false)
 {
-	//printf("TreeReadTagged constructor\n");
-	
+	//printf("TreeReadTagged constructor %s\n", FileName);
 	FindName(FileName, fileName);
-	//strcpy(fileName, FileName);
+	//printf("TreeReadTagged constructor %s\n", FileName);
 }
 TreeReadTagged::~TreeReadTagged()
 {

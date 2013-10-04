@@ -16,7 +16,8 @@ public:
 	Bool_t	Init(const TreeHistTagged& source, const TString* Name);
 	void	Clear();
 	void	Add(const TreeHistTagged& source, const Double_t f = 1);
-	void	Fill(const Int_t* NTagged, const Double_t** value);
+	void	Fill(const Int_t* NTagged, const Double_t* Prompt, const Double_t* Rand1, const Double_t* Rand2);
+	void	Fill(const Int_t type, const Double_t value);
 	void	Fill(const Int_t nPrompt, const Int_t nRand1, const Int_t nRand2, const Double_t value);
 	void	SubstractBackground(const Char_t* NameBG, const Char_t* NameResult);
 	void	Save(const Int_t index = -1);
@@ -97,6 +98,10 @@ inline	void	TreeHistTagged::Fill(const Int_t* NTagged, const Double_t* Prompt, c
 	for(int i=0; i<NTagged[2]; i++)
 		hist[2]->Fill(Rand2[i]);
 }
+inline	void	TreeHistTagged::Fill(const Int_t type, const Double_t value)
+{
+	hist[type]->Fill(value);
+}
 inline	void	TreeHistTagged::Fill(const Int_t nPrompt, const Int_t nRand1, const Int_t nRand2, const Double_t value)
 {
 	for(int i=0; i<nPrompt; i++)
@@ -114,17 +119,14 @@ void	TreeHistTagged::SubstractBackground(const Char_t* NameBG, const Char_t* Nam
 	hist[3]->Scale(0.5);
 	hist[4]	= (TH1D*)hist[0]->Clone(NameResult);
 	hist[4]->Add(hist[3], -1);
-	
 	BG_Substracted = true;
 }
 
 void	TreeHistTagged::Save(const Int_t index)
 {
-	
 	if(index<0)
 	{
-		if(!BG_Substracted)
-			return;
+		//printf("Save %d %s %s %s\n", index, hist[0]->GetName(), hist[1]->GetName(), hist[2]->GetName());
 		hist[0]->Write();
 		hist[1]->Write();
 		hist[2]->Write();
@@ -139,6 +141,7 @@ void	TreeHistTagged::Save(const Int_t index)
 		if(!BG_Substracted)
 			return;
 	}
+	//printf("Save %d %s \n", index, hist[index]->GetName());
 	hist[index]->Write();
 }
 

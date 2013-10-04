@@ -193,7 +193,6 @@ void	TreeHistGeneralTagged::Save(const Bool_t withBGCorrection)
 	hNTagged[1]->Write();
 	hNTagged[2]->Write();
 	hMultiplicity->Write();
-	printf("bool %d\n", withBGCorrection);
 	Int_t	max = 3;
 	if(withBGCorrection)
 		max	= 5;

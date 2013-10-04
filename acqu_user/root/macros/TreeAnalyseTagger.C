@@ -75,7 +75,7 @@ public:
 		printf("Setting Tagger Rand2 Cut\n");
 		c->SetCutTaggerTimeRand2(  8, 20);
 		printf("Analysing\n");
-		c->Analyse(10000);
+		c->Analyse();
 		printf("Saving\n");
 		c->Save();
 		printf("End\n");
@@ -440,8 +440,6 @@ bool	TreeAnalyseTagger::Save()
 	histAll.Add(hist[1]);
 	histAll.Add(hist[2]);
 	
-	printf("hier\n");
-	
 	BaseName[0]		= "BG_TaggedEnergy";
 	BaseName[1]		= "Result_TaggedEnergy";
 	BaseName[2]		= "BG_CBEnergyAll";
@@ -454,8 +452,6 @@ bool	TreeAnalyseTagger::Save()
 	BaseName[9]		= "Result_PhiAll";
 	histAll.SubstractBackground(BaseName);
 	
-	printf("hier\n");
-	
 	TString	Name[10];
 	for(int i=0; i<10; i++)
 	{
@@ -463,21 +459,18 @@ bool	TreeAnalyseTagger::Save()
 		Name[i].Prepend("2g_");
 	}
 	hist[0].SubstractBackground(Name);
-	printf("hier\n");
 	for(int i=0; i<10; i++)
 	{
 		Name[i]	= BaseName[i];
 		Name[i].Prepend("6g_");
 	}
 	hist[1].SubstractBackground(Name);
-	printf("hier\n");
 	for(int i=0; i<10; i++)
 	{
 		Name[i]	= BaseName[i];
 		Name[i].Prepend("10g_");
 	}
 	hist[2].SubstractBackground(Name);
-	printf("hier\n");
 	
 	TH1D*	hTaggerTimeAll;
 	if(hTaggerTimeAll			= (TH1D*)gROOT->Get("TaggerTime"))
@@ -585,8 +578,6 @@ bool	TreeAnalyseTagger::Save()
 		Name[i].Prepend("10g_Result_");
 	CalcResult(Result[2], hist[2][0], BG[2], Name);*/
 	
-	printf("hier\n");
-	
 	result->cd();
 	hCBTimeCutCount->Write();
 	hCBTime->Write();
@@ -602,11 +593,11 @@ bool	TreeAnalyseTagger::Save()
 	hTaggerTime[1]->Write();
 	hTaggerTimeCutCount[1]->Write();
 	hTaggerTimeCutCheck[1]->Write();
-	hist[1].Save();	
+	hist[1].Save(true);	
 	hTaggerTime[2]->Write();
 	hTaggerTimeCutCount[2]->Write();
 	hTaggerTimeCutCheck[2]->Write();
-	hist[2].Save();	
+	hist[2].Save(true);	
 	result->Flush();
 	result->Close();
 	delete result;
