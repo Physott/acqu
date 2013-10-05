@@ -78,10 +78,10 @@ inline	void	TreeHistTagged::Clear()
 	hist[1]->Reset("M");
 	hist[2]->Reset("M");
 	BG_Substracted	= false;
-	if(hist[3])
+	/*if(hist[3])
 		hist[3]->Delete();
 	if(hist[4])
-		hist[4]->Delete();
+		hist[4]->Delete();*/
 }
 
 void	TreeHistTagged::Add(const TreeHistTagged& source, const Double_t f)

@@ -63,7 +63,7 @@ public:
 	static	TreeAnalyseTagger*	test()
 	{
 		printf("Creating\n");
-		TreeAnalyseTagger* c = new TreeAnalyseTagger("TTreeOutput_41941");
+		TreeAnalyseTagger* c = new TreeAnalyseTagger("TTreeOutput_41942");
 		printf("Opening\n");
 		c->Open();
 		printf("Setting CBTime Cut\n");

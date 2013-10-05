@@ -4,7 +4,7 @@
 
 #define MASS_PROTON	938.27203
 
-class	TreeAnalyseMissMass	: public TreeReadTagged
+class	TreeAnalyse2GammaMissMass	: public TreeReadTagged
 {
 private:
 	Double_t	cut[2];
@@ -26,8 +26,8 @@ protected:
 	bool	AnalyseEvent(const Int_t i);
 
 public:
-	TreeAnalyseMissMass(const Char_t* FileName);
-	~TreeAnalyseMissMass();
+	TreeAnalyse2GammaMissMass(const Char_t* FileName);
+	~TreeAnalyse2GammaMissMass();
 	
 			void	Clear();
 			void	AnalyseEvent(const Int_t Min, const Int_t Max);
@@ -41,9 +41,9 @@ public:
 			void		SetCut(const Double_t Min, const Double_t Max)	{cut[0] = Min; cut[1] = Max;}
 	
 
-	static	TreeAnalyseMissMass*	test()
+	static	TreeAnalyse2GammaMissMass*	test()
 	{
-		TreeAnalyseMissMass* c = new TreeAnalyseMissMass("tree_TTreeOutput_41941_2g.root");
+		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41941_2g.root");
 		c->Open();
 		c->Analyse();
 		c->Save();
@@ -58,7 +58,7 @@ public:
 
 
 
-TreeAnalyseMissMass::TreeAnalyseMissMass(const Char_t* FileName)	: TreeReadTagged(FileName)
+TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: TreeReadTagged(FileName)
 {	
 	cut[0]	= 750;
 	cut[1]	= 1100;
@@ -111,12 +111,12 @@ TreeAnalyseMissMass::TreeAnalyseMissMass(const Char_t* FileName)	: TreeReadTagge
 	
 	Clear();
 }
-TreeAnalyseMissMass::~TreeAnalyseMissMass()
+TreeAnalyse2GammaMissMass::~TreeAnalyse2GammaMissMass()
 {
 	
 }
 
-inline	void	TreeAnalyseMissMass::Clear()
+inline	void	TreeAnalyse2GammaMissMass::Clear()
 {
 	hCutCount->Reset("M");
 	hMissMass->Reset("M");
@@ -125,40 +125,13 @@ inline	void	TreeAnalyseMissMass::Clear()
 	hist[1].Clear();
 }
 
-bool	TreeAnalyseMissMass::AnalyseEvent(const Int_t i)
+bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 {
 	TreeReadTagged::AnalyseEvent(i);
 	
-	if(nCBHits == 2)
-	{
-		vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-		vecAll	= vec[0] + vec[1];
-	}	
-	else if(nCBHits == 6)
-	{
-		vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-		vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
-		vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
-		vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
-		vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
-		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
-	}
-	else if(nCBHits == 10)
-	{
-		vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-		vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-		vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
-		vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
-		vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
-		vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
-		vec[6].SetPxPyPzE(Px[6], Py[6], Pz[6], E[6]);
-		vec[7].SetPxPyPzE(Px[7], Py[7], Pz[7], E[7]);
-		vec[8].SetPxPyPzE(Px[8], Py[8], Pz[8], E[8]);
-		vec[9].SetPxPyPzE(Px[9], Py[9], Pz[9], E[9]);
-		vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5] + vec[6] + vec[7] + vec[8] + vec[9];
-	}
+	vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
+	vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
+	vecAll	= vec[0] + vec[1];
 	
 	hCutCount->Fill(1);
 	hist[0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
@@ -199,7 +172,7 @@ bool	TreeAnalyseMissMass::AnalyseEvent(const Int_t i)
 	return false;
 
 }
-void	TreeAnalyseMissMass::Analyse(const Int_t Min, const Int_t Max)
+void	TreeAnalyse2GammaMissMass::Analyse(const Int_t Min, const Int_t Max)
 {
 	Double_t	min = Min;
 	Double_t	max = Max;
@@ -213,7 +186,7 @@ void	TreeAnalyseMissMass::Analyse(const Int_t Min, const Int_t Max)
 	for(int i=min; i<max; i++)
 		AnalyseEvent(i);
 }
-bool	TreeAnalyseMissMass::Save()
+bool	TreeAnalyse2GammaMissMass::Save()
 {
 	TString	BaseName[10];
 	BaseName[0]		= "BG_TaggedEnergy";
