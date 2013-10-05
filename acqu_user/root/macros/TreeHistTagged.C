@@ -19,6 +19,7 @@ public:
 	void	Fill(const Int_t* NTagged, const Double_t* Prompt, const Double_t* Rand1, const Double_t* Rand2);
 	void	Fill(const Int_t type, const Double_t value);
 	void	Fill(const Int_t nPrompt, const Int_t nRand1, const Int_t nRand2, const Double_t value);
+	void	Fill(const Int_t* nTagged, const Double_t value)														{Fill(nTagged[0], nTagged[1], nTagged[2], value);}
 	void	SubstractBackground(const Char_t* NameBG, const Char_t* NameResult);
 	void	Save(const Int_t index = -1);
 };

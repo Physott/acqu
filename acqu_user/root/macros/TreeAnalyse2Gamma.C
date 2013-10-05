@@ -102,9 +102,9 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	BaseName[16]	= "Prompt_PhiAll";
 	BaseName[17]	= "Rand1_PhiAll";
 	BaseName[18]	= "Rand2_PhiAll";
-	Int_t		NBin[9]	=	{8,  200, 16, 2000, 2000,  180,  360};
-	Double_t	Min[9]	=	{0, 1400,  0,    0,    0,    0, -180};
-	Double_t	Max[9]	=	{8, 1600, 16, 2000, 2000,  180,  180};
+	Int_t		NBin[7]	=	{8,  200, 16, 2000, 2000,  180,  360};
+	Double_t	Min[7]	=	{0, 1400,  0,    0,    0,    0, -180};
+	Double_t	Max[7]	=	{8, 1600, 16, 2000, 2000,  180,  180};
 	if(!hIMAll.Init(BaseName, BaseName, NBin, Min, Max))
 	{
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hIMAll could not been initiated\n");

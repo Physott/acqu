@@ -4,6 +4,8 @@
 class	TreeHistGeneralTagged
 {
 private:
+	
+protected:
 	TH1I*			hNTagged[3];
 	TreeHistTagged	hTaggedEnergy;
 	TH1I*			hMultiplicity;
@@ -12,8 +14,6 @@ private:
 	TreeHistTagged	hThetaAll;
 	TreeHistTagged	hPhiAll;
 	
-protected:
-
 public:
 	TreeHistGeneralTagged();
 	~TreeHistGeneralTagged();
@@ -189,15 +189,14 @@ void	TreeHistGeneralTagged::Scale(const Double_t s)
 
 void	TreeHistGeneralTagged::Save(const Bool_t withBGCorrection)
 {
-	hNTagged[0]->Write();
-	hNTagged[1]->Write();
-	hNTagged[2]->Write();
 	hMultiplicity->Write();
 	Int_t	max = 3;
 	if(withBGCorrection)
 		max	= 5;
 	for(int i=0; i<max; i++)
 	{
+		if(i<3)
+			hNTagged[i]->Write();
 		hTaggedEnergy.Save(i);
 		hCBEnergyAll.Save(i);
 		hIMAll.Save(i);
