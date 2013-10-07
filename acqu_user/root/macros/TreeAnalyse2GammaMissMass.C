@@ -20,6 +20,7 @@ private:
 	TH1I*					hCutCount;
 	TreeHistTagged			hMissP[5][2];	//[x,y,z,E,Mag]
 	TH1D*					hMissMass;
+	TH1D*					hMissMassSq;
 	TH1D*					hCutCheck;
 	TreeHistGeneralTagged	hist[2];
 
@@ -44,7 +45,7 @@ public:
 
 	static	TreeAnalyse2GammaMissMass*	test()
 	{
-		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41941_2g_IMPi0.root");
+		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41948_2g_IMPi0.root");
 		c->Open();
 		c->Analyse();
 		c->Save();
@@ -123,6 +124,8 @@ TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: T
 	
 	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
 		hMissMass	= new TH1D("MissMass", "MissMass", 4000, -2000, 2000);
+	if(!(hMissMassSq	= (TH1D*)gROOT->Get("MissMassSq")))
+		hMissMassSq		= new TH1D("MissMassSq", "MissMassSq", 4000, -4000000, 4000000);
 	if(!(hCutCheck	= (TH1D*)gROOT->Get("hCutCheck")))
 		hCutCheck	= new TH1D("hCutCheck", "hCutCheck", 450, 700, 1150);
 	
@@ -180,6 +183,7 @@ inline	void	TreeAnalyse2GammaMissMass::Clear()
 		hMissP[i][1].Clear();
 	}
 	hMissMass->Reset("M");
+	hMissMassSq->Reset("M");
 	hCutCheck->Reset("M");
 	hist[0].Clear();
 	hist[1].Clear();
@@ -205,6 +209,7 @@ bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 			miss[l][nBeam[l]]		= beam[l][nBeam[l]] - vecAll;
 			missMass[l][nBeam[l]]	= miss[l][nBeam[l]].M();
 			hMissMass->Fill(missMass[l][nBeam[l]]);
+			hMissMassSq->Fill(miss[l][nBeam[l]].M2());
 			hMissP[0][0].Fill(l, miss[l][nBeam[l]].Px());
 			hMissP[1][0].Fill(l, miss[l][nBeam[l]].Py());
 			hMissP[2][0].Fill(l, miss[l][nBeam[l]].Pz());
@@ -316,6 +321,7 @@ bool	TreeAnalyse2GammaMissMass::Save()
 	hMissP[3][1].Save();	hMissP[3][1].Save(3); hMissP[3][1].Save(4);
 	hMissP[4][1].Save();	hMissP[4][1].Save(3); hMissP[4][1].Save(4);
 	hMissMass->Write();
+	hMissMassSq->Write();
 	hCutCheck->Write();
 	hist[1].Save(true);
 	result->Close();

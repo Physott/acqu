@@ -31,6 +31,7 @@ private:
 	TH1I*				hCutCount;
 	TreeHistTagged		hMissP[5][2];	//[x,y,z,E,Mag]
 	TH1D*				hMissMass;
+	TH1D*				hMissMassSq;
 	TH1D*				hCutCheck;
 	Bool_t				isEta2Pi0;
 	TreeHist6gTagged	hist[2];
@@ -81,10 +82,6 @@ TreeAnalyse6GammaMissMass::TreeAnalyse6GammaMissMass(const Char_t* FileName, con
 	
 	if(!(hCutCount	= (TH1I*)gROOT->Get("CutCount")))
 		hCutCount	= new TH1I("CutCount", "1:All/2,3,4:(Prompt,Rand1,Rand2)/5:Untagged/7,8,9:MultiFilled(Prompt,Rand1,Rand2)", 11, 0, 11);
-	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
-		hMissMass	= new TH1D("MissMass", "MissMass", 4000, -2000, 2000);
-	if(!(hCutCheck	= (TH1D*)gROOT->Get("CutCheck")))
-		hCutCheck	= new TH1D("CutCheck", "CutCheck", 450, 700, 1150);
 	
 	TString	BaseName[40];
 	BaseName[0]		= "Prompt_MissPx";
@@ -139,6 +136,13 @@ TreeAnalyse6GammaMissMass::TreeAnalyse6GammaMissMass(const Char_t* FileName, con
 	BaseName[2]		= "CutMM_Rand2_MissP";
 	if(!hMissP[4][1].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
+		
+	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
+		hMissMass	= new TH1D("MissMass", "MissMass", 4000, -2000, 2000);
+	if(!(hMissMassSq	= (TH1D*)gROOT->Get("MissMassSq")))
+		hMissMassSq	= new TH1D("MissMassSq", "MissMassSq", 4000, -4000000, 4000000);
+	if(!(hCutCheck	= (TH1D*)gROOT->Get("CutCheck")))
+		hCutCheck	= new TH1D("CutCheck", "CutCheck", 450, 700, 1150);
 		
 	BaseName[0]		= "Prompt_NTagged";
 	BaseName[1]		= "Rand1_NTagged";
@@ -240,6 +244,7 @@ inline	void	TreeAnalyse6GammaMissMass::Clear()
 		hMissP[i][1].Clear();
 	}
 	hMissMass->Reset("M");
+	hMissMassSq->Reset("M");
 	hCutCheck->Reset("M");
 	hist[0].Clear();
 	hist[1].Clear();
@@ -301,6 +306,7 @@ bool	TreeAnalyse6GammaMissMass::AnalyseEvent(const Int_t i)
 			hMissP[3][0].Fill(l, miss[l][nBeam[l]].E());
 			hMissP[4][0].Fill(l, miss[l][nBeam[l]].P());
 			hMissMass->Fill(missMass[l][nBeam[l]]);
+			hMissMassSq->Fill(miss[l][nBeam[l]].M2());
 			if(missMass[l][nBeam[l]] >= cut[0] && missMass[l][nBeam[l]] <= cut[1])
 			{
 				nBeam[l]++;
@@ -429,6 +435,7 @@ bool	TreeAnalyse6GammaMissMass::Save()
 	hMissP[3][1].Save();	hMissP[3][1].Save(3); hMissP[3][1].Save(4);
 	hMissP[4][1].Save();	hMissP[4][1].Save(3); hMissP[4][1].Save(4);
 	hMissMass->Write();
+	hMissMassSq->Write();
 	hCutCheck->Write();
 	hist[1].Save(true);
 	result->Close();
