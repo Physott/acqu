@@ -86,12 +86,12 @@ TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: T
 	BaseName[0]		= "Prompt_MissE";
 	BaseName[1]		= "Rand1_MissE";
 	BaseName[2]		= "Rand2_MissE";
-	if(!hMissP[3][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+	if(!hMissP[3][0].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[3][0] could not been initiated\n");
 	BaseName[0]		= "Prompt_MissP";
 	BaseName[1]		= "Rand1_MissP";
 	BaseName[2]		= "Rand2_MissP";
-	if(!hMissP[4][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+	if(!hMissP[4][0].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
 	
 	
@@ -113,12 +113,12 @@ TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: T
 	BaseName[0]		= "CutMM_Prompt_MissE";
 	BaseName[1]		= "CutMM_Rand1_MissE";
 	BaseName[2]		= "CutMM_Rand2_MissE";
-	if(!hMissP[3][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+	if(!hMissP[3][1].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[3][0] could not been initiated\n");
 	BaseName[0]		= "CutMM_Prompt_MissP";
 	BaseName[1]		= "CutMM_Rand1_MissP";
 	BaseName[2]		= "CutMM_Rand2_MissP";
-	if(!hMissP[4][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+	if(!hMissP[4][1].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
 	
 	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
