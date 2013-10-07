@@ -18,6 +18,7 @@ private:
 	Double_t		missMass[3][8];
 	
 	TH1I*					hCutCount;
+	TreeHistTagged			hMissP[5][2];	//[x,y,z,E,Mag]
 	TH1D*					hMissMass;
 	TH1D*					hCutCheck;
 	TreeHistGeneralTagged	hist[2];
@@ -43,7 +44,7 @@ public:
 
 	static	TreeAnalyse2GammaMissMass*	test()
 	{
-		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41941_2g.root");
+		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41941_2g_IMPi0.root");
 		c->Open();
 		c->Analyse();
 		c->Save();
@@ -65,12 +66,66 @@ TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: T
 	
 	if(!(hCutCount	= (TH1I*)gROOT->Get("CutCount")))
 		hCutCount	= new TH1I("CutCount", "1:All/2,3,4:(Prompt,Rand1,Rand2)/5:Untagged/7,8,9:MultiFilled(Prompt,Rand1,Rand2)", 11, 0, 11);
+		
+	TString	BaseName[19];
+	BaseName[0]		= "Prompt_MissPx";
+	BaseName[1]		= "Rand1_MissPx";
+	BaseName[2]		= "Rand2_MissPx";
+	if(!hMissP[0][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[0][0] could not been initiated\n");
+	BaseName[0]		= "Prompt_MissPy";
+	BaseName[1]		= "Rand1_MissPy";
+	BaseName[2]		= "Rand2_MissPy";
+	if(!hMissP[1][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[1][0] could not been initiated\n");
+	BaseName[0]		= "Prompt_MissPz";
+	BaseName[1]		= "Rand1_MissPz";
+	BaseName[2]		= "Rand2_MissPz";
+	if(!hMissP[2][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[2][0] could not been initiated\n");
+	BaseName[0]		= "Prompt_MissE";
+	BaseName[1]		= "Rand1_MissE";
+	BaseName[2]		= "Rand2_MissE";
+	if(!hMissP[3][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[3][0] could not been initiated\n");
+	BaseName[0]		= "Prompt_MissP";
+	BaseName[1]		= "Rand1_MissP";
+	BaseName[2]		= "Rand2_MissP";
+	if(!hMissP[4][0].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
+	
+	
+	BaseName[0]		= "CutMM_Prompt_MissPx";
+	BaseName[1]		= "CutMM_Rand1_MissPx";
+	BaseName[2]		= "CutMM_Rand2_MissPx";
+	if(!hMissP[0][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[0][0] could not been initiated\n");
+	BaseName[0]		= "CutMM_Prompt_MissPy";
+	BaseName[1]		= "CutMM_Rand1_MissPy";
+	BaseName[2]		= "CutMM_Rand2_MissPy";
+	if(!hMissP[1][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[1][0] could not been initiated\n");
+	BaseName[0]		= "CutMM_Prompt_MissPz";
+	BaseName[1]		= "CutMM_Rand1_MissPz";
+	BaseName[2]		= "CutMM_Rand2_MissPz";
+	if(!hMissP[2][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[2][0] could not been initiated\n");
+	BaseName[0]		= "CutMM_Prompt_MissE";
+	BaseName[1]		= "CutMM_Rand1_MissE";
+	BaseName[2]		= "CutMM_Rand2_MissE";
+	if(!hMissP[3][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[3][0] could not been initiated\n");
+	BaseName[0]		= "CutMM_Prompt_MissP";
+	BaseName[1]		= "CutMM_Rand1_MissP";
+	BaseName[2]		= "CutMM_Rand2_MissP";
+	if(!hMissP[4][1].Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
+	
 	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
 		hMissMass	= new TH1D("MissMass", "MissMass", 4000, -2000, 2000);
-	if(!(hCutCheck	= (TH1D*)gROOT->Get("CutCheck")))
-		hCutCheck	= new TH1D("CutCheck", "CutCheck", 450, 700, 1150);
+	if(!(hCutCheck	= (TH1D*)gROOT->Get("hCutCheck")))
+		hCutCheck	= new TH1D("hCutCheck", "hCutCheck", 450, 700, 1150);
 	
-	TString	BaseName[19];
 	BaseName[0]		= "Prompt_NTagged";
 	BaseName[1]		= "Rand1_NTagged";
 	BaseName[2]		= "Rand2_NTagged";
@@ -119,6 +174,11 @@ TreeAnalyse2GammaMissMass::~TreeAnalyse2GammaMissMass()
 inline	void	TreeAnalyse2GammaMissMass::Clear()
 {
 	hCutCount->Reset("M");
+	for(int i=0; i<5; i++)
+	{
+		hMissP[i][0].Clear();
+		hMissP[i][1].Clear();
+	}
 	hMissMass->Reset("M");
 	hCutCheck->Reset("M");
 	hist[0].Clear();
@@ -145,11 +205,21 @@ bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 			miss[l][nBeam[l]]		= beam[l][nBeam[l]] - vecAll;
 			missMass[l][nBeam[l]]	= miss[l][nBeam[l]].M();
 			hMissMass->Fill(missMass[l][nBeam[l]]);
+			hMissP[0][0].Fill(l, miss[l][nBeam[l]].Px());
+			hMissP[1][0].Fill(l, miss[l][nBeam[l]].Py());
+			hMissP[2][0].Fill(l, miss[l][nBeam[l]].Pz());
+			hMissP[3][0].Fill(l, miss[l][nBeam[l]].E());
+			hMissP[4][0].Fill(l, miss[l][nBeam[l]].P());
 			if(missMass[l][nBeam[l]] >= cut[0] && missMass[l][nBeam[l]] <= cut[1])
 			{
 				nBeam[l]++;
 				hCutCount->Fill(l+6);
 				hCutCheck->Fill(missMass[l][nBeam[l]]);
+				hMissP[0][1].Fill(l, miss[l][nBeam[l]].Px());
+				hMissP[1][1].Fill(l, miss[l][nBeam[l]].Py());
+				hMissP[2][1].Fill(l, miss[l][nBeam[l]].Pz());
+				hMissP[3][1].Fill(l, miss[l][nBeam[l]].E());
+				hMissP[4][1].Fill(l, miss[l][nBeam[l]].P());
 			}
 		}
 	}
@@ -189,6 +259,23 @@ void	TreeAnalyse2GammaMissMass::Analyse(const Int_t Min, const Int_t Max)
 bool	TreeAnalyse2GammaMissMass::Save()
 {
 	TString	BaseName[10];
+	TString	Name[10];
+	
+	hMissP[0][0].SubstractBackground("BG_MissPx", "Result_MissPx");
+	hMissP[0][1].SubstractBackground("CutMM_BG_MissPx", "CutMM_Result_MissPx");
+	
+	hMissP[1][0].SubstractBackground("BG_MissPy", "Result_MissPy");
+	hMissP[1][1].SubstractBackground("CutMM_BG_MissPy", "CutMM_Result_MissPy");
+	
+	hMissP[2][0].SubstractBackground("BG_MissPz", "Result_MissPz");
+	hMissP[2][1].SubstractBackground("CutMM_BG_MissPz", "CutMM_Result_MissPz");
+	
+	hMissP[3][0].SubstractBackground("BG_MissE", "Result_MissE");
+	hMissP[3][1].SubstractBackground("CutMM_BG_MissE", "CutMM_Result_MissE");
+	
+	hMissP[4][0].SubstractBackground("BG_MissP", "Result_MissP");
+	hMissP[4][1].SubstractBackground("CutMM_BG_MissP", "CutMM_Result_MissP");
+	
 	BaseName[0]		= "BG_TaggedEnergy";
 	BaseName[1]		= "Result_TaggedEnergy";
 	BaseName[2]		= "BG_CBEnergyAll";
@@ -201,7 +288,6 @@ bool	TreeAnalyse2GammaMissMass::Save()
 	BaseName[9]		= "Result_PhiAll";
 	hist[0].SubstractBackground(BaseName);
 	
-	TString	Name[10];
 	for(int i=0; i<10; i++)
 	{
 		Name[i]	= BaseName[i];
@@ -219,6 +305,16 @@ bool	TreeAnalyse2GammaMissMass::Save()
 	result->cd();
 	hist[0].Save(true);
 	hCutCount->Write();
+	hMissP[0][0].Save();	hMissP[0][0].Save(3); hMissP[0][0].Save(4);
+	hMissP[1][0].Save();	hMissP[1][0].Save(3); hMissP[1][0].Save(4);
+	hMissP[2][0].Save();	hMissP[2][0].Save(3); hMissP[2][0].Save(4);
+	hMissP[3][0].Save();	hMissP[3][0].Save(3); hMissP[3][0].Save(4);
+	hMissP[4][0].Save();	hMissP[4][0].Save(3); hMissP[4][0].Save(4);
+	hMissP[0][1].Save();	hMissP[0][1].Save(3); hMissP[0][1].Save(4);
+	hMissP[1][1].Save();	hMissP[1][1].Save(3); hMissP[1][1].Save(4);
+	hMissP[2][1].Save();	hMissP[2][1].Save(3); hMissP[2][1].Save(4);
+	hMissP[3][1].Save();	hMissP[3][1].Save(3); hMissP[3][1].Save(4);
+	hMissP[4][1].Save();	hMissP[4][1].Save(3); hMissP[4][1].Save(4);
 	hMissMass->Write();
 	hCutCheck->Write();
 	hist[1].Save(true);
