@@ -1,5 +1,5 @@
 #include "TreeReadTagged.C"
-#include "TreeHistGeneralTagged.C"
+#include "TaggedHistSet.C"
 
 #define MASS_PROTON	938.27203
 
@@ -17,9 +17,9 @@ private:
 	TLorentzVector	vecAll;
 	Double_t		massAll;
 	
-	TH1I*					hCutIMCount;
-	TreeHistGeneralTagged	hIMAll;
-	TreeHistGeneralTagged	hIM[3];		//[Pi0, Eta, EtaP]
+	TH1I*			hCutIMCount;
+	TaggedHistSet*	hAll;
+	TaggedHistSet*	h[3];		//[Pi0, Eta, EtaP]
 	
 	
 protected:
@@ -79,74 +79,19 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	cutIMEtaP[0]	= 850;
 	cutIMEtaP[1]	= 1050;
 	
-	if(!(hCutIMCount	= (TH1I*)gROOT->Get("IMCutCount")))
-		hCutIMCount		= new TH1I("IMCutCount", "1:All/2,3,4:(Pi0,Eta,EtaP)", 6, 0, 6);
+	if((hCutIMCount	= (TH1I*)gROOT->Get("IMCutCount")))
+		hCutIMCount->Delete();
+	hCutIMCount		= new TH1I("IMCutCount", "1:All/2,3,4:(Pi0,Eta,EtaP)", 6, 0, 6);
+	if(!hCutIMCount)
+	{
+		cout << "Could not create histogram " << "IMCutCount" << ". Exiting!" << endl;
+		exit(1);
+	}
 			
-	TString	BaseName[19];
-	BaseName[0]		= "Prompt_NTagged";
-	BaseName[1]		= "Rand1_NTagged";
-	BaseName[2]		= "Rand2_NTagged";
-	BaseName[3]		= "Prompt_TaggedEnergy";
-	BaseName[4]		= "Rand1_TaggedEnergy";
-	BaseName[5]		= "Rand2_TaggedEnergy";
-	BaseName[6]		= "Multiplicity";
-	BaseName[7]		= "Prompt_CBEnergyAll";
-	BaseName[8]		= "Rand1_CBEnergyAll";
-	BaseName[9]		= "Rand2_CBEnergyAll";
-	BaseName[10]	= "Prompt_IMAll";
-	BaseName[11]	= "Rand1_IMAll";
-	BaseName[12]	= "Rand2_IMAll";
-	BaseName[13]	= "Prompt_ThetaAll";
-	BaseName[14]	= "Rand1_ThetaAll";
-	BaseName[15]	= "Rand2_ThetaAll";
-	BaseName[16]	= "Prompt_PhiAll";
-	BaseName[17]	= "Rand1_PhiAll";
-	BaseName[18]	= "Rand2_PhiAll";
-	Int_t		NBin[7]	=	{8,  200, 16, 2000, 2000,  180,  360};
-	Double_t	Min[7]	=	{0, 1400,  0,    0,    0,    0, -180};
-	Double_t	Max[7]	=	{8, 1600, 16, 2000, 2000,  180,  180};
-	if(!hIMAll.Init(BaseName, BaseName, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyse2Gamma Constructor: hIMAll could not been initiated\n");
-	}
-	
-	TString	Name[19];
-	NBin[4]	= 300;
-	Max[4]	= 300;
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("Pi0_");
-	}
-	if(!hIM[0].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hIM[0][0] could not been initiated\n");
-	}
-	
-	Min[4]	=	400;
-	Max[4]	=	700;
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("Eta_");
-	}
-	if(!hIM[1].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hIM[1][0] could not been initiated\n");
-	}
-	
-	NBin[4]	=	450;
-	Min[4]	=	700;
-	Max[4]	=	1150;
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_");
-	}
-	if(!hIM[2].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hIM[2][0] could not been initiated\n");
-	}
+	hAll = new TaggedHistSet("");
+	h[0] = new TaggedHistSet("Pi0");
+	h[1] = new TaggedHistSet("Eta");
+	h[2] = new TaggedHistSet("EtaP");
 		
 	Clear();
 }
@@ -164,9 +109,9 @@ TreeAnalyse2Gamma::~TreeAnalyse2Gamma()
 inline	void	TreeAnalyse2Gamma::Clear()	
 {
 	hCutIMCount->Reset("M");
-	hIMAll.Clear();
+	hAll->Clear();
 	for(int i=0; i<3; i++)
-		hIM[i].Clear();
+		h[i]->Clear();
 }
 
 void	TreeAnalyse2Gamma::Open()
@@ -209,46 +154,6 @@ void	TreeAnalyse2Gamma::Open()
 	//printf("TreeAnalyseMultiplicity::Open 2()\n");
 }
 
-/*bool	TreeAnalyse2Gamma::CutMissMass(const Int_t type)
-{
-	hCutMMCount[type]->Fill(1);
-	for(int l=0; l<3; l++)
-	{
-		nBeam[l]	= 0;
-		for(int i=0; i<nTagged[l]; i++)
-		{
-			beamEnergy[l][nBeam[l]]	= TaggedEnergy[l][i];
-			beam[l][nBeam[l]].SetPxPyPzE(TaggedEnergy[l][i], 0.0, 0.0, TaggedEnergy[l][i] + MASS_PROTON);
-			miss[l][nBeam[l]]		= beam[l][nBeam[l]] - vecAll;
-			missMass[l][nBeam[l]]	= miss[l][nBeam[l]].M();
-			hMM[type][0].Fill(l, missMass[l][nBeam[l]]);
-			if(missMass[l][nBeam[l]] >= cutMM[0] && missMass[l][nBeam[l]] <= cutMM[1])
-			{
-				nBeam[l]++;
-				hCutMMCount[type]->Fill(l+6);
-			}
-		}
-	}
-	
-	bool	ret = false;
-	for(int l=0; l<3; l++)
-	{
-		if(nBeam[l] > 0)
-		{
-			hCutMMCount[type]->Fill(l+2);
-			ret	= true;
-		}
-	}
-	if(ret)
-	{
-		hIM[type][1].Fill(nBeam, beamEnergy[0], beamEnergy[1], beamEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
-		hMM[type][1].Fill(nBeam, missMass[0], missMass[1], missMass[2]);
-		return true;
-	}
-	
-	return false;
-}*/
-
 bool	TreeAnalyse2Gamma::AnalyseEvent(const Int_t i)
 {
 	TreeReadTagged::AnalyseEvent(i);
@@ -259,25 +164,25 @@ bool	TreeAnalyse2Gamma::AnalyseEvent(const Int_t i)
 	massAll	= vecAll.M();
 	
 	hCutIMCount->Fill(1);
-	hIMAll.Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+	hAll->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 	if(massAll >= cutIMPi0[0] && massAll <= cutIMPi0[1])
 	{
 		hCutIMCount->Fill(2);
-		hIM[0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		h[0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 		outTree[0]->Fill();
 		return true;
 	}
 	else if(massAll >= cutIMEta[0] && massAll <= cutIMEta[1])
 	{
 		hCutIMCount->Fill(3);
-		hIM[1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		h[1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 		outTree[1]->Fill();
 		return true;
 	}
 	else if(massAll >= cutIMEtaP[0] && massAll <= cutIMEtaP[1])
 	{
 		hCutIMCount->Fill(4);
-		hIM[2].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		h[2]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 		outTree[2]->Fill();
 		return true;
 	}
@@ -307,50 +212,36 @@ bool	TreeAnalyse2Gamma::Save()
 		outFile[i]->Flush();
 	}
 	
-	TString	BaseName[10];
-	BaseName[0]		= "BG_TaggedEnergy";
-	BaseName[1]		= "Result_TaggedEnergy";
-	BaseName[2]		= "BG_CBEnergyAll";
-	BaseName[3]		= "Result_CBEnergyAll";
-	BaseName[4]		= "BG_IMAll";
-	BaseName[5]		= "Result_IMAll";
-	BaseName[6]		= "BG_ThetaAll";
-	BaseName[7]		= "Result_ThetaAll";
-	BaseName[8]		= "BG_PhiAll";
-	BaseName[9]		= "Result_PhiAll";
-	hIMAll.SubstractBackground(BaseName);
-	
-	TString	Name[10];
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("Pi0_");
-	}
-	hIM[0].SubstractBackground(Name);
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("Eta_");
-	}
-	hIM[1].SubstractBackground(Name);
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_");
-	}
-	hIM[2].SubstractBackground(Name);
+	hAll->SubstractBackground();
+	h[0]->SubstractBackground();
+	h[1]->SubstractBackground();
+	h[2]->SubstractBackground();
 
 	Char_t	str[128];
 	sprintf(str, "hist_%s_IM.root", GetFileName());
 	TFile*	result	= new TFile(str, "RECREATE");
 	if(!result)
 		return false;
+		
 	result->cd();
 	hCutIMCount->Write();
-	hIMAll.Save(true);
-	hIM[0].Save(true);
-	hIM[1].Save(true);
-	hIM[2].Save(true);
+	hAll->Save();
+	
+	result->cd();
+	result->mkdir("Pi0");
+	result->cd("Pi0");
+	h[0]->Save();
+	
+	result->cd();
+	result->mkdir("Eta");
+	result->cd("Eta");
+	h[1]->Save();
+	
+	result->cd();
+	result->mkdir("EtaP");
+	result->cd("EtaP");
+	h[2]->Save();
+	
 	result->Close();
 	delete result;
 }

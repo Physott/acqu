@@ -96,6 +96,7 @@ bool	TreeRead::Open()
 	
 	Char_t	str[128];
 	sprintf(str, "%s.root", fileName);
+	
 	file	= TFile::Open(str);
 	if(!file )
 	{
@@ -108,6 +109,7 @@ bool	TreeRead::Open()
 		}
 	}
 	bool	oldVersion = false;
+	
 	tree	= (TTree*)file->Get("tree");
 	if(!tree)
 	{

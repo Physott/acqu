@@ -1,5 +1,5 @@
 #include "TreeReadTagged.C"
-#include "TreeHist6gTagged.C"
+#include "TaggedHistSet6g.C"
 
 #define MASS_PI0	135
 #define MASS_ETA	547
@@ -33,7 +33,7 @@ private:
 	Double_t		out[4][6];
 	
 	TH1I*				hCount;
-	TreeHist6gTagged	hist[2][2];	//[Etap,3Pi0][All,IM]
+	TaggedHistSet6g*	hist[2][2];	//[Etap,3Pi0][All,IM]
 	
 	void	SetMass(const int index, const Double_t mass);
 	void	Reconstruct();
@@ -94,101 +94,20 @@ TreeAnalyse6Gamma::TreeAnalyse6Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	cutIMEtaP[0]	= 850;
 	cutIMEtaP[1]	= 1050;
 	
-	if(!(hCount	= (TH1I*)gROOT->Get("ReconstructCount")))
-		hCount		= new TH1I("ReconstructCount", "1:All/2,3:(EtaP,3Pi0)/5,6:(EtaP,3Pi0)Passed IM", 8, 0, 8);
+	if((hCount	= (TH1I*)gROOT->Get("ReconstructCount")))
+		hCount->Delete();
+	hCount		= new TH1I("ReconstructCount", "1:All/2,3:(EtaP,3Pi0)/5,6:(EtaP,3Pi0)Passed IM", 8, 0, 8);
+	if(!hCount)
+	{
+		cout << "Could not create histogram " << "ReconstructCount" << ". Exiting!" << endl;
+		exit(1);
+	}
+		
 	
-	TString	BaseName[40];
-	BaseName[0]		= "Prompt_NTagged";
-	BaseName[1]		= "Rand1_NTagged";
-	BaseName[2]		= "Rand2_NTagged";
-	BaseName[3]		= "Prompt_TaggedEnergy";
-	BaseName[4]		= "Rand1_TaggedEnergy";
-	BaseName[5]		= "Rand2_TaggedEnergy";
-	BaseName[6]		= "Multiplicity";
-	BaseName[7]		= "Prompt_CBEnergyAll";
-	BaseName[8]		= "Rand1_CBEnergyAll";
-	BaseName[9]		= "Rand2_CBEnergyAll";
-	BaseName[10]	= "Prompt_IMAll";
-	BaseName[11]	= "Rand1_IMAll";
-	BaseName[12]	= "Rand2_IMAll";
-	BaseName[13]	= "Prompt_ThetaAll";
-	BaseName[14]	= "Rand1_ThetaAll";
-	BaseName[15]	= "Rand2_ThetaAll";
-	BaseName[16]	= "Prompt_PhiAll";
-	BaseName[17]	= "Rand1_PhiAll";
-	BaseName[18]	= "Rand2_PhiAll";
-	BaseName[19]	= "Prompt_Pi0a";
-	BaseName[20]	= "Rand1_Pi0a";
-	BaseName[21]	= "Rand2_Pi0a";
-	BaseName[22]	= "Prompt_Pi0b";
-	BaseName[23]	= "Rand1_Pi0b";
-	BaseName[24]	= "Rand2_Pi0b";
-	BaseName[25]	= "Prompt_Eta";
-	BaseName[26]	= "Rand1_Eta";
-	BaseName[27]	= "Rand2_Eta";
-	BaseName[28]	= "Prompt_Pi0aDiced";
-	BaseName[29]	= "Rand1_Pi0aDiced";
-	BaseName[30]	= "Rand2_Pi0aDiced";
-	BaseName[31]	= "Prompt_Pi0bDiced";
-	BaseName[32]	= "Rand1_Pi0bDiced";
-	BaseName[33]	= "Rand2_Pi0bDiced";
-	BaseName[34]	= "Prompt_EtaDiced";
-	BaseName[35]	= "Rand1_EtaDiced";
-	BaseName[36]	= "Rand2_EtaDiced";
-	BaseName[37]	= "Prompt_IMAllSet";
-	BaseName[38]	= "Rand1_IMAllSet";
-	BaseName[39]	= "Rand2_IMAllSet";
-	Int_t		NBin[14]	=	{8,  200, 16, 2000, 2000,  180,  360, 500, 500, 1000, 500, 500, 1000, 2000};
-	Double_t	Min[14]		=	{0, 1400,  0,    0,    0,    0, -180,   0,   0,    0,   0,   0,    0,    0};
-	Double_t	Max[14]		=	{8, 1600, 16, 2000, 2000,  180,  180, 500, 500, 1000, 500, 500, 1000, 2000};
-	TString	Name[40];
-	for(int i=0; i<40; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_");
-	}
-	if(!hist[0][0].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyse2Gamma Constructor: hist[0][0] could not been initiated\n");
-	}
-	hist[0][0].SetEta2Pi0();
-	for(int i=0; i<40; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_IM_");
-	}
-	if(!hist[0][1].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[0][1] could not been initiated\n");
-	}
-	hist[0][1].SetEta2Pi0();
-	
-	BaseName[25]	= "Prompt_Pi0c";
-	BaseName[26]	= "Rand1_Pi0c";
-	BaseName[27]	= "Rand2_Pi0c";
-	BaseName[34]	= "Prompt_Pi0cDiced";
-	BaseName[35]	= "Rand1_Pi0cDiced";
-	BaseName[36]	= "Rand2_Pi0cDiced";
-	NBin[9]			= 500;
-	Max[9]			= 500;
-	for(int i=0; i<40; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3Pi0_");
-	}
-	if(!hist[1][0].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyse2Gamma Constructor: hist[1][0] could not been initiated\n");
-	}
-	for(int i=0; i<40; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3Pi0_IM_");
-	}
-	if(!hist[1][1].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[1][1] could not been initiated\n");
-	}
+	hist[0][0]	= new TaggedHistSet6g("Etap", true);
+	hist[0][1]	= new TaggedHistSet6g("Etap_IM", true);
+	hist[1][0]	= new TaggedHistSet6g("3Pi0");
+	hist[1][1]	= new TaggedHistSet6g("3Pi0_IM");
 }
 TreeAnalyse6Gamma::~TreeAnalyse6Gamma()
 {
@@ -217,7 +136,7 @@ void	TreeAnalyse6Gamma::Clear()
 	{
 		for(int l=0; l<2; l++)
 		{
-			hist[i][l].Clear();
+			hist[i][l]->Clear();
 		}
 	}
 }
@@ -289,7 +208,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		if(mass[bestPerm][1]<cutIMPi0[0] || mass[bestPerm][1]>cutIMPi0[1])
 			return false;
@@ -299,7 +218,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		for(int i=0; i<6; i++)
 		{
@@ -322,7 +241,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -332,7 +251,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		out[0][0]	= vec[perm[bestPerm][2]].Px();
 		out[1][0]	= vec[perm[bestPerm][2]].Py();
@@ -373,7 +292,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -383,7 +302,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		out[0][0]	= vec[perm[bestPerm][4]].Px();
 		out[1][0]	= vec[perm[bestPerm][4]].Py();
@@ -424,7 +343,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(3);
-		hist[1][0].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[1][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -434,7 +353,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(6);
-		hist[1][1].Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[1][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
 		
 		for(int i=0; i<6; i++)
 		{
@@ -519,62 +438,10 @@ bool	TreeAnalyse6Gamma::Save()
 	outTree[1]->Write();
 	outFile[1]->Flush();
 	
-	TString	BaseName[24];
-	BaseName[0]		= "BG_TaggedEnergy";
-	BaseName[1]		= "Result_TaggedEnergy";
-	BaseName[2]		= "BG_CBEnergyAll";
-	BaseName[3]		= "Result_CBEnergyAll";
-	BaseName[4]		= "BG_IMAll";
-	BaseName[5]		= "Result_IMAll";
-	BaseName[6]		= "BG_ThetaAll";
-	BaseName[7]		= "Result_ThetaAll";
-	BaseName[8]		= "BG_PhiAll";
-	BaseName[9]		= "Result_PhiAll";
-	BaseName[10]	= "BG_IMPi0a";
-	BaseName[11]	= "Result_IMPi0a";
-	BaseName[12]	= "BG_IMPi0b";
-	BaseName[13]	= "Result_IMPi0b";
-	BaseName[14]	= "BG_IMEta";
-	BaseName[15]	= "Result_IMEta";
-	BaseName[16]	= "BG_IMPi0aDiced";
-	BaseName[17]	= "Result_IMPi0aDiced";
-	BaseName[18]	= "BG_IMPi0bDiced";
-	BaseName[19]	= "Result_IMPi0bDiced";
-	BaseName[20]	= "BG_IMEtaDiced";
-	BaseName[21]	= "Result_IMEtaDiced";
-	BaseName[22]	= "BG_IMAllSet";
-	BaseName[23]	= "Result_IMAllSet";
-	TString	Name[24];
-	for(int i=0; i<24; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_");
-	}
-	hist[0][0].SubstractBackground(Name);
-	for(int i=0; i<24; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("EtaP_IM_");
-	}
-	hist[0][1].SubstractBackground(Name);
-	
-	BaseName[14]	= "BG_IMPi0c";
-	BaseName[15]	= "Result_IMPi0c";
-	BaseName[20]	= "BG_IMPi0cDiced";
-	BaseName[21]	= "Result_IMPi0cDiced";
-	for(int i=0; i<24; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3Pi0_");
-	}
-	hist[1][0].SubstractBackground(Name);
-	for(int i=0; i<24; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3Pi0_IM_");
-	}
-	hist[1][1].SubstractBackground(Name);
-	
+	hist[0][0]->SubstractBackground();
+	hist[0][1]->SubstractBackground();
+	hist[1][0]->SubstractBackground();
+	hist[1][1]->SubstractBackground();
 	
 	
 	Char_t	str[128];
@@ -586,10 +453,25 @@ bool	TreeAnalyse6Gamma::Save()
 		
 	result->cd();
 	hCount->Write();
-	hist[0][0].Save(true);
-	hist[0][1].Save(true);
-	hist[1][0].Save(true);
-	hist[1][1].Save(true);
+	
+	result->cd();
+	result->mkdir("EtaP");
+	result->cd("EtaP");
+	hist[0][0]->Save();
+	
+	gDirectory->mkdir("IM");
+	result->cd("EtaP/IM");
+	hist[0][1]->Save();
+	
+	result->cd();
+	result->mkdir("3Pi0");
+	result->cd("3Pi0");
+	hist[1][0]->Save();
+	
+	gDirectory->mkdir("IM");
+	result->cd("3Pi0/IM");
+	hist[1][1]->Save();
+	
 	result->Close();
 	delete result;
 	

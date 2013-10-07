@@ -94,11 +94,11 @@ bool	TreeReadTagged::Open()
 		return true;
 	
 	Char_t	str[128];
-	sprintf(str, "%s.root", fileName);
+	sprintf(str, "tree_%s.root", fileName);
 	file	= TFile::Open(str);
 	if(!file )
 	{
-		sprintf(str, "tree_%s.root", fileName);
+		sprintf(str, "%s.root", fileName);
 		file	= TFile::Open(str);
 		if(!file )
 		{

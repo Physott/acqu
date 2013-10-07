@@ -1,5 +1,5 @@
 #include "TreeRead.C"
-#include "TreeHistGeneralTagged.C"
+#include "TaggedHistSet.C"
 
 class	TreeAnalyseTagger	: public TreeRead
 {
@@ -17,13 +17,13 @@ private:
 	Double_t		beamEnergy[3][16];
 	Double_t		beamTime[3][16];
 	
-	TH1I*					hCBTimeCutCount;
-	TH1D*					hCBTime;
-	TH1D*					hCBTimeCutCheck;
-	TH1I*					hTaggerTimeCutCount[4];		//[2g, 6g, 10g]
-	TH1D*					hTaggerTime[4];				//[2g, 6g, 10g]
-	TH1D*					hTaggerTimeCutCheck[4];		//[Prompt, Rand1, Rand2]
-	TreeHistGeneralTagged	hist[4];					//[2g, 6g, 10g]
+	TH1I*			hCBTimeCutCount;
+	TH1D*			hCBTime;
+	TH1D*			hCBTimeCutCheck;
+	TH1I*			hTaggerTimeCutCount[4];		//[2g, 3g, 6g, 10g]
+	TH1D*			hTaggerTime[4];				//[2g, 3g, 6g, 10g]
+	TH1D*			hTaggerTimeCutCheck[3];		//[Prompt, Rand1, Rand2]
+	TaggedHistSet*	hist[4];					//[2g, 3g, 6g, 10g]
 	
 	bool	CutCBTime();
 
@@ -63,7 +63,7 @@ public:
 	static	TreeAnalyseTagger*	test()
 	{
 		printf("Creating\n");
-		TreeAnalyseTagger* c = new TreeAnalyseTagger("TTreeOutput_41942");
+		TreeAnalyseTagger* c = new TreeAnalyseTagger("TTreeOutput_41941");
 		printf("Opening\n");
 		c->Open();
 		printf("Setting CBTime Cut\n");
@@ -75,7 +75,7 @@ public:
 		printf("Setting Tagger Rand2 Cut\n");
 		c->SetCutTaggerTimeRand2(  8, 20);
 		printf("Analysing\n");
-		c->Analyse();
+		c->Analyse(1000);
 		printf("Saving\n");
 		c->Save();
 		printf("End\n");
@@ -118,79 +118,17 @@ TreeAnalyseTagger::TreeAnalyseTagger(const Char_t* FileName)	: TreeRead(FileName
 		hTaggerTime[2]		= new TH1D("6g_TaggerTime", "6g_TaggerTime", 2000, -100, 100);	
 	if(!(hTaggerTime[3]		= (TH1D*)gROOT->Get("10g_TaggerTime")))
 		hTaggerTime[3]		= new TH1D("10g_TaggerTime", "10g_TaggerTime", 2000, -100, 100);	
-	if(!(hTaggerTimeCutCheck[0]		= (TH1D*)gROOT->Get("2g_TaggerTimeCutCheck")))
-		hTaggerTimeCutCheck[0]		= new TH1D("2g_TaggerTimeCutCheck", "2g_TaggerTimeCutCheck", 2000, -100, 100);	
-	if(!(hTaggerTimeCutCheck[1]		= (TH1D*)gROOT->Get("3g_TaggerTimeCutCheck")))
-		hTaggerTimeCutCheck[1]		= new TH1D("3g_TaggerTimeCutCheck", "3g_TaggerTimeCutCheck", 2000, -100, 100);	
-	if(!(hTaggerTimeCutCheck[2]		= (TH1D*)gROOT->Get("6g_TaggerTimeCutCheck")))
-		hTaggerTimeCutCheck[2]		= new TH1D("6g_TaggerTimeCutCheck", "6g_TaggerTimeCutCheck", 2000, -100, 100);	
-	if(!(hTaggerTimeCutCheck[3]		= (TH1D*)gROOT->Get("10g_TaggerTimeCutCheck")))
-		hTaggerTimeCutCheck[3]		= new TH1D("10g_TaggerTimeCutCheck", "10g_TaggerTimeCutCheck", 2000, -100, 100);	
+	if(!(hTaggerTimeCutCheck[0]		= (TH1D*)gROOT->Get("Prompt_TaggerTimeCutCheck")))
+		hTaggerTimeCutCheck[0]		= new TH1D("Prompt_TaggerTimeCutCheck", "Prompt_TaggerTimeCutCheck", 2000, -100, 100);	
+	if(!(hTaggerTimeCutCheck[1]		= (TH1D*)gROOT->Get("Rand1_TaggerTimeCutCheck")))
+		hTaggerTimeCutCheck[1]		= new TH1D("Rand1_TaggerTimeCutCheck", "Rand1_TaggerTimeCutCheck", 2000, -100, 100);	
+	if(!(hTaggerTimeCutCheck[2]		= (TH1D*)gROOT->Get("Rand2_TaggerTimeCutCheck")))
+		hTaggerTimeCutCheck[2]		= new TH1D("Rand2_TaggerTimeCutCheck", "Rand2_TaggerTimeCutCheck", 2000, -100, 100);	
 	
-	TString	BaseName[19];
-	BaseName[0]		= "Prompt_NTagged";
-	BaseName[1]		= "Rand1_NTagged";
-	BaseName[2]		= "Rand2_NTagged";
-	BaseName[3]		= "Prompt_TaggedEnergy";
-	BaseName[4]		= "Rand1_TaggedEnergy";
-	BaseName[5]		= "Rand2_TaggedEnergy";
-	BaseName[6]		= "Multiplicity";
-	BaseName[7]		= "Prompt_CBEnergyAll";
-	BaseName[8]		= "Rand1_CBEnergyAll";
-	BaseName[9]		= "Rand2_CBEnergyAll";
-	BaseName[10]	= "Prompt_IMAll";
-	BaseName[11]	= "Rand1_IMAll";
-	BaseName[12]	= "Rand2_IMAll";
-	BaseName[13]	= "Prompt_ThetaAll";
-	BaseName[14]	= "Rand1_ThetaAll";
-	BaseName[15]	= "Rand2_ThetaAll";
-	BaseName[16]	= "Prompt_PhiAll";
-	BaseName[17]	= "Rand1_PhiAll";
-	BaseName[18]	= "Rand2_PhiAll";
-	Int_t		NBin[9]	=	{8,  200, 16, 2000, 2000,  180,  360};
-	Double_t	Min[9]	=	{0, 1400,  0,    0,    0,    0, -180};
-	Double_t	Max[9]	=	{8, 1600, 16, 2000, 2000,  180,  180};
-	TString	Name[19];
-	
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("2g_");
-	}
-	if(!hist[0].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[0] could not been initiated\n");
-	}
-	
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3g_");
-	}
-	if(!hist[1].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[1] could not been initiated\n");
-	}
-	
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("6g_");
-	}
-	if(!hist[2].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[2] could not been initiated\n");
-	}
-	
-	for(int i=0; i<19; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("10g_");
-	}
-	if(!hist[3].Init(Name, Name, NBin, Min, Max))
-	{
-		printf("ERROR: TreeAnalyseTagger Constructor: hist[3] could not been initiated\n");
-	}
+	hist[0]	= new TaggedHistSet("2g_");
+	hist[1]	= new TaggedHistSet("3g_");
+	hist[2]	= new TaggedHistSet("6g_");
+	hist[3]	= new TaggedHistSet("10g_");
 	
 	Clear();
 	
@@ -231,13 +169,16 @@ inline	void	TreeAnalyseTagger::Clear()
 	hCBTimeCutCount->Reset("M");
 	hCBTime->Reset("M");
 	hCBTimeCutCheck->Reset("M");
-	for(int i=0; i<4; i++)
+	for(int i=0; i<3; i++)
 	{
 		hTaggerTimeCutCount[i]->Reset("M");
 		hTaggerTime[i]->Reset("M");
 		hTaggerTimeCutCheck[i]->Reset("M");
-		hist[i].Clear(); 
+		hist[i]->Clear(); 
 	}
+	hTaggerTimeCutCount[3]->Reset("M");
+	hTaggerTime[3]->Reset("M");
+	hist[3]->Clear(); 
 }
 	
 void	TreeAnalyseTagger::Open()
@@ -402,7 +343,7 @@ void	TreeAnalyseTagger::AnalyseEvent(const Int_t i)
 	else
 	{
 		outTree[multiplicityEnum]->Fill();
-		hist[multiplicityEnum].Fill(nBeam, beamEnergy[0], beamEnergy[1], beamEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
+		hist[multiplicityEnum]->Fill(nBeam, beamEnergy[0], beamEnergy[1], beamEnergy[2], nCBHits, vecAll.E(), vecAll.M(), vecAll.Theta(), vecAll.Phi());
 	}
 }
 void	TreeAnalyseTagger::Analyse(const Int_t Min, const Int_t Max)
@@ -434,77 +375,16 @@ bool	TreeAnalyseTagger::Save()
 	if(!result)
 		return false;
 	
-	//**********************************************************************************
-	//**********************************************************************************
-	//*********************************    TO DO    ************************************
-	//**********************************************************************************
-	//**********************************************************************************
-	
-	TreeHistGeneralTagged	histAll;
-	TString	BaseName[19];
-	BaseName[0]		= "Prompt_NTagged";
-	BaseName[1]		= "Rand1_NTagged";
-	BaseName[2]		= "Rand2_NTagged";
-	BaseName[3]		= "Prompt_TaggedEnergy";
-	BaseName[4]		= "Rand1_TaggedEnergy";
-	BaseName[5]		= "Rand2_TaggedEnergy";
-	BaseName[6]		= "Multiplicity";
-	BaseName[7]		= "Prompt_CBEnergyAll";
-	BaseName[8]		= "Rand1_CBEnergyAll";
-	BaseName[9]		= "Rand2_CBEnergyAll";
-	BaseName[10]	= "Prompt_IMAll";
-	BaseName[11]	= "Rand1_IMAll";
-	BaseName[12]	= "Rand2_IMAll";
-	BaseName[13]	= "Prompt_ThetaAll";
-	BaseName[14]	= "Rand1_ThetaAll";
-	BaseName[15]	= "Rand2_ThetaAll";
-	BaseName[16]	= "Prompt_PhiAll";
-	BaseName[17]	= "Rand1_PhiAll";
-	BaseName[18]	= "Rand2_PhiAll";
-	Int_t		NBin[9]	=	{8,  200, 16, 2000, 2000,  180,  360};
-	Double_t	Min[9]	=	{0, 1400,  0,    0,    0,    0, -180};
-	Double_t	Max[9]	=	{8, 1600, 16, 2000, 2000,  180,  180};
-	if(!histAll.Init(hist[0], BaseName))
-		return false;
+	TaggedHistSet	histAll("", hist[0]);
 	histAll.Add(hist[1]);
 	histAll.Add(hist[2]);
+	histAll.Add(hist[3]);
 	
-	BaseName[0]		= "BG_TaggedEnergy";
-	BaseName[1]		= "Result_TaggedEnergy";
-	BaseName[2]		= "BG_CBEnergyAll";
-	BaseName[3]		= "Result_CBEnergyAll";
-	BaseName[4]		= "BG_IMAll";
-	BaseName[5]		= "Result_IMAll";
-	BaseName[6]		= "BG_ThetaAll";
-	BaseName[7]		= "Result_ThetaAll";
-	BaseName[8]		= "BG_PhiAll";
-	BaseName[9]		= "Result_PhiAll";
-	histAll.SubstractBackground(BaseName);
-	
-	TString	Name[10];
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("2g_");
-	}
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("3g_");
-	}
-	hist[1].SubstractBackground(Name);
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("6g_");
-	}
-	hist[2].SubstractBackground(Name);
-	for(int i=0; i<10; i++)
-	{
-		Name[i]	= BaseName[i];
-		Name[i].Prepend("10g_");
-	}
-	hist[3].SubstractBackground(Name);
+	histAll.SubstractBackground();
+	hist[0]->SubstractBackground();
+	hist[1]->SubstractBackground();
+	hist[2]->SubstractBackground();
+	hist[3]->SubstractBackground();
 	
 	TH1D*	hTaggerTimeAll;
 	if(hTaggerTimeAll			= (TH1D*)gROOT->Get("TaggerTime"))
@@ -534,23 +414,44 @@ bool	TreeAnalyseTagger::Save()
 	hTaggerTimeAll->Write();
 	hTaggerTimeCutCountAll->Write();
 	hTaggerTimeCutCheckAll->Write();
-	histAll.Save(true);
+	hTaggerTimeCutCheck[0]->Write();
+	hTaggerTimeCutCheck[1]->Write();
+	hTaggerTimeCutCheck[2]->Write();
+	histAll.SaveResult();
+	histAll.SaveSubs();
+	
+	result->cd();
+	result->mkdir("2g");
+	result->cd("2g");
 	hTaggerTime[0]->Write();
 	hTaggerTimeCutCount[0]->Write();
-	hTaggerTimeCutCheck[0]->Write();
-	hist[0].Save(true);	
+	hist[0]->SaveResult();
+	hist[0]->SaveSubs();
+	
+	result->cd();
+	result->mkdir("3g");
+	result->cd("3g");
 	hTaggerTime[1]->Write();
 	hTaggerTimeCutCount[1]->Write();
-	hTaggerTimeCutCheck[1]->Write();
-	hist[1].Save(true);	
+	hist[1]->SaveResult();
+	hist[1]->SaveSubs();
+	
+	result->cd();
+	result->mkdir("6g");
+	result->cd("6g");
 	hTaggerTime[2]->Write();
 	hTaggerTimeCutCount[2]->Write();
-	hTaggerTimeCutCheck[2]->Write();
-	hist[2].Save(true);	
+	hist[2]->SaveResult();
+	hist[2]->SaveSubs();
+	
+	result->cd();
+	result->mkdir("10g");
+	result->cd("10g");
 	hTaggerTime[3]->Write();
 	hTaggerTimeCutCount[3]->Write();
-	hTaggerTimeCutCheck[3]->Write();
-	hist[3].Save(true);	
+	hist[3]->SaveResult();
+	hist[3]->SaveSubs();
+	
 	result->Flush();
 	result->Close();
 	delete result;
