@@ -19,9 +19,9 @@ private:
 	
 	TH1I*					hCutCount;
 	TreeHistTagged			hMissP[5][2];	//[x,y,z,E,Mag]
-	TH1D*					hMissMass;
-	TH1D*					hMissMassSq;
-	TH1D*					hCutCheck;
+	TreeHistTagged			hMissMass;
+	TreeHistTagged			hMissMassSq;
+	TreeHistTagged			hCutCheck;
 	TreeHistGeneralTagged	hist[2];
 
 protected:
@@ -45,7 +45,7 @@ public:
 
 	static	TreeAnalyse2GammaMissMass*	test()
 	{
-		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41948_2g_IMPi0.root");
+		TreeAnalyse2GammaMissMass* c = new TreeAnalyse2GammaMissMass("tree_TTreeOutput_41941_2g_IMPi0.root");
 		c->Open();
 		c->Analyse();
 		c->Save();
@@ -122,12 +122,21 @@ TreeAnalyse2GammaMissMass::TreeAnalyse2GammaMissMass(const Char_t* FileName)	: T
 	if(!hMissP[4][1].Init(BaseName, BaseName, 3000, 0, 3000))
 		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissP[4][0] could not been initiated\n");
 	
-	if(!(hMissMass	= (TH1D*)gROOT->Get("MissMass")))
-		hMissMass	= new TH1D("MissMass", "MissMass", 4000, -2000, 2000);
-	if(!(hMissMassSq	= (TH1D*)gROOT->Get("MissMassSq")))
-		hMissMassSq		= new TH1D("MissMassSq", "MissMassSq", 4000, -4000000, 4000000);
-	if(!(hCutCheck	= (TH1D*)gROOT->Get("hCutCheck")))
-		hCutCheck	= new TH1D("hCutCheck", "hCutCheck", 450, 700, 1150);
+	BaseName[0]		= "Prompt_MissMass";
+	BaseName[1]		= "Rand1_MissMass";
+	BaseName[2]		= "Rand2_MissMass";
+	if(!hMissMass.Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissMass could not been initiated\n");
+	BaseName[0]		= "Prompt_MissMassSq";
+	BaseName[1]		= "Rand1_MissMassSq";
+	BaseName[2]		= "Rand2_MissMassSq";
+	if(!hMissMassSq.Init(BaseName, BaseName, 4000, -4000000, 4000000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissMass could not been initiated\n");
+	BaseName[0]		= "Prompt_CutCheck";
+	BaseName[1]		= "Rand1_CutCheck";
+	BaseName[2]		= "Rand2_CutCheck";
+	if(!hCutCheck.Init(BaseName, BaseName, 4000, -2000, 2000))
+		printf("ERROR: TreeAnalyse2Gamma Constructor: hMissMass could not been initiated\n");
 	
 	BaseName[0]		= "Prompt_NTagged";
 	BaseName[1]		= "Rand1_NTagged";
@@ -182,9 +191,9 @@ inline	void	TreeAnalyse2GammaMissMass::Clear()
 		hMissP[i][0].Clear();
 		hMissP[i][1].Clear();
 	}
-	hMissMass->Reset("M");
-	hMissMassSq->Reset("M");
-	hCutCheck->Reset("M");
+	hMissMass.Clear();
+	hMissMassSq.Clear();
+	hCutCheck.Clear();
 	hist[0].Clear();
 	hist[1].Clear();
 }
@@ -208,8 +217,8 @@ bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 			beam[l][nBeam[l]].SetPxPyPzE(TaggedEnergy[l][i], 0.0, 0.0, TaggedEnergy[l][i] + MASS_PROTON);
 			miss[l][nBeam[l]]		= beam[l][nBeam[l]] - vecAll;
 			missMass[l][nBeam[l]]	= miss[l][nBeam[l]].M();
-			hMissMass->Fill(missMass[l][nBeam[l]]);
-			hMissMassSq->Fill(miss[l][nBeam[l]].M2());
+			hMissMass.Fill(l, missMass[l][nBeam[l]]);
+			hMissMassSq.Fill(l, miss[l][nBeam[l]].M2());
 			hMissP[0][0].Fill(l, miss[l][nBeam[l]].Px());
 			hMissP[1][0].Fill(l, miss[l][nBeam[l]].Py());
 			hMissP[2][0].Fill(l, miss[l][nBeam[l]].Pz());
@@ -217,14 +226,9 @@ bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 			hMissP[4][0].Fill(l, miss[l][nBeam[l]].P());
 			if(missMass[l][nBeam[l]] >= cut[0] && missMass[l][nBeam[l]] <= cut[1])
 			{
-				nBeam[l]++;
 				hCutCount->Fill(l+6);
-				hCutCheck->Fill(missMass[l][nBeam[l]]);
-				hMissP[0][1].Fill(l, miss[l][nBeam[l]].Px());
-				hMissP[1][1].Fill(l, miss[l][nBeam[l]].Py());
-				hMissP[2][1].Fill(l, miss[l][nBeam[l]].Pz());
-				hMissP[3][1].Fill(l, miss[l][nBeam[l]].E());
-				hMissP[4][1].Fill(l, miss[l][nBeam[l]].P());
+				hCutCheck.Fill(l, missMass[l][nBeam[l]]);
+				nBeam[l]++;
 			}
 		}
 	}
@@ -235,6 +239,11 @@ bool	TreeAnalyse2GammaMissMass::AnalyseEvent(const Int_t i)
 		if(nBeam[l] > 0)
 		{
 			hCutCount->Fill(l+2);
+			hMissP[0][1].Fill(l, miss[l][nBeam[l]].Px());
+			hMissP[1][1].Fill(l, miss[l][nBeam[l]].Py());
+			hMissP[2][1].Fill(l, miss[l][nBeam[l]].Pz());
+			hMissP[3][1].Fill(l, miss[l][nBeam[l]].E());
+			hMissP[4][1].Fill(l, miss[l][nBeam[l]].P());
 			ret	= true;
 		}
 	}
@@ -281,6 +290,10 @@ bool	TreeAnalyse2GammaMissMass::Save()
 	hMissP[4][0].SubstractBackground("BG_MissP", "Result_MissP");
 	hMissP[4][1].SubstractBackground("CutMM_BG_MissP", "CutMM_Result_MissP");
 	
+	hMissMass.SubstractBackground("BG_MissMass", "Result_MissMass");
+	hMissMassSq.SubstractBackground("BG_MissMassSq", "Result_MissMassSq");
+	hCutCheck.SubstractBackground("BG_CutCheck", "Result_CutCheck");
+	
 	BaseName[0]		= "BG_TaggedEnergy";
 	BaseName[1]		= "Result_TaggedEnergy";
 	BaseName[2]		= "BG_CBEnergyAll";
@@ -310,19 +323,19 @@ bool	TreeAnalyse2GammaMissMass::Save()
 	result->cd();
 	hist[0].Save(true);
 	hCutCount->Write();
-	hMissP[0][0].Save();	hMissP[0][0].Save(3); hMissP[0][0].Save(4);
-	hMissP[1][0].Save();	hMissP[1][0].Save(3); hMissP[1][0].Save(4);
-	hMissP[2][0].Save();	hMissP[2][0].Save(3); hMissP[2][0].Save(4);
-	hMissP[3][0].Save();	hMissP[3][0].Save(3); hMissP[3][0].Save(4);
-	hMissP[4][0].Save();	hMissP[4][0].Save(3); hMissP[4][0].Save(4);
-	hMissP[0][1].Save();	hMissP[0][1].Save(3); hMissP[0][1].Save(4);
-	hMissP[1][1].Save();	hMissP[1][1].Save(3); hMissP[1][1].Save(4);
-	hMissP[2][1].Save();	hMissP[2][1].Save(3); hMissP[2][1].Save(4);
-	hMissP[3][1].Save();	hMissP[3][1].Save(3); hMissP[3][1].Save(4);
-	hMissP[4][1].Save();	hMissP[4][1].Save(3); hMissP[4][1].Save(4);
-	hMissMass->Write();
-	hMissMassSq->Write();
-	hCutCheck->Write();
+	hMissP[0][0].Save();	hMissP[0][0].Save(3); 	hMissP[0][0].Save(4);
+	hMissP[1][0].Save();	hMissP[1][0].Save(3); 	hMissP[1][0].Save(4);
+	hMissP[2][0].Save();	hMissP[2][0].Save(3); 	hMissP[2][0].Save(4);
+	hMissP[3][0].Save();	hMissP[3][0].Save(3); 	hMissP[3][0].Save(4);
+	hMissP[4][0].Save();	hMissP[4][0].Save(3); 	hMissP[4][0].Save(4);
+	hMissP[0][1].Save();	hMissP[0][1].Save(3); 	hMissP[0][1].Save(4);
+	hMissP[1][1].Save();	hMissP[1][1].Save(3); 	hMissP[1][1].Save(4);
+	hMissP[2][1].Save();	hMissP[2][1].Save(3); 	hMissP[2][1].Save(4);
+	hMissP[3][1].Save();	hMissP[3][1].Save(3); 	hMissP[3][1].Save(4);
+	hMissP[4][1].Save();	hMissP[4][1].Save(3); 	hMissP[4][1].Save(4);
+	hMissMass.Save();		hMissMass.Save(3); 		hMissMass.Save(4);
+	hMissMassSq.Save();		hMissMassSq.Save(3); 	hMissMassSq.Save(4);
+	hCutCheck.Save();		hCutCheck.Save(3); 		hCutCheck.Save(4);
 	hist[1].Save(true);
 	result->Close();
 	delete result;
