@@ -47,7 +47,8 @@ public:
 	
 			void	Clear();
 	virtual	bool	Open();
-			void	AnalyseEvent(const Int_t Min, const Int_t Max);
+			void	AnalyseEvent(const Int_t i);
+			void	Analyse(const Int_t Min, const Int_t Max);
 	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
 	virtual	bool	Save();
 	
@@ -169,12 +170,12 @@ void	TreeAnalyse6Gamma::Open()
 		outTree[i]->Branch("Rand2Energy", TaggedEnergy[2], "Rand2Energy[nRand2]/D");
 		outTree[i]->Branch("Rand2Time", TaggedTime[2], "Rand2Time[nRand2]/D");
 		
-		outTree[i]->Branch("nCBHits",&nCBHits,"nCBHits/I");
-		outTree[i]->Branch("Px", out[0], "Px[nCBHits]/D");
-		outTree[i]->Branch("Py", out[1], "Py[nCBHits]/D");
-		outTree[i]->Branch("Pz", out[2], "Pz[nCBHits]/D");
-		outTree[i]->Branch("E", out[3], "E[nCBHits]/D");	
-		outTree[i]->Branch("CBTime", CBTime, "CBTime[nCBHits]/D");
+		outTree[i]->Branch("nCB_Hits",&nCB_Hits,"nCB_Hits/I");
+		outTree[i]->Branch("CB_Px", out[0], "CB_Px[nCB_Hits]/D");
+		outTree[i]->Branch("CB_Py", out[1], "CB_Py[nCB_Hits]/D");
+		outTree[i]->Branch("CB_Pz", out[2], "CB_Pz[nCB_Hits]/D");
+		outTree[i]->Branch("CB_E", out[3], "CB_E[nCB_Hits]/D");	
+		outTree[i]->Branch("CB_Time", CB_Time, "CB_Time[nCB_Hits]/D");
 
 	}
 }
@@ -182,12 +183,12 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 {
 	TreeReadTagged::AnalyseEvent(i);
 	
-	vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-	vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-	vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
-	vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
-	vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
-	vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
+	vec[0].SetPxPyPzE(CB_Px[0], CB_Py[0], CB_Pz[0], CB_E[0]);
+	vec[1].SetPxPyPzE(CB_Px[1], CB_Py[1], CB_Pz[1], CB_E[1]);
+	vec[2].SetPxPyPzE(CB_Px[2], CB_Py[2], CB_Pz[2], CB_E[2]);
+	vec[3].SetPxPyPzE(CB_Px[3], CB_Py[3], CB_Pz[3], CB_E[3]);
+	vec[4].SetPxPyPzE(CB_Px[4], CB_Py[4], CB_Pz[4], CB_E[4]);
+	vec[5].SetPxPyPzE(CB_Px[5], CB_Py[5], CB_Pz[5], CB_E[5]);
 	vecAll	= vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
 	massAll	= vecAll.M();
 	
@@ -208,7 +209,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		if(mass[bestPerm][1]<cutIMPi0[0] || mass[bestPerm][1]>cutIMPi0[1])
 			return false;
@@ -218,7 +219,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		for(int i=0; i<6; i++)
 		{
@@ -241,7 +242,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -251,7 +252,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		out[0][0]	= vec[perm[bestPerm][2]].Px();
 		out[1][0]	= vec[perm[bestPerm][2]].Py();
@@ -292,7 +293,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(2);
-		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -302,7 +303,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(5);
-		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[0][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		out[0][0]	= vec[perm[bestPerm][4]].Px();
 		out[1][0]	= vec[perm[bestPerm][4]].Py();
@@ -343,7 +344,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 		massSet	= allSet.M();
 		
 		hCount->Fill(3);
-		hist[1][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[1][0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		if(mass[bestPerm][0]<cutIMPi0[0] || mass[bestPerm][0]>cutIMPi0[1])
 			return false;
@@ -353,7 +354,7 @@ bool	TreeAnalyse6Gamma::AnalyseEvent(const Int_t i)
 			return false;
 		
 		hCount->Fill(6);
-		hist[1][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[1][1]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		
 		for(int i=0; i<6; i++)
 		{

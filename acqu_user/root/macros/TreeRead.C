@@ -19,12 +19,19 @@ protected:
 	Double_t	TaggedEnergy[64];
 	Double_t	TaggedTime[64];
 	
-	Int_t		nCBHits;
-	Double_t	Px[32];
-	Double_t	Py[32];
-	Double_t	Pz[32];
-	Double_t	E[32];
-	Double_t	CBTime[32];
+	Int_t		nCB_Hits;
+	Double_t	CB_Px[32];
+	Double_t	CB_Py[32];
+	Double_t	CB_Pz[32];
+	Double_t	CB_E[32];
+	Double_t	CB_Time[32];
+	
+	Int_t		nTAPS_Hits;
+	Double_t	TAPS_Px[32];
+	Double_t	TAPS_Py[32];
+	Double_t	TAPS_Pz[32];
+	Double_t	TAPS_E[32];
+	Double_t	TAPS_Time[32];
 	
 	
 public:	
@@ -108,33 +115,30 @@ bool	TreeRead::Open()
 			return false;
 		}
 	}
-	bool	oldVersion = false;
-	
 	tree	= (TTree*)file->Get("tree");
 	if(!tree)
 	{
-		tree	= (TTree*)file->Get(fileName);
-		if(!tree)
-		{
-			printf("Could not open tree in file %s\n", str);
-			return false;
-		}
-		oldVersion = true;
+		printf("Could not open tree in file %s\n", str);
+		return false;
 	}
 	
 	tree->SetBranchAddress("nTagged",&nTagged);
 	tree->SetBranchAddress("BeamEnergy",&TaggedEnergy);
 	tree->SetBranchAddress("BeamTime", &TaggedTime);
 	
-	tree->SetBranchAddress("nCBHits",&nCBHits);
-	tree->SetBranchAddress("Px", &Px);
-	tree->SetBranchAddress("Py", &Py);
-	tree->SetBranchAddress("Pz", &Pz);
-	tree->SetBranchAddress("E", &E);	
-	if(oldVersion)
-		tree->SetBranchAddress("Time", &CBTime);
-	else
-		tree->SetBranchAddress("CBTime", &CBTime);
+	tree->SetBranchAddress("nCB_Hits",&nCB_Hits);
+	tree->SetBranchAddress("CB_Px", &CB_Px);
+	tree->SetBranchAddress("CB_Py", &CB_Py);
+	tree->SetBranchAddress("CB_Pz", &CB_Pz);
+	tree->SetBranchAddress("CB_E", &CB_E);	
+	tree->SetBranchAddress("CB_Time", &CB_Time);
+	
+	tree->SetBranchAddress("nTAPS_Hits",&nTAPS_Hits);
+	tree->SetBranchAddress("TAPS_Px", &TAPS_Px);
+	tree->SetBranchAddress("TAPS_Py", &TAPS_Py);
+	tree->SetBranchAddress("TAPS_Pz", &TAPS_Pz);
+	tree->SetBranchAddress("TAPS_E", &TAPS_E);	
+	tree->SetBranchAddress("TAPS_Time", &TAPS_Time);
 	
 	printf("Open file %s and load tree successfully.    %ld Events at all\n", str, (long int)tree->GetEntries());
 
@@ -143,5 +147,5 @@ bool	TreeRead::Open()
 
 void	TreeRead::Print()
 {
-	printf("Entry:\tNTagged: %d\tNCB: %d\n", nTagged, nCBHits);
+	printf("Entry:\tNTagged: %d\tNCB: %d\tNTAPS: %d\n", nTagged, nCB_Hits, nTAPS_Hits);
 }

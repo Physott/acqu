@@ -1,27 +1,30 @@
-#include "TreeReadTagged.C"
 #include "TaggedHist.C"
 #include "TaggedHist2D.C"
 
 
 #define MASS_PROTON	938.27203
 
-class	TreeAnalyse3Gamma	: public TreeReadTagged
+class	TreeAnalyse3GammaFindProton
 {
 private:
-	TFile*		outFile[3];
-	TTree*		outTree[3];
-	
-	Double_t	cutIMPi0[2];
-	Double_t	cutIMEta[2];
-	Double_t	cutIMEtaP[2];
-	
-	TLorentzVector	vec[3];					//[Perm0,Perm1,Perm2]
 	TLorentzVector	vecPart[3];				//[Perm0,Perm1,Perm2]
 	Double_t		massPart[3];
+	TLorentzVector	beam[8];
+	TLorentzVector	vecMiss[3][8];
+	Double_t		thetaDiff[3][8];
+	Double_t		phiDiff[3][8];
+	Int_t			foundIM[3];
+	Int_t			foundAngle;
+	Int_t			foundAll[3];
 	
-	Double_t		out[4][2];
+	Double_t		cutIMPi0[2];
+	Double_t		cutIMEta[2];
+	Double_t		cutIMEtaP[2];
 	
-	TH1I*			hCount[8];				//[All,IMPi0,IMEta,IMEtaP,Angle,AllPi0,AllEta,AllEtaP]
+	bool			foundIM[3];
+	bool			foundAngle;
+	
+	TH1I*			hCount;
 	TaggedHist*		hIMParticle[3];			//[Perm0,Perm1,Perm2]
 	TaggedHist*		hIMParticleDiced[3];	//[Perm0,Perm1,Perm2]
 	TaggedHist*		hProtonThetaDiff[3];	//[Perm0,Perm1,Perm2]
@@ -46,15 +49,12 @@ private:
 protected:
 
 public:
-	TreeAnalyse3Gamma(const Char_t* FileName);
-	~TreeAnalyse3Gamma();
+	TreeAnalyse3GammaFindProton(const Char_t* FileName);
+	~TreeAnalyse3GammaFindProton();
 	
-			void	Clear();
-	virtual	bool	Open();
-			void	AnalyseEvent(const Int_t i);
-			void	Analyse(const Int_t Min, const Int_t Max);
-	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
-	virtual	bool	Save();
+	void	Clear();
+	Int_t	Analyse(const TLorentzVector* vec, const Int_t nTagged, const Double_t* TaggedEnergy);
+	bool	Save();
 	
 	const	Double_t*	GetCutIMPi0()		const	{return cutIMPi0;}
 	const	Double_t	GetCutIMPi0Min()	const	{return cutIMPi0[0];}
@@ -71,10 +71,10 @@ public:
 			void		SetCutIMEta(const Double_t Min, const Double_t Max)		{cutIMEta[0] = Min ; cutIMEta[1] = Max;}
 			void		SetCutIMEtaP(const Double_t Min, const Double_t Max)	{cutIMEtaP[0] = Min; cutIMEtaP[1] = Max;}
 			
-	static	TreeAnalyse3Gamma*	test()
+	static	TreeAnalyse3GammaFindProton*	test()
 	{
 		printf("Creating\n");
-		TreeAnalyse3Gamma* c = new TreeAnalyse3Gamma("tree_TTreeOutput_41941_3g.root");
+		TreeAnalyse3GammaFindProton* c = new TreeAnalyse3GammaFindProton("tree_TTreeOutput_41941_3g.root");
 		printf("Opening\n");
 		c->Open();
 		printf("Analysing\n");
@@ -87,7 +87,7 @@ public:
 };
 
 
-TreeAnalyse3Gamma::TreeAnalyse3Gamma(const Char_t* FileName)	: TreeReadTagged(FileName)
+TreeAnalyse3GammaFindProton::TreeAnalyse3GammaFindProton(const Char_t* FileName)	: TreeReadTagged(FileName)
 {
 	cutIMPi0[0]		= 100;
 	cutIMPi0[1]		= 170;
@@ -96,68 +96,12 @@ TreeAnalyse3Gamma::TreeAnalyse3Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	cutIMEtaP[0]	= 850;
 	cutIMEtaP[1]	= 1050;
 	
-	if((hCount[0]	= (TH1I*)gROOT->Get("hCount")))
-		hCount[0]->Delete();
-	hCount[0]		= new TH1I("hCount", "1:All/2,3,4:PassedIM(Pi0,Eta,EtaP)/6:PassedAngle/8,9,10:PassedAll(Pi0,Eta,EtaP)", 12, 0, 12);
-	if(!hCount[0])
+	if((hCount	= (TH1I*)gROOT->Get("hCount")))
+		hCount->Delete();
+	hCount		= new TH1I("hCount", "1:All/2,3,4:PassedIM(Pi0,Eta,EtaP)/6:PassedAngle/8,9,10:PassedAll(Pi0,Eta,EtaP)", 12, 0, 12);
+	if(!hCount)
 	{
 		cout << "Could not create histogram " << "hCount" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[1]	= (TH1I*)gROOT->Get("hCountWinCutIMPi0")))
-		hCount[1]->Delete();
-	hCount[1]		= new TH1I("hCountWinCutIMPi0", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[1])
-	{
-		cout << "Could not create histogram " << "hCountWinCutIMPi0" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[2]	= (TH1I*)gROOT->Get("hCountWinCutIMEta")))
-		hCount[2]->Delete();
-	hCount[2]		= new TH1I("hCountWinCutIMEta", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[2])
-	{
-		cout << "Could not create histogram " << "hCountWinCutIMEta" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[3]	= (TH1I*)gROOT->Get("hCountWinCutIMEtaP")))
-		hCount[3]->Delete();
-	hCount[3]		= new TH1I("hCountWinCutIMEtaP", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[3])
-	{
-		cout << "Could not create histogram " << "hCountWinCutIMEtaP" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[4]	= (TH1I*)gROOT->Get("hCountWinCutAngle")))
-		hCount[4]->Delete();
-	hCount[4]		= new TH1I("hCountWinCutAngle", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[4])
-	{
-		cout << "Could not create histogram " << "hCountWinCutAngle" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[5]	= (TH1I*)gROOT->Get("hCountWinCutAllPi0")))
-		hCount[5]->Delete();
-	hCount[5]		= new TH1I("hCountWinCutAllPi0", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[5])
-	{
-		cout << "Could not create histogram " << "hCountWinCutAllPi0" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[6]	= (TH1I*)gROOT->Get("hCountWinCutAllEta")))
-		hCount[6]->Delete();
-	hCount[6]		= new TH1I("hCountWinCutAllEta", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[6])
-	{
-		cout << "Could not create histogram " << "hCountWinCutAllEta" << ". Exiting!" << endl;
-		exit(1);
-	}
-	if((hCount[7]	= (TH1I*)gROOT->Get("hCountWinCutAllEtaP")))
-		hCount[7]->Delete();
-	hCount[7]		= new TH1I("hCountWinCutAllEtaP", "1:All/2,3,4:Passed(Prompt,Rand1,Rand2)", 6, 0, 6);
-	if(!hCount[7])
-	{
-		cout << "Could not create histogram " << "hCountWinCutAllEtaP" << ". Exiting!" << endl;
 		exit(1);
 	}
 	
@@ -293,7 +237,7 @@ TreeAnalyse3Gamma::TreeAnalyse3Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	hProtonAngleDiffCutAll[2][2]	= new TaggedHist2D("CutAllEtaP_ProtonAngleDiff_2", 720, -360, 360, 720, -360, 360);
 }
 
-TreeAnalyse3Gamma::~TreeAnalyse3Gamma()
+TreeAnalyse3GammaFindProton::~TreeAnalyse3GammaFindProton()
 {
 	for(int i=0; i<3; i++)
 	{
@@ -305,10 +249,9 @@ TreeAnalyse3Gamma::~TreeAnalyse3Gamma()
 }
 
 
-inline	void	TreeAnalyse3Gamma::Clear()
+inline	void	TreeAnalyse3GammaFindProton::Clear()
 {
-	for(int i=0; i<8; i++)
-		hCount[i]->Reset("M");
+	hCount->Reset("M");
 	
 	for(int i=0; i<3; i++)
 	{
@@ -343,54 +286,12 @@ inline	void	TreeAnalyse3Gamma::Clear()
 		}
 	}
 }
-
-void	TreeAnalyse3Gamma::Open()
-{
-	//printf("TreeAnalyseMultiplicity::Open()\n");
-	TreeReadTagged::Open();
-	//printf("TreeAnalyseMultiplicity::Open 2()\n");
-	
-	Char_t	str[128];
-	for(int i=0; i<3; i++)
-	{
-		if(i==0)	
-			sprintf(str, "tree_%s_IMPi0.root", GetFileName());
-		else if(i==1)
-			sprintf(str, "tree_%s_IMEta.root", GetFileName());
-		else if(i==2)
-			sprintf(str, "tree_%s_IMEtaP.root", GetFileName());
-			
-		outFile[i]		= new TFile(str, "RECREATE");
-		outTree[i]		= new TTree("tree", "tree");
-		
-		outTree[i]->Branch("nPrompt",&nTagged[0],"nPrompt/I");
-		outTree[i]->Branch("PromptEnergy", TaggedEnergy[0], "PromptEnergy[nPrompt]/D");
-		outTree[i]->Branch("PromptTime", TaggedTime[0], "PromptTime[nPrompt]/D");
-		outTree[i]->Branch("nRand1",&nTagged[1],"nRand1/I");
-		outTree[i]->Branch("Rand1Energy", TaggedEnergy[1], "Rand1Energy[nRand1]/D");
-		outTree[i]->Branch("Rand1Time", TaggedTime[1], "Rand1Time[nRand1]/D");
-		outTree[i]->Branch("nRand2",&nTagged[2],"nRand2/I");
-		outTree[i]->Branch("Rand2Energy", TaggedEnergy[2], "Rand2Energy[nRand2]/D");
-		outTree[i]->Branch("Rand2Time", TaggedTime[2], "Rand2Time[nRand2]/D");
-		
-		outTree[i]->Branch("nCB_Hits",&nCB_Hits,"nCB_Hits/I");
-		outTree[i]->Branch("CB_Px", out[0], "CB_Px[nCB_Hits]/D");
-		outTree[i]->Branch("CB_Py", out[1], "CB_Py[nCB_Hits]/D");
-		outTree[i]->Branch("CB_Pz", out[2], "CB_Pz[nCB_Hits]/D");
-		outTree[i]->Branch("CB_E", out[3], "CB_E[nCB_Hits]/D");	
-		outTree[i]->Branch("CB_Time", CB_Time, "CB_Time[nCB_Hits]/D");
-	}
-}
-
-bool	TreeAnalyse3Gamma::AnalyseEvent(const Int_t i)
+Int_t	TreeAnalyse3GammaFindProton::Analyse(const TLorentzVector* vec, const Int_t nTagged, const Double_t* TaggedEnergy)
 {
 	TreeReadTagged::AnalyseEvent(i);
 	
 	hCount[0]->Fill(1);
 	
-	vec[0].SetPxPyPzE(CB_Px[0], CB_Py[0], CB_Pz[0], CB_E[0]);
-	vec[1].SetPxPyPzE(CB_Px[1], CB_Py[1], CB_Pz[1], CB_E[1]);
-	vec[2].SetPxPyPzE(CB_Px[2], CB_Py[2], CB_Pz[2], CB_E[2]);
 	vecPart[0]	= vec[1] + vec[2];
 	vecPart[1]	= vec[0] + vec[2];
 	vecPart[2]	= vec[0] + vec[1];
@@ -402,34 +303,47 @@ bool	TreeAnalyse3Gamma::AnalyseEvent(const Int_t i)
 	hIMParticle[1]->Fill(nTagged, massPart[1]);
 	hIMParticle[2]->Fill(nTagged, massPart[2]);
 	
-	static	Int_t	dice	= 0;
-	if(dice == 0)
+	static	Int_t	dice1	= 0;
+	if(dice1 == 0)
 	{
 		hIMParticleDiced[0]->Fill(nTagged, massPart[0]);
 		hIMParticleDiced[1]->Fill(nTagged, massPart[1]);
 		hIMParticleDiced[2]->Fill(nTagged, massPart[2]);
-		dice	= 1;
+		dice1	= 1;
 	}
-	else if(dice == 1)
+	else if(dice1 == 1)
 	{
 		hIMParticleDiced[0]->Fill(nTagged, massPart[1]);
 		hIMParticleDiced[1]->Fill(nTagged, massPart[2]);
 		hIMParticleDiced[2]->Fill(nTagged, massPart[0]);
-		dice	= 2;
+		dice1	= 2;
 	}
 	else
 	{
 		hIMParticleDiced[0]->Fill(nTagged, massPart[2]);
 		hIMParticleDiced[1]->Fill(nTagged, massPart[0]);
 		hIMParticleDiced[2]->Fill(nTagged, massPart[1]);
-		dice	= 0;
+		dice1	= 0;
 	}
 	
-	TLorentzVector	beam;
-	TLorentzVector	vecMiss[3];
-	Double_t		thetaDiff[3];
-	Double_t		phiDiff[3];
-	bool			found	= false;
+	for(int l=0; l<nTagged; l++)
+	{
+		beam[l].SetPxPyPzE(TaggedEnergy[l], 0.0, 0.0, TaggedEnergy[l] + MASS_PROTON);
+		for(int i=0; i<3; i++)
+		{
+			vecMiss[i][l]	= beam[l] - vecPart[i];
+			thetaDiff[i][l]	= TMath::RadToDeg()*(vecPart[i].Theta() - vecMiss[i][l].Theta());
+			phiDiff[i][l]	= TMath::RadToDeg()*(vecPart[i].Phi() - vecMiss[i][l].Phi());
+			if(massPart[m] >= cutIMPi0[0] && massPart[m] <= cutIMPi0[1])
+			{
+			}
+		}
+	}
+	
+	
+	
+	
+	
 	for(int l=0; l<3; l++)
 	{
 		if(nTagged[l] == 1)
@@ -662,22 +576,7 @@ bool	TreeAnalyse3Gamma::AnalyseEvent(const Int_t i)
 	}
 }
 
-void	TreeAnalyse3Gamma::Analyse(const Int_t Min, const Int_t Max)
-{
-	Double_t	min = Min;
-	Double_t	max = Max;
-	if(min < 0)
-		min = 0;
-	if(min > tree->GetEntries())
-		min = tree->GetEntries();
-	if(max < 0 || max > tree->GetEntries())
-		max = tree->GetEntries();
-		
-	for(int i=min; i<max; i++)
-		AnalyseEvent(i);
-}
-
-void	TreeAnalyse3Gamma::Save()
+void	TreeAnalyse3GammaFindProton::Save()
 {
 	for(int i=0; i<3; i++)
 	{

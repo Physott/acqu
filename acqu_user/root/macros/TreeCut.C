@@ -77,7 +77,7 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits,cons
     Double_t			TaggedEnergy[128];
     Double_t			TaggedTime[128];
     
-    Int_t				nCBHits;
+    Int_t				nCB_Hits;
     Double_t			Px[64];
     Double_t			Py[64];
     Double_t			Pz[64];
@@ -89,7 +89,7 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits,cons
 	tree->SetBranchAddress("BeamEnergy",&TaggedEnergy);
 	tree->SetBranchAddress("BeamTime", &TaggedTime);
 	
-	tree->SetBranchAddress("nCBHits",&nCBHits);
+	tree->SetBranchAddress("nCB_Hits",&nCB_Hits);
 	tree->SetBranchAddress("Px", &Px);
 	tree->SetBranchAddress("Py", &Py);
 	tree->SetBranchAddress("Pz", &Pz);
@@ -101,19 +101,19 @@ void	TreeCut(const char* treeFileName,const char* treeName,const int CBHits,cons
 	outTree->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
 	outTree->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
 	
-	outTree->Branch("nCBHits",&nCBHits,"nCBHits/I");
-	outTree->Branch("Px", Px, "Px[nCBHits]/D");
-	outTree->Branch("Py", Py, "Py[nCBHits]/D");
-	outTree->Branch("Pz", Pz, "Pz[nCBHits]/D");
-	outTree->Branch("E", E, "E[nCBHits]/D");	
-	outTree->Branch("CBTime", Time, "CBTime[nCBHits]/D");
+	outTree->Branch("nCB_Hits",&nCB_Hits,"nCB_Hits/I");
+	outTree->Branch("Px", Px, "Px[nCB_Hits]/D");
+	outTree->Branch("Py", Py, "Py[nCB_Hits]/D");
+	outTree->Branch("Pz", Pz, "Pz[nCB_Hits]/D");
+	outTree->Branch("E", E, "E[nCB_Hits]/D");	
+	outTree->Branch("CB_Time", Time, "CB_Time[nCB_Hits]/D");
 	
 	printf("Number of Entries in origin:\t%d\n",tree->GetEntries());
 	
 	for(int i=0; i<tree->GetEntries(); i++)
 	{
 		tree->GetEntry(i);
-		if(nCBHits==CBHits || nCBHits==CBHits1 || nCBHits==CBHits2 || nCBHits==CBHits3 || nCBHits==CBHits4 || nCBHits==CBHits5)
+		if(nCB_Hits==CBHits || nCB_Hits==CBHits1 || nCB_Hits==CBHits2 || nCB_Hits==CBHits3 || nCB_Hits==CBHits4 || nCB_Hits==CBHits5)
 			outTree->Fill();
 	}
 	
@@ -131,7 +131,7 @@ void	TreeCreate(const char* treeFileName = "testTree.root",const char* treeName 
 	Double_t*	TaggedEnergy	= new Double_t[64];
     Double_t*	TaggedTime		= new Double_t[64];
     
-    Int_t		nCBHits;
+    Int_t		nCB_Hits;
     Double_t*	Px				= new Double_t[128];
     Double_t*	Py				= new Double_t[128];
     Double_t*	Pz				= new Double_t[128];
@@ -149,12 +149,12 @@ void	TreeCreate(const char* treeFileName = "testTree.root",const char* treeName 
 	tree->Branch("BeamEnergy", TaggedEnergy, "BeamEnergy[nTagged]/D");
 	tree->Branch("BeamTime", TaggedTime, "BeamTime[nTagged]/D");
 	
-	tree->Branch("nCBHits",&nCBHits,"nCBHits/I");
-	tree->Branch("Px", Px, "Px[nCBHits]/D");
-	tree->Branch("Py", Py, "Py[nCBHits]/D");
-	tree->Branch("Pz", Pz, "Pz[nCBHits]/D");
-	tree->Branch("E", E, "E[nCBHits]/D");	
-	tree->Branch("Time", Time, "Time[nCBHits]/D");
+	tree->Branch("nCB_Hits",&nCB_Hits,"nCB_Hits/I");
+	tree->Branch("Px", Px, "Px[nCB_Hits]/D");
+	tree->Branch("Py", Py, "Py[nCB_Hits]/D");
+	tree->Branch("Pz", Pz, "Pz[nCB_Hits]/D");
+	tree->Branch("E", E, "E[nCB_Hits]/D");	
+	tree->Branch("Time", Time, "Time[nCB_Hits]/D");
 	
 	nTagged			= 3;
 	TaggedEnergy[0]	= 1450;
@@ -164,7 +164,7 @@ void	TreeCreate(const char* treeFileName = "testTree.root",const char* treeName 
 	TaggedTime[1]	= 1;
 	TaggedTime[2]	= 2;
 	
-	nCBHits			= 2;
+	nCB_Hits			= 2;
 	Px[0]			= 10;
 	Px[1]			= 11;
 	Py[0]			= 20;
@@ -186,7 +186,7 @@ void	TreeCreate(const char* treeFileName = "testTree.root",const char* treeName 
 	TaggedTime[1]	= 1;
 	TaggedTime[2]	= 2;
 	
-	nCBHits			= 3;
+	nCB_Hits			= 3;
 	Px[0]			= 10;
 	Px[1]			= 11;
 	Px[2]			= 12;

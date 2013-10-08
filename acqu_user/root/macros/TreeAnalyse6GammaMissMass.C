@@ -47,7 +47,8 @@ public:
 	~TreeAnalyse6GammaMissMass();
 	
 			void	Clear();
-			void	AnalyseEvent(const Int_t Min, const Int_t Max);
+			void	AnalyseEvent(const Int_t i);
+			void	Analyse(const Int_t Min, const Int_t Max);
 	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
 	virtual	bool	Save();
 	
@@ -144,12 +145,12 @@ bool	TreeAnalyse6GammaMissMass::AnalyseEvent(const Int_t i)
 {
 	TreeReadTagged::AnalyseEvent(i);
 	
-	vec[0].SetPxPyPzE(Px[0], Py[0], Pz[0], E[0]);
-	vec[1].SetPxPyPzE(Px[1], Py[1], Pz[1], E[1]);
-	vec[2].SetPxPyPzE(Px[2], Py[2], Pz[2], E[2]);
-	vec[3].SetPxPyPzE(Px[3], Py[3], Pz[3], E[3]);
-	vec[4].SetPxPyPzE(Px[4], Py[4], Pz[4], E[4]);
-	vec[5].SetPxPyPzE(Px[5], Py[5], Pz[5], E[5]);
+	vec[0].SetPxPyPzE(CB_Px[0], CB_Py[0], CB_Pz[0], CB_E[0]);
+	vec[1].SetPxPyPzE(CB_Px[1], CB_Py[1], CB_Pz[1], CB_E[1]);
+	vec[2].SetPxPyPzE(CB_Px[2], CB_Py[2], CB_Pz[2], CB_E[2]);
+	vec[3].SetPxPyPzE(CB_Px[3], CB_Py[3], CB_Pz[3], CB_E[3]);
+	vec[4].SetPxPyPzE(CB_Px[4], CB_Py[4], CB_Pz[4], CB_E[4]);
+	vec[5].SetPxPyPzE(CB_Px[5], CB_Py[5], CB_Pz[5], CB_E[5]);
 	vecPart[0]	= vec[0] + vec[1];
 	vecPart[1]	= vec[2] + vec[3];
 	vecPart[2]	= vec[4] + vec[5];
@@ -180,14 +181,14 @@ bool	TreeAnalyse6GammaMissMass::AnalyseEvent(const Int_t i)
 	massSet	= allSet.M();
 	
 	hCutCount->Fill(1);
-	hist[0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+	hist[0]->Fill(nTagged, TaggedEnergy[0], TaggedEnergy[1], TaggedEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 	for(int l=0; l<3; l++)
 	{
 		nBeam[l]	= 0;
 		for(int i=0; i<nTagged[l]; i++)
 		{
 			beamEnergy[l][nBeam[l]]	= TaggedEnergy[l][i];
-			beam[l][nBeam[l]].SetPxPyPzE(TaggedEnergy[l][i], 0.0, 0.0, TaggedEnergy[l][i] + MASS_PROTON);
+			beam[l][nBeam[l]].SetPxPyPzE(0.0, 0.0, TaggedEnergy[l][i], TaggedEnergy[l][i] + MASS_PROTON);
 			miss[l][nBeam[l]]		= beam[l][nBeam[l]] - vecAll;
 			missMass[l][nBeam[l]]	= miss[l][nBeam[l]].M();
 			hMissP[0][0]->Fill(l, miss[l][nBeam[l]].Px());
@@ -225,7 +226,7 @@ bool	TreeAnalyse6GammaMissMass::AnalyseEvent(const Int_t i)
 	}
 	if(ret)
 	{
-		hist[1]->Fill(nBeam, beamEnergy[0], beamEnergy[1], beamEnergy[2], nCBHits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi());
+		hist[1]->Fill(nBeam, beamEnergy[0], beamEnergy[1], beamEnergy[2], nCB_Hits, vecAll.E(), massPart, massAll, massSet, vecAll.Theta(), vecAll.Phi(), nTAPS_Hits);
 		return true;
 	}
 	
@@ -296,6 +297,8 @@ bool	TreeAnalyse6GammaMissMass::Save()
 	hMissP[2][0]->SaveSubs();
 	hMissP[3][0]->SaveSubs();
 	hMissP[4][0]->SaveSubs();
+	hMissMass->SaveSubs();
+	hMissMassSq->SaveSubs();
 	
 	result->cd();
 	result->mkdir("CutMM");

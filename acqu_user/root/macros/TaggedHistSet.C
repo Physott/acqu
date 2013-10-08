@@ -11,6 +11,7 @@ private:
 protected:
 	TString		name;
 	TH1I*		hMultiplicity;
+	TH1I*		nTAPS;
 	TH1I*		nTagged[3];
 	TaggedHist*	hTaggedEnergy;
 	TaggedHist*	hCBEnergyAll;
@@ -25,7 +26,7 @@ public:
 	
 	void	Clear();
 	void	Add(const TaggedHistSet* source, const Double_t f = 1);
-	void	Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t NCBHits, const Double_t CBEnergyAll, const Double_t IMAll, const Double_t ThetaAll, const Double_t PhiAll);
+	void	Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t nCB_Hits, const Double_t CBEnergyAll, const Double_t IMAll, const Double_t ThetaAll, const Double_t PhiAll, const Int_t nTAPS_Hits);
 	void	SubstractBackground();
 	void	SaveSubs();
 	void	SaveResult();
@@ -37,11 +38,22 @@ TaggedHistSet::TaggedHistSet(const Char_t* Name)	: name(Name), BG_Substracted(fa
 {
 	TString	str;
 	str	 = name;
-	str	+= "_NCBHits";
+	str	+= "_nCB_Hits";
 	if((hMultiplicity	= (TH1I*)gROOT->Get(str.Data())))
 		hMultiplicity->Delete();
 	hMultiplicity	= new TH1I(str.Data(), str.Data(), 16, 0, 16);
 	if(!hMultiplicity)
+	{
+		cout << "Could not create histogram " << str.Data() << ". Exiting!" << endl;
+		exit(1);
+	}
+	
+	str	 = name;
+	str	+= "_nTAPS_Hits";
+	if((nTAPS	= (TH1I*)gROOT->Get(str.Data())))
+		nTAPS->Delete();
+	nTAPS	= new TH1I(str.Data(), str.Data(), 8, 0, 8);
+	if(!nTAPS)
 	{
 		cout << "Could not create histogram " << str.Data() << ". Exiting!" << endl;
 		exit(1);
@@ -103,7 +115,7 @@ TaggedHistSet::TaggedHistSet(const Char_t* Name, const TaggedHistSet* source)	: 
 {
 	TString	str;
 	str	 = name;
-	str	+= "_NCBHits";
+	str	+= "_nCB_Hits";
 	if((hMultiplicity	= (TH1I*)gROOT->Get(str.Data())))
 		hMultiplicity->Delete();
 	hMultiplicity	= (TH1I*)source->hMultiplicity->Clone(str.Data());
@@ -113,6 +125,17 @@ TaggedHistSet::TaggedHistSet(const Char_t* Name, const TaggedHistSet* source)	: 
 		exit(1);
 	}
 		
+	str	 = name;
+	str	+= "_nTAPS_Hits";
+	if((nTAPS	= (TH1I*)gROOT->Get(str.Data())))
+		nTAPS->Delete();
+	nTAPS	= (TH1I*)source->nTAPS->Clone(str.Data());
+	if(!nTAPS)
+	{
+		cout << "Could not create histogram " << str.Data() << ". Exiting!" << endl;
+		exit(1);
+	}
+	
 	str	 = name;
 	str	+= "_NTagged_Prompt";
 	if((nTagged[0]	= (TH1I*)gROOT->Get(str.Data())))
@@ -174,6 +197,7 @@ TaggedHistSet::~TaggedHistSet()
 void	TaggedHistSet::Clear()
 {
 	hMultiplicity->Reset("M");
+	nTAPS->Reset("M");
 	nTagged[0]->Reset("M");
 	nTagged[1]->Reset("M");
 	nTagged[2]->Reset("M");
@@ -187,6 +211,7 @@ void	TaggedHistSet::Clear()
 void	TaggedHistSet::Add(const TaggedHistSet* source, const Double_t f)
 {
 	hMultiplicity->Add(source->hMultiplicity, f);
+	nTAPS->Add(source->nTAPS, f);
 	nTagged[0]->Add(source->nTagged[0], f);
 	nTagged[1]->Add(source->nTagged[1], f);
 	nTagged[2]->Add(source->nTagged[2], f);
@@ -197,17 +222,18 @@ void	TaggedHistSet::Add(const TaggedHistSet* source, const Double_t f)
 	hPhiAll->Add(source->hPhiAll, f);
 }
 	
-inline	void	TaggedHistSet::Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t NCBHits, const Double_t CBEnergyAll, const Double_t IMAll, const Double_t ThetaAll, const Double_t PhiAll)
+inline	void	TaggedHistSet::Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t nCB_Hits, const Double_t CBEnergyAll, const Double_t IMAll, const Double_t ThetaAll, const Double_t PhiAll, const Int_t nTAPS_Hits)
 {
-	hMultiplicity->Fill(NCBHits);
+	hMultiplicity->Fill(nCB_Hits);
+	nTAPS->Fill(nTAPS_Hits);
 	nTagged[0]->Fill(NTagged[0]);
 	nTagged[1]->Fill(NTagged[1]);
 	nTagged[2]->Fill(NTagged[2]);
 	hTaggedEnergy->Fill(NTagged, PromptEnergy, Rand1Energy, Rand2Energy);
 	hCBEnergyAll->Fill(NTagged, CBEnergyAll);
 	hIMAll->Fill(NTagged, IMAll);
-	hThetaAll->Fill(NTagged, ThetaAll);
-	hPhiAll->Fill(NTagged, PhiAll);
+	hThetaAll->Fill(NTagged, TMath::RadToDeg()*ThetaAll);
+	hPhiAll->Fill(NTagged, TMath::RadToDeg()*PhiAll);
 }
 	
 void	TaggedHistSet::SubstractBackground()
@@ -231,6 +257,7 @@ void	TaggedHistSet::SaveSubs()
 void	TaggedHistSet::SaveResult()
 {
 	hMultiplicity->Write();
+	nTAPS->Write();
 	nTagged[0]->Write();
 	nTagged[1]->Write();
 	nTagged[2]->Write();

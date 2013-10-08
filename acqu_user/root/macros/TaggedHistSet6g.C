@@ -20,7 +20,7 @@ public:
 	Bool_t	Init(const TString* Name, const TString* Title, const Int_t* NBin, const Double_t* Min, const Double_t* Max);
 	Bool_t	Init(const TaggedHistSet6g* source, const TString* Name, const TString* Title);
 	void	Clear();
-	void	Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t Multiplicity, const Double_t CBEnergyAll, const Double_t* IMPart, const Double_t IMAll, const Double_t IMAllSet, const Double_t ThetaAll, const Double_t PhiAll);
+	void	Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t Multiplicity, const Double_t CBEnergyAll, const Double_t* IMPart, const Double_t IMAll, const Double_t IMAllSet, const Double_t ThetaAll, const Double_t PhiAll, const Int_t nTAPS_Hits);
 	void	SubstractBackground();	
 	void	Add(const TaggedHistSet6g* source, const Double_t f = 1);
 	void	SaveSubs();
@@ -134,9 +134,9 @@ inline	void	TaggedHistSet6g::Clear()
 	hIMAllSet->Clear();
 }
 
-inline	void	TaggedHistSet6g::Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t Multiplicity, const Double_t CBEnergyAll, const Double_t* IMPart, const Double_t IMAll, const Double_t IMAllSet, const Double_t ThetaAll, const Double_t PhiAll)
+inline	void	TaggedHistSet6g::Fill(const Int_t* NTagged, const Double_t* PromptEnergy, const Double_t* Rand1Energy, const Double_t* Rand2Energy, const Int_t Multiplicity, const Double_t CBEnergyAll, const Double_t* IMPart, const Double_t IMAll, const Double_t IMAllSet, const Double_t ThetaAll, const Double_t PhiAll, const Int_t nTAPS_Hits)
 {	
-	TaggedHistSet::Fill(NTagged, PromptEnergy, Rand1Energy, Rand2Energy, Multiplicity, CBEnergyAll, IMAll, ThetaAll, PhiAll);
+	TaggedHistSet::Fill(NTagged, PromptEnergy, Rand1Energy, Rand2Energy, Multiplicity, CBEnergyAll, IMAll, ThetaAll, PhiAll, nTAPS_Hits);
 	
 	hIMPart[0]->Fill(NTagged, IMPart[0]);
 	hIMPart[1]->Fill(NTagged, IMPart[1]);
