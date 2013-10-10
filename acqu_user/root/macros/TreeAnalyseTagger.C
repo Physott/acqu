@@ -102,6 +102,8 @@ void	TreeAnalyseTagger::Analyse(const Char_t* FileName, const Double_t CB_Time_M
 {
 	TreeAnalyseTagger* c = new TreeAnalyseTagger(FileName);
 		c->Open();
+		if(!c->IsOpen())
+			return;
 		c->SetCutCBTime(CB_Time_Min, CB_Time_Max);
 		c->SetCutTapsTime(TAPS_Time_Min, TAPS_Time_Max);
 		c->SetCutTaggerTimePrompt(Prompt_Min,  Prompt_Max);
@@ -113,6 +115,9 @@ void	TreeAnalyseTagger::Analyse(const Char_t* FileName, const Double_t CB_Time_M
 }
 void	TreeAnalyseTagger::AnalyseFolder(const Char_t* FolderName)
 {
+	cout << "***********************************************************************" << endl;
+	cout << "************************TreeAnalyseTagger******************************" << endl;
+	cout << "***********************************************************************" << endl;
 	TSystemDirectory dir(FolderName, FolderName);
 	TList* files = dir.GetListOfFiles()->Clone("MyInputFiles");
 	if (files) 

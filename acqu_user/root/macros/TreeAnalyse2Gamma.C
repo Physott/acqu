@@ -78,12 +78,17 @@ void	TreeAnalyse2Gamma::Analyse(const Char_t* FileName)
 {
 	TreeAnalyse2Gamma* c = new TreeAnalyse2Gamma(FileName);
 		c->Open();
+		if(!c->IsOpen())
+			return;
 		c->Analyse();
 		c->Save();
 		delete c;
 }
 void	TreeAnalyse2Gamma::AnalyseFolder(const Char_t* FolderName)
 {
+	cout << "***********************************************************************" << endl;
+	cout << "************************TreeAnalyse2Gamma******************************" << endl;
+	cout << "***********************************************************************" << endl;
 	TSystemDirectory dir(FolderName, FolderName);
 	TList* files = dir.GetListOfFiles()->Clone("MyInputFiles");
 	if (files) 
@@ -118,7 +123,7 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 	cutIMEta[1]		= 607;
 	cutIMEtaP[0]	= 850;
 	cutIMEtaP[1]	= 1050;
-	cutAngleDiff	= 5;
+	cutAngleDiff	= 8;
 	
 	if((hCutIMCount[0]	= (TH1I*)gROOT->Get("IMCutCount")))
 		hCutIMCount[0]->Delete();
@@ -137,6 +142,11 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 		cout << "Could not create histogram " << "Proton_IMCutCount" << ". Exiting!" << endl;
 		exit(1);
 	}
+	
+	hAll[0] = new TaggedHistSet("");
+	h[0][0] = new TaggedHistSet("Pi0");
+	h[1][0] = new TaggedHistSet("Eta");
+	h[2][0] = new TaggedHistSet("EtaP");
 	
 	if((hCutAngleCount[0]	= (TH1I*)gROOT->Get("WithProton_AngleCutCount_Prompt")))
 		hCutAngleCount[0]->Delete();
@@ -162,12 +172,6 @@ TreeAnalyse2Gamma::TreeAnalyse2Gamma(const Char_t* FileName)	: TreeReadTagged(Fi
 		cout << "Could not create histogram " << "WithProton_AngleCutCount_Rand2" << ". Exiting!" << endl;
 		exit(1);
 	}
-			
-	hAll[0] = new TaggedHistSet("");
-	h[0][0] = new TaggedHistSet("Pi0");
-	h[1][0] = new TaggedHistSet("Eta");
-	h[2][0] = new TaggedHistSet("EtaP");
-	
 	hAngleDiff			= new TaggedHist("WithProton_AngleDiff", 360, 0, 180);
 	hCutAngleDiffCheck	= new TaggedHist("WithProton_CutAngleDiffCheck", 90, 0, 45);
 	

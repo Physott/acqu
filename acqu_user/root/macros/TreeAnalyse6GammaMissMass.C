@@ -50,6 +50,8 @@ public:
 			void	AnalyseEvent(const Int_t i);
 			void	Analyse(const Int_t Min, const Int_t Max);
 	virtual	void	Analyse(const Int_t Max = -1)							{Analyse(0, Max);}
+	static	void	Analyse(const Char_t* FileName);
+	static	void	AnalyseFolder(const Char_t* FolderName);
 	virtual	bool	Save();
 	
 	const	Double_t*	GetCut()	const	{return cut;}
@@ -70,7 +72,47 @@ public:
 };
 
 
-
+void	TreeAnalyse6GammaMissMass::Analyse(const Char_t* FileName)
+{
+	TreeAnalyse6GammaMissMass* c = new TreeAnalyse6GammaMissMass(FileName);
+		c->Open();
+		if(!c->IsOpen())
+			return;
+		c->Analyse();
+		c->Save();
+		delete c;
+}
+void	TreeAnalyse6GammaMissMass::AnalyseFolder(const Char_t* FolderName)
+{
+	cout << "***********************************************************************" << endl;
+	cout << "********************TreeAnalyse6GammaMissMass**************************" << endl;
+	cout << "***********************************************************************" << endl;
+	TSystemDirectory dir(FolderName, FolderName);
+	TList* files = dir.GetListOfFiles()->Clone("MyInputFiles");
+	if (files) 
+	{
+		TSystemFile *sfile;
+		TString fname;
+		TIter next(files);
+		int	ccc=0;
+		while(sfile=(TSystemFile*)next())
+		{
+			fname = sfile->GetName();
+			ccc++;
+			printf("%d\t%s\t", ccc, fname.Data());
+			if (!sfile->IsDirectory() && fname.BeginsWith("tree_") && !fname.BeginsWith("hist_")) 
+			{
+				if(fname.EndsWith("6g_IM3Pi0.root") || fname.EndsWith("6g_IMEtaP.root") || fname.EndsWith("6gProton_IM3Pi0.root") || fname.EndsWith("6gProton_IMEtaP.root"))
+					TreeAnalyse6GammaMissMass::Analyse(fname.Data());
+				else
+					printf("\n");
+			}
+			else
+				printf("\n");
+		}
+		
+	}
+}
 
 
 
