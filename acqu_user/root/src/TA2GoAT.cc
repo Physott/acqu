@@ -205,6 +205,7 @@ void    TA2GoAT::Reconstruct()
 	{
 		tagged_ch[i]	= fLadder->GetHits(i);
 		tagged_t[i]		= (fLadder->GetTime())[i];
+		printf("time: %lf\tHit: %d\tmulti: 0\n", (fLadder->GetTime())[i], i);	
 	}
 	
 	// Collect Tagger M0 Hits
@@ -213,6 +214,7 @@ void    TA2GoAT::Reconstruct()
 		for(int i=0; i<fLadder->GetNhitsM(m); i++)
 		{
 			tagged_ch[nTagged+i]	= (fLadder->GetHitsM(m))[i];
+			printf("time: %lf\t%lf\tHit: %d\tmulti: %d\n", (fLadder->GetTimeM()[m])[i], fLadder->GetTimeM()[m][i], i, m);
 			tagged_t[nTagged+i]		= (fLadder->GetTimeM()[m])[i];
 		}
 		nTagged	+= fLadder->GetNhitsM(m);
@@ -226,12 +228,10 @@ void    TA2GoAT::Reconstruct()
 		Py[i]			= fCB->GetParticles(i).GetPy();
 		Pz[i]			= fCB->GetParticles(i).GetPz();
 		E[i]			= fCB->GetParticles(i).GetE();
-		time[i]			= fCB->GetParticles(i).GetTime();
-		
-//		clusterSize[i]  = // Will be included
-
-//		Apparatus 		= // Mark as CB
-//    	d_E[i]			= // PID Energy		
+		time[i]			= fCB->GetParticles(i).GetTime();	
+		clusterSize[i]  = fCB->GetParticles(i).GetClusterSize();
+		Apparatus[i]	= (UChar_t)EAppCB;	
+		d_E[i]			= fCB->GetParticles(i).GetVetoEnergy();
 //   	WC1_E[i]		= // Will be included
 //	 	WC2_E[i]    	= // Will be included
 //	 	WC_Vertex_X[i]  = // Will be included
@@ -242,16 +242,14 @@ void    TA2GoAT::Reconstruct()
 	// Collect TAPS Hits
 	for(int i=0; i<fTAPS->GetNParticle(); i++)
 	{
-		Px[nParticles+i]		= fTAPS->GetParticles(i).GetPx();
-		Py[nParticles+i]		= fTAPS->GetParticles(i).GetPy();
-		Pz[nParticles+i]		= fTAPS->GetParticles(i).GetPz();
-		E[nParticles+i]			= fTAPS->GetParticles(i).GetE();
-		time[nParticles+i]		= fTAPS->GetParticles(i).GetTime();
-
-//		clusterSize[nParticles+i]   = // Will be included
-
-//		Apparatus[nParticles+i]		= // Mark as TAPS
-//    	d_E[nParticles+i]			= // VETO Energy		
+		Px[nParticles+i]			= fTAPS->GetParticles(i).GetPx();
+		Py[nParticles+i]			= fTAPS->GetParticles(i).GetPy();
+		Pz[nParticles+i]			= fTAPS->GetParticles(i).GetPz();
+		E[nParticles+i]				= fTAPS->GetParticles(i).GetE();
+		time[nParticles+i]			= fTAPS->GetParticles(i).GetTime();
+		clusterSize[nParticles+i]	= fTAPS->GetParticles(i).GetClusterSize();
+		Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;
+		d_E[nParticles+i]			= fTAPS->GetParticles(i).GetVetoEnergy();
 //   	WC1_E[nParticles+i]			= 0.0; // Will be included
 //	 	WC2_E[nParticles+i]    		= 0.0; // Will be included
 //	 	WC_Vertex_X[nParticles+i]  	= 0.0; // Will be included
@@ -261,13 +259,12 @@ void    TA2GoAT::Reconstruct()
 	nParticles += fTAPS->GetNParticle(); // update number of particles
 	
 	
+	//Fill Tree
+	treeEvent->Fill();
+	
 	
 	//increment event number
-	eventNumber++;
-	
-	//treeEvent->Fill();
-	
-	
+	eventNumber++;	
 }
 
 void    TA2GoAT::Finish()
