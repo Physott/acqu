@@ -106,6 +106,8 @@ class TA2Particle : public TObject
   Bool_t fUnclear;
   Int_t    fIintersMwpc[2]; //Indexes of intersections in the internal (0) and external (1) MWPC
   Double_t fTrackEnergy;    //Sum of MWPCs intersections pulse amplitudes
+  Double_t fEnergyMwpc0;    //Mwpc0 energy 
+  Double_t fEnergyMwpc1;    //Mwpc1 energy   
   Double_t fTrackTime;      //To-do 
   //
  public:
@@ -195,6 +197,8 @@ class TA2Particle : public TObject
   const Int_t  &GetTrackIntersect(const Int_t iCh) const { return fIintersMwpc[iCh]; }
   const Int_t* GetTrackIntersects() const { return fIintersMwpc; }
   const Double_t &GetTrackEnergy() const { return fTrackEnergy; }
+  const Double_t &GetEnergyMwpc0() const { return fEnergyMwpc0; }  
+  const Double_t &GetEnergyMwpc1() const { return fEnergyMwpc1; }    
   const Double_t &GetTrackTime()   const { return fTrackTime; }
   void SetTime(Double_t pTime){ fTime = pTime; }
   void SetVetoIndex(Int_t pVetoIndex){ fVetoIndex = pVetoIndex; }
@@ -252,6 +256,8 @@ class TA2Particle : public TObject
   void SetTrackIntersects(const Int_t i0, const Int_t i1) { fIintersMwpc[0] = i0; fIintersMwpc[1] = i1; }
   void SetTrackIntersect(const Int_t iCh, const Int_t i) { fIintersMwpc[iCh] = i; }
   void SetTrackEnergy(const Double_t &e) { fTrackEnergy = e; }
+  void SetEnergyMwpc0(const Double_t &e) { fEnergyMwpc0 = e; }  
+  void SetEnergyMwpc1(const Double_t &e) { fEnergyMwpc1 = e; }    
   void SetTrackTime(const Double_t &t) { fTrackTime = t; }
   void Reset();
   TA2Particle Add(TA2Particle pParticle);
