@@ -181,8 +181,9 @@ void    TA2GoAT::PostInit()
 	
 	treeScaler->Branch("eventNumber", &eventNumber, "eventNumber/I");
 	treeScaler->Branch("eventID", &eventID, "eventID/I");
-	sprintf(str, "Scaler[%d]/I", gAR->GetMaxScaler());
-	treeScaler->Branch("Scaler", gAR->GetScaler(), str);
+	printf("GetMaxScaler: %d\n", GetMaxScaler());
+	sprintf(str, "Scaler[%d]/i", GetMaxScaler());
+	treeScaler->Branch("Scaler", fScaler, str);
 	
 	eventNumber	= 0;
 }
@@ -195,6 +196,8 @@ void    TA2GoAT::Reconstruct()
 	{
 		eventID	= gAN->GetNDAQEvent();
 		
+		//for(int i=0; i<GetMaxScaler(); i++)
+		//	printf("Scaler%d: %d\n", i, fScaler[i]);
 		treeScaler->Fill();		
 		return;
 	}
@@ -204,8 +207,7 @@ void    TA2GoAT::Reconstruct()
 	for(int i=0; i<nTagged; i++)
 	{
 		tagged_ch[i]	= fLadder->GetHits(i);
-		tagged_t[i]		= (fLadder->GetTime())[i];
-		printf("time: %lf\tHit: %d\tmulti: 0\n", (fLadder->GetTime())[i], i);	
+		tagged_t[i]		= (fLadder->GetTimeOR())[i];
 	}
 	
 	// Collect Tagger M0 Hits
@@ -214,8 +216,7 @@ void    TA2GoAT::Reconstruct()
 		for(int i=0; i<fLadder->GetNhitsM(m); i++)
 		{
 			tagged_ch[nTagged+i]	= (fLadder->GetHitsM(m))[i];
-			printf("time: %lf\t%lf\tHit: %d\tmulti: %d\n", (fLadder->GetTimeM()[m])[i], fLadder->GetTimeM()[m][i], i, m);
-			tagged_t[nTagged+i]		= (fLadder->GetTimeM()[m])[i];
+			tagged_t[nTagged+i]		= (fLadder->GetTimeORM(m))[i];
 		}
 		nTagged	+= fLadder->GetNhitsM(m);
 	}
