@@ -21,8 +21,8 @@ ClassImp(TA2GoAT)
 
 TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, Analysis),
                                                                     file(0),
-                                                                    tree(0),
-                                                                    treeTagger(0),
+                                                                    treeEvent(0),
+                                                                    treeScaler(0),
                                                                     nParticles(0),
                                                                     Px(0),
                                                                     Py(0),
@@ -33,13 +33,13 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     nTagged(0),
                                                                     tagged_ch(0),
                                                                     tagged_t(0),
-                                                                    NaI_E(0),
-                                                                    BaF2_E(0),
-                                                                    PbWO4_E(0),
-                                                                    PID_E(0),
-                                                                    Veto_E(0),
+                                                                    Apparatus(0),
+                                                                    d_E(0),
                                                                     WC1_E(0),
                                                                     WC2_E(0),
+                                                                    WC_Vertex_X(0),
+                                                                    WC_Vertex_Y(0),
+                                                                    WC_Vertex_Z(0),
                                                                     nNaI_Hits(0),
                                                                     NaI_Hits(0),
                                                                     nBaF2_Hits(0),
@@ -112,7 +112,7 @@ void    TA2GoAT::PostInit()
     Pz			= new Double_t[TA2GoAT_MAX_PARTICLE];
     E			= new Double_t[TA2GoAT_MAX_PARTICLE];
     time		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    clusterSize	= new Double_t[TA2GoAT_MAX_PARTICLE];
+    clusterSize	= new UChar_t[TA2GoAT_MAX_PARTICLE];
     
     tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
     tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
@@ -181,7 +181,6 @@ void    TA2GoAT::PostInit()
 	
 	treeScaler->Branch("eventNumber", &eventNumber, "eventNumber/I");
 	treeScaler->Branch("eventID", &eventID, "eventID/I");
-	Char_t	str[128];
 	sprintf(str, "Scaler[%d]/I", gAR->GetMaxScaler());
 	treeScaler->Branch("Scaler", gAR->GetScaler(), str);
 	
@@ -194,29 +193,29 @@ void    TA2GoAT::Reconstruct()
 	//Is Scaler Read
 	if(gAR->IsScalerRead())
 	{
-		eventID	= gUA->GetNDAQEvent();
+		eventID	= gAN->GetNDAQEvent();
 		
 		treeScaler->Fill();		
 		return;
 	}
 	
 	// Collect Tagger M0 Hits
-	nTagged	= fTagger->GetNhits();
+	nTagged	= fLadder->GetNhits();
 	for(int i=0; i<nTagged; i++)
 	{
-		tagged_ch[i]	= fTagger->GetHits(i);
-		tagged_t[i]		= (fTagger->GetTime())[i];
+		tagged_ch[i]	= fLadder->GetHits(i);
+		tagged_t[i]		= (fLadder->GetTime())[i];
 	}
 	
 	// Collect Tagger M0 Hits
-	for(int m=1; m<GetNMultihit(); m++)
+	for(int m=1; m<fLadder->GetNMultihit(); m++)
 	{
-		for(int i=0; i<fTagger->GetNhitsM(m); i++)
+		for(int i=0; i<fLadder->GetNhitsM(m); i++)
 		{
-			tagged_ch[nTagged+i]	= (fTagger->GetHitsM(m))[i];
-			tagged_t[nTagged+i]		= (fTagger->GetTimeM(m))[i];
+			tagged_ch[nTagged+i]	= (fLadder->GetHitsM(m))[i];
+			tagged_t[nTagged+i]		= (fLadder->GetTimeM()[m])[i];
 		}
-		nTagged	+= fTagger->GetNhitsM(m);
+		nTagged	+= fLadder->GetNhitsM(m);
 	}
 	
 	// Collect CB Hits
@@ -259,7 +258,7 @@ void    TA2GoAT::Reconstruct()
 //	 	WC_Vertex_Y[nParticles+i]  	= 0.0; // Will be included
 //	 	WC_Vertex_Z[nParticles+i]  	= 0.0; // Will be included    			
 	}
-	nparticles += fTAPS->GetNParticle(); // update number of particles
+	nParticles += fTAPS->GetNParticle(); // update number of particles
 	
 	
 	

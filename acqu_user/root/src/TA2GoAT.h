@@ -61,7 +61,7 @@ private:
     UChar_t*		clusterSize;
     
     //Tagger
-    Int_t			nTagger;
+    Int_t			nTagged;
     Int_t*			tagged_ch;
     Double_t*		tagged_t;
     
