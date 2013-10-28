@@ -1,5 +1,5 @@
 //*************************************************************************
-//* Author: Patrik Ott
+//* Author: Patrik Ott, Cristina Collicott
 //*************************************************************************
 
 //////////////////////////////////////////////////////////////////////////
@@ -82,6 +82,24 @@ void    TA2GoAT::LoadVariable()
 {
 	// Including histogram output for testing purposes (quick check of variables)
     TA2AccessSQL::LoadVariable();
+
+    TA2DataManager::LoadVariable("nParticles", 	&nParticles,	EISingleX);
+    TA2DataManager::LoadVariable("Px", 			Px,				EDMultiX);
+    TA2DataManager::LoadVariable("Py", 			Py,				EDMultiX);
+    TA2DataManager::LoadVariable("Pz", 			Pz,				EDMultiX);
+    TA2DataManager::LoadVariable("E", 			E,				EDMultiX);
+    TA2DataManager::LoadVariable("time", 		time,			EDMultiX);
+    TA2DataManager::LoadVariable("clusterSize", clusterSize,	EIMultiX);
+
+    TA2DataManager::LoadVariable("nTagged", 	&nTagged,		EISingleX);
+    TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,		EIMultiX);
+    TA2DataManager::LoadVariable("taggedT", 	tagged_t,		EDMultiX);    
+
+    TA2DataManager::LoadVariable("dE", 			d_E,			EDMultiX);
+    TA2DataManager::LoadVariable("WC0E", 		WC0_E,			EDMultiX);   
+    TA2DataManager::LoadVariable("WC1E", 		WC1_E,			EDMultiX); 
+    return;
+    
 }
 
 
@@ -106,14 +124,14 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 
 void    TA2GoAT::PostInit()
 {
-    TA2AccessSQL::PostInit();
+//    TA2AccessSQL::PostInit();
     
     Px			= new Double_t[TA2GoAT_MAX_PARTICLE];
     Py			= new Double_t[TA2GoAT_MAX_PARTICLE];
     Pz			= new Double_t[TA2GoAT_MAX_PARTICLE];
     E			= new Double_t[TA2GoAT_MAX_PARTICLE];
     time		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    clusterSize	= new UChar_t[TA2GoAT_MAX_PARTICLE];
+    clusterSize	= new Int_t[TA2GoAT_MAX_PARTICLE];
     
     tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
     tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
@@ -167,7 +185,7 @@ void    TA2GoAT::PostInit()
 	treeEvent->Branch("Pz", Pz, "Pz[nParticles]/D");
 	treeEvent->Branch("E",  E,  "E[nParticles]/D");	
 	treeEvent->Branch("time", time, "time[nParticles]/D");
-	treeEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/D");
+	treeEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/I");
     
 	treeEvent->Branch("nTagged", &nTagged,"nTagged/I");
 	treeEvent->Branch("tagged_ch", tagged_ch, "tagged_ch[nTagged]/I");
@@ -206,7 +224,13 @@ void    TA2GoAT::PostInit()
 	sprintf(str, "Scaler[%d]/i", GetMaxScaler());
 	treeScaler->Branch("Scaler", fScaler, str);
 	
+	gROOT->cd();
+	
 	eventNumber	= 0;
+	
+	// Default SQL-physics initialisation
+    TA2AccessSQL::PostInit();	
+
 }
 
 
@@ -279,12 +303,25 @@ void    TA2GoAT::Reconstruct()
 //	 	WC_Vertex_Z[nParticles+i]  	= 0.0; // Will be included    			
 	}
 	nParticles += fTAPS->GetNParticle(); // update number of particles
-	
+
+	//Apply EndBuffer
+    Px[nParticles] = EBufferEnd;
+    Py[nParticles] = EBufferEnd;
+    Pz[nParticles] = EBufferEnd;
+    E[nParticles] = EBufferEnd;
+    time[nParticles] = EBufferEnd;
+    clusterSize[nParticles] = EBufferEnd;
+    WC0_E[nParticles] = EBufferEnd;
+    WC1_E[nParticles] = EBufferEnd;
+	d_E[nParticles] = EBufferEnd;    
+    tagged_ch[nTagged] = EBufferEnd;
+    tagged_t[nTagged] = EBufferEnd;	
 	
 	//Fill Tree
 	treeEvent->Fill();
-	
-	
+
+
+
 	//increment event number
 	eventNumber++;	
 }
