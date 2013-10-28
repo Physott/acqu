@@ -20,9 +20,9 @@
 
 #include "TA2AccessSQL.h"
 
-#define TA2GoAT_MAX_TAGGER		256
+#define TA2GoAT_MAX_TAGGER		1024
 #define TA2GoAT_MAX_PARTICLE	128
-#define TA2GoAT_MAX_HITS		512  // Why 512 ?
+#define TA2GoAT_MAX_HITS		720  
 
 enum {
     EG_OUTPUT_FOLDER = 30250,
@@ -70,8 +70,8 @@ private:
     
     //Charged detector energies
     Double_t*		d_E;
+    Double_t*		WC0_E;
     Double_t*		WC1_E;
-    Double_t*		WC2_E;
 
 	//Wire Chamber vertex reconstruction
     Double_t* 		WC_Vertex_X;
@@ -89,10 +89,10 @@ private:
     Int_t*			PID_Hits;
     Int_t			nVeto_Hits;
     Int_t*			Veto_Hits;
+    Int_t			nWC0_Hits;
+    Int_t*			WC0_Hits;
     Int_t			nWC1_Hits;
     Int_t*			WC1_Hits;
-    Int_t			nWC2_Hits;
-    Int_t*			WC2_Hits;
     
     //Trigger TBD
     Double_t 		ESum;

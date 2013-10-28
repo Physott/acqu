@@ -1,0 +1,17 @@
+#########################################################################
+#                                                                       #
+# GoAT analysis class configuration file                                #
+#                                                                       #
+#########################################################################
+
+Reconstruct:
+
+#
+# CaLib configuration, off for MC
+#
+
+RootTree-Output-Folder:         ~/
+RootTree-File-Name:		RootTreeMC
+
+Initialise:
+

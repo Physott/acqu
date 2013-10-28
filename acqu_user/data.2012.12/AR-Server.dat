@@ -14,7 +14,7 @@ Input-Streams:	1		32768		0
 ##############################################################################
 # Optional directory spec. 
 # If not specified File-Names must contain the full directory path
-File-Directory:	/home/cristina/RawData/Compton.12.12/
+File-Directory:	/home/cristina/Analysis/RawData/Compton.12.12/
 #
 ##############################################################################
 # Now the list of data files to analyse normal mode

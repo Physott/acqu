@@ -35,8 +35,8 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     tagged_t(0),
                                                                     Apparatus(0),
                                                                     d_E(0),
+                                                                    WC0_E(0),
                                                                     WC1_E(0),
-                                                                    WC2_E(0),
                                                                     WC_Vertex_X(0),
                                                                     WC_Vertex_Y(0),
                                                                     WC_Vertex_Z(0),
@@ -50,10 +50,10 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     PID_Hits(0),
                                                                     nVeto_Hits(0),
                                                                     Veto_Hits(0),
+                                                                    nWC0_Hits(0),
+                                                                    WC0_Hits(0),
                                                                     nWC1_Hits(0),
                                                                     WC1_Hits(0),
-                                                                    nWC2_Hits(0),
-                                                                    WC2_Hits(0),
                                                                     ESum(0),
                                                                     CBMult(0),
                                                                     TAPSMult(0),
@@ -80,6 +80,7 @@ TA2GoAT::~TA2GoAT()
 
 void    TA2GoAT::LoadVariable()
 {
+	// Including histogram output for testing purposes (quick check of variables)
     TA2AccessSQL::LoadVariable();
 }
 
@@ -119,23 +120,43 @@ void    TA2GoAT::PostInit()
     
     Apparatus	= new UChar_t[TA2GoAT_MAX_PARTICLE];
     d_E			= new Double_t[TA2GoAT_MAX_PARTICLE];
+    WC0_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     WC1_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    WC2_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     
     NaI_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     BaF2_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     PbWO4_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     PID_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     Veto_Hits	= new Int_t[TA2GoAT_MAX_HITS];
+    WC0_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     WC1_Hits	= new Int_t[TA2GoAT_MAX_HITS];
-    WC2_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     
     printf("---------\n");
     printf("Init Tree\n");
     printf("---------\n");
     
-    Char_t	str[256];
-    sprintf(str, "%s/%s_%d.root", outputFolder, fileName, GetRunNumber());
+    // Append input filename to output tree name.
+    TString fullName;
+    if(gAR->GetProcessType() == EMCProcess) fullName = gAR->GetTreeFileList(0);        
+    else  fullName = gAR->GetFileName();
+		
+	int length = fullName.Length();
+	int last = 0;
+	for (int i = 0; i < length; i++)
+	{
+		int index = fullName.Index("/"); 
+		fullName.Remove(0,index+1);	
+		if (index == -1) break;
+		last += index+1; 
+	}
+	Char_t inFile[256], str[256];
+    if(gAR->GetProcessType() == EMCProcess) 
+		sscanf( gAR->GetTreeFileList(0)+last, "%[^.].root\n", inFile);       
+    else    
+		sscanf( gAR->GetFileName()+last, "%[^.].dat\n", inFile);	
+
+    sprintf(str, "%s/%s_%s.root", outputFolder, fileName, inFile);        
+        
     file		= new TFile(str,"RECREATE");
 	treeEvent	= new TTree("treeEvent", "treeEvent");
 	treeScaler	= new TTree("treeScaler", "treeScaler");
@@ -154,8 +175,8 @@ void    TA2GoAT::PostInit()
     
 	treeEvent->Branch("Apparatus", Apparatus, "Apparatus[nParticles]/b");
 	treeEvent->Branch("d_E", d_E, "d_E[nParticles]/D");	
-	treeEvent->Branch("WC1_E", WC1_E, "WC1_E[nParticles]/D");	
-	treeEvent->Branch("WC2_E", WC2_E, "WC2_E[nParticles]/D");
+	treeEvent->Branch("WC0_E", WC0_E, "WC0_E[nParticles]/D");	
+	treeEvent->Branch("WC1_E", WC1_E, "WC1_E[nParticles]/D");
 	treeEvent->Branch("WC_Vertex_X", WC_Vertex_X, "WC_Vertex_X[nParticles]/D");	
 	treeEvent->Branch("WC_Vertex_Y", WC_Vertex_Y, "WC_Vertex_Y[nParticles]/D");	
 	treeEvent->Branch("WC_Vertex_Z", WC_Vertex_Z, "WC_Vertex_Z[nParticles]/D");	
@@ -170,10 +191,10 @@ void    TA2GoAT::PostInit()
 	treeEvent->Branch("PID_Hits", PID_Hits, "PID_Hits[nPID_Hits]/I");
 	treeEvent->Branch("nVeto_Hits", &nVeto_Hits, "nVeto_Hits/I");
 	treeEvent->Branch("Veto_Hits", Veto_Hits, "Veto_Hits[nVeto_Hits]/I");
+	treeEvent->Branch("nWC0_Hits", &nWC0_Hits, "nWC0_Hits/I");
+	treeEvent->Branch("WC0_Hits", WC0_Hits, "WC0_Hits[nWC0_Hits]/I");
 	treeEvent->Branch("nWC1_Hits", &nWC1_Hits, "nWC1_Hits/I");
 	treeEvent->Branch("WC1_Hits", WC1_Hits, "WC1_Hits[nWC1_Hits]/I");
-	treeEvent->Branch("nWC2_Hits", &nWC2_Hits, "nWC2_Hits/I");
-	treeEvent->Branch("WC2_Hits", WC2_Hits, "WC2_Hits[nWC2_Hits]/I");
 	
 	treeEvent->Branch("ESum", &ESum, "ESum/D");
 	treeEvent->Branch("CBMult", &CBMult, "CBMult/I");
@@ -233,8 +254,8 @@ void    TA2GoAT::Reconstruct()
 		clusterSize[i]  = fCB->GetParticles(i).GetClusterSize();
 		Apparatus[i]	= (UChar_t)EAppCB;	
 		d_E[i]			= fCB->GetParticles(i).GetVetoEnergy();
-//   	WC1_E[i]		= // Will be included
-//	 	WC2_E[i]    	= // Will be included
+//   	WC0_E[i]		= // Will be included
+//	 	WC1_E[i]    	= // Will be included
 //	 	WC_Vertex_X[i]  = // Will be included
 //	 	WC_Vertex_Y[i]  = // Will be included
 //	 	WC_Vertex_Z[i]  = // Will be included
@@ -251,8 +272,8 @@ void    TA2GoAT::Reconstruct()
 		clusterSize[nParticles+i]	= fTAPS->GetParticles(i).GetClusterSize();
 		Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;
 		d_E[nParticles+i]			= fTAPS->GetParticles(i).GetVetoEnergy();
-//   	WC1_E[nParticles+i]			= 0.0; // Will be included
-//	 	WC2_E[nParticles+i]    		= 0.0; // Will be included
+//   	WC0_E[nParticles+i]			= 0.0; // Will be included
+//	 	WC1_E[nParticles+i]    		= 0.0; // Will be included
 //	 	WC_Vertex_X[nParticles+i]  	= 0.0; // Will be included
 //	 	WC_Vertex_Y[nParticles+i]  	= 0.0; // Will be included
 //	 	WC_Vertex_Z[nParticles+i]  	= 0.0; // Will be included    			
