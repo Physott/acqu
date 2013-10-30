@@ -89,7 +89,6 @@ void    TA2GoAT::LoadVariable()
     TA2DataManager::LoadVariable("Pz", 			Pz,				EDMultiX);
     TA2DataManager::LoadVariable("E", 			E,				EDMultiX);
     TA2DataManager::LoadVariable("time", 		time,			EDMultiX);
-    TA2DataManager::LoadVariable("clusterSize", clusterSize,	EIMultiX);
 
     TA2DataManager::LoadVariable("nTagged", 	&nTagged,		EISingleX);
     TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,		EIMultiX);
@@ -131,7 +130,7 @@ void    TA2GoAT::PostInit()
     Pz			= new Double_t[TA2GoAT_MAX_PARTICLE];
     E			= new Double_t[TA2GoAT_MAX_PARTICLE];
     time		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    clusterSize	= new Int_t[TA2GoAT_MAX_PARTICLE];
+    clusterSize	= new UChar_t[TA2GoAT_MAX_PARTICLE];
     
     tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
     tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
@@ -185,7 +184,7 @@ void    TA2GoAT::PostInit()
 	treeEvent->Branch("Pz", Pz, "Pz[nParticles]/D");
 	treeEvent->Branch("E",  E,  "E[nParticles]/D");	
 	treeEvent->Branch("time", time, "time[nParticles]/D");
-	treeEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/I");
+	treeEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/b");
     
 	treeEvent->Branch("nTagged", &nTagged,"nTagged/I");
 	treeEvent->Branch("tagged_ch", tagged_ch, "tagged_ch[nTagged]/I");
@@ -275,7 +274,7 @@ void    TA2GoAT::Reconstruct()
 		Pz[i]			= fCB->GetParticles(i).GetPz();
 		E[i]			= fCB->GetParticles(i).GetE();
 		time[i]			= fCB->GetParticles(i).GetTime();	
-		clusterSize[i]  = fCB->GetParticles(i).GetClusterSize();
+		clusterSize[i]  = (UChar_t)fCB->GetParticles(i).GetClusterSize();
 		Apparatus[i]	= (UChar_t)EAppCB;	
 		d_E[i]			= fCB->GetParticles(i).GetVetoEnergy();
 //   	WC0_E[i]		= // Will be included
@@ -293,7 +292,7 @@ void    TA2GoAT::Reconstruct()
 		Pz[nParticles+i]			= fTAPS->GetParticles(i).GetPz();
 		E[nParticles+i]				= fTAPS->GetParticles(i).GetE();
 		time[nParticles+i]			= fTAPS->GetParticles(i).GetTime();
-		clusterSize[nParticles+i]	= fTAPS->GetParticles(i).GetClusterSize();
+		clusterSize[nParticles+i]	= (UChar_t)fTAPS->GetParticles(i).GetClusterSize();
 		Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;
 		d_E[nParticles+i]			= fTAPS->GetParticles(i).GetVetoEnergy();
 //   	WC0_E[nParticles+i]			= 0.0; // Will be included
@@ -310,7 +309,6 @@ void    TA2GoAT::Reconstruct()
     Pz[nParticles] = EBufferEnd;
     E[nParticles] = EBufferEnd;
     time[nParticles] = EBufferEnd;
-    clusterSize[nParticles] = EBufferEnd;
     WC0_E[nParticles] = EBufferEnd;
     WC1_E[nParticles] = EBufferEnd;
 	d_E[nParticles] = EBufferEnd;    
