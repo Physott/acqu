@@ -73,6 +73,7 @@ protected:
     TA2CentralApparatus* 	fCB;    						// pointer to the Crystal Ball
     TA2CalArray* 			fNaI;        					// pointer to the NaI elements
     TA2PlasticPID* 			fPID;              				// pointer to the PID
+    TA2CylMwpc*				fMWPC;							// pointer to the Mwpc
     TA2Taps* 				fTAPS;       					// pointer to TAPS
     TA2TAPS_BaF2* 			fBaF2PWO;       				// pointer to the BaF2 (or the BaF2/PWO) array
     TA2TAPS_Veto* 			fVeto;           				// pointer to the TAPS Vetos

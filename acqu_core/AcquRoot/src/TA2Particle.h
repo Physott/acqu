@@ -108,6 +108,7 @@ class TA2Particle : public TObject
   Double_t fTrackEnergy;    //Sum of MWPCs intersections pulse amplitudes
   Double_t fEnergyMwpc0;    //Mwpc0 energy 
   Double_t fEnergyMwpc1;    //Mwpc1 energy   
+  TVector3	 fPsVertex;		//Mwpc vertex vector 
   Double_t fTrackTime;      //To-do 
   //
  public:
@@ -200,6 +201,7 @@ class TA2Particle : public TObject
   const Double_t &GetEnergyMwpc0() const { return fEnergyMwpc0; }  
   const Double_t &GetEnergyMwpc1() const { return fEnergyMwpc1; }    
   const Double_t &GetTrackTime()   const { return fTrackTime; }
+  const TVector3 &GetPsVertex() const { return fPsVertex; }
   void SetTime(Double_t pTime){ fTime = pTime; }
   void SetVetoIndex(Int_t pVetoIndex){ fVetoIndex = pVetoIndex; }
   void SetCentralIndex(Int_t pCentralIndex){ fCentralIndex = pCentralIndex; }
@@ -257,7 +259,8 @@ class TA2Particle : public TObject
   void SetTrackIntersect(const Int_t iCh, const Int_t i) { fIintersMwpc[iCh] = i; }
   void SetTrackEnergy(const Double_t &e) { fTrackEnergy = e; }
   void SetEnergyMwpc0(const Double_t &e) { fEnergyMwpc0 = e; }  
-  void SetEnergyMwpc1(const Double_t &e) { fEnergyMwpc1 = e; }    
+  void SetEnergyMwpc1(const Double_t &e) { fEnergyMwpc1 = e; } 
+  void SetPsVertex(const TVector3 &vertex) { fPsVertex = vertex; }
   void SetTrackTime(const Double_t &t) { fTrackTime = t; }
   void Reset();
   TA2Particle Add(TA2Particle pParticle);

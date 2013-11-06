@@ -1158,7 +1158,8 @@ void TA2CentralApparatus::AddParticleInfo(const TA2CentralTrack &track)
   fParticleInfo[fNparticle].SetTrackIntersects(track.GetIinterMwpc(0),track.GetIinterMwpc(1));
   fParticleInfo[fNparticle].SetTrackEnergy(track.GetEtrackMwpc());
   fParticleInfo[fNparticle].SetEnergyMwpc0(track.GetEtrackMwpc0());  
-  fParticleInfo[fNparticle].SetEnergyMwpc1(track.GetEtrackMwpc1());   
+  fParticleInfo[fNparticle].SetEnergyMwpc1(track.GetEtrackMwpc1());
+  fParticleInfo[fNparticle].SetPsVertex(track.GetPsVertex()); 
   fParticleInfo[fNparticle].SetTrackTime(track.GetTtrackMwpc());
   
   ++fNparticle;

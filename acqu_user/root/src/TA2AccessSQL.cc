@@ -332,6 +332,11 @@ void TA2AccessSQL::LoadDetectors(TA2DataManager* parent, Int_t depth)
             fPID = (TA2PlasticPID*) obj;
             added = kTRUE;
         }
+        else if (!strcmp(obj->GetName(), "MWPC"))
+        {
+            fMWPC = (TA2CylMwpc*) obj;
+            added = kTRUE;
+        }        
         else if (!strcmp(obj->GetName(), "TAPS"))
         {
             fTAPS = (TA2Taps*) obj;
