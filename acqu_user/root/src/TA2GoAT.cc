@@ -4,7 +4,10 @@ ClassImp(TA2GoAT)
 
 TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, Analysis),
                                                                     file(0),
-                                                                    treeEvent(0),
+                                                                    treeRawEvent(0),
+								    treeTagger(0),
+								    treeTrigger(0),
+                                                                    treeDetectorHits(0),
                                                                     treeScaler(0),
                                                                     nParticles(0),
                                                                     Px(0),
@@ -13,9 +16,6 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     E(0),
                                                                     time(0),
                                                                     clusterSize(0),
-                                                                    nTagged(0),
-                                                                    tagged_ch(0),
-                                                                    tagged_t(0),
                                                                     Apparatus(0),
                                                                     d_E(0),
                                                                     WC0_E(0),
@@ -23,13 +23,15 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     WC_Vertex_X(0),
                                                                     WC_Vertex_Y(0),
                                                                     WC_Vertex_Z(0),
+                                                                    nTagged(0),
+                                                                    tagged_ch(0),
+                                                                    tagged_t(0),
                                                                     nNaI_Hits(0),
                                                                     NaI_Hits(0),
                                                                     nPID_Hits(0),
                                                                     PID_Hits(0),
                                                                     nWC_Hits(0),
-                                                                    WC_Hits(0),                                                                    
-                                                                    nBaF2_PbWO4_Hits(0),
+                                                                    WC_Hits(0),                                                                                                    nBaF2_PbWO4_Hits(0),
                                                                     BaF2_PbWO4_Hits(0),
                                                                     nVeto_Hits(0),
                                                                     Veto_Hits(0),
@@ -48,8 +50,12 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
 
 TA2GoAT::~TA2GoAT()
 {
-	if(treeEvent)
-		delete treeEvent;
+	if(treeRawEvent)
+		delete treeRawEvent;
+	if(treeTagger)
+		delete treeTagger;
+	if(treeDetectorHits)
+		delete treeDetectorHits;
 	if(treeScaler)
 		delete treeScaler;
     	if(file)
@@ -63,10 +69,10 @@ void    TA2GoAT::LoadVariable()
    	TA2AccessSQL::LoadVariable();
 
     	TA2DataManager::LoadVariable("nParticles", 	&nParticles,	EISingleX);
-    	TA2DataManager::LoadVariable("Px", 		Px,		EDMultiX);
-    	TA2DataManager::LoadVariable("Py", 		Py,		EDMultiX);
-    	TA2DataManager::LoadVariable("Pz", 		Pz,		EDMultiX);
-    	TA2DataManager::LoadVariable("E", 		E,		EDMultiX);
+    	TA2DataManager::LoadVariable("Px", 			Px,		EDMultiX);
+    	TA2DataManager::LoadVariable("Py", 			Py,		EDMultiX);
+    	TA2DataManager::LoadVariable("Pz", 			Pz,		EDMultiX);
+    	TA2DataManager::LoadVariable("E", 			E,		EDMultiX);
     	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
 
     	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
@@ -156,43 +162,45 @@ void    TA2GoAT::PostInit()
     	sprintf(str, "%s/%s_%s.root", outputFolder, fileName, inFile);        
         
    	file		= new TFile(str,"RECREATE");
-	treeEvent	= new TTree("treeEvent", "treeEvent");
+	treeRawEvent	= new TTree("treeRawEvent", "treeRawEvent");
+	treeTagger	= new TTree("treeTagger","treeTagger");
+	treeTrigger	= new TTree("treeTrigger","treeTrigger");
+	treeDetectorHits = new TTree("treeDetectorHits", "treeDetectorHits");
 	treeScaler	= new TTree("treeScaler", "treeScaler");
 	
-	treeEvent->Branch("nParticles",&nParticles,"nParticles/I");
-	treeEvent->Branch("Px", Px, "Px[nParticles]/D");
-	treeEvent->Branch("Py", Py, "Py[nParticles]/D");
-	treeEvent->Branch("Pz", Pz, "Pz[nParticles]/D");
-	treeEvent->Branch("E",  E,  "E[nParticles]/D");	
-	treeEvent->Branch("time", time, "time[nParticles]/D");
-	treeEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/b");
-    
-	treeEvent->Branch("nTagged", &nTagged,"nTagged/I");
-	treeEvent->Branch("tagged_ch", tagged_ch, "tagged_ch[nTagged]/I");
-	treeEvent->Branch("tagged_t", tagged_t, "tagged_t[nTagged]/D");
-    
-	treeEvent->Branch("Apparatus", Apparatus, "Apparatus[nParticles]/b");
-	treeEvent->Branch("d_E", d_E, "d_E[nParticles]/D");	
-	treeEvent->Branch("WC0_E", WC0_E, "WC0_E[nParticles]/D");	
-	treeEvent->Branch("WC1_E", WC1_E, "WC1_E[nParticles]/D");
-	treeEvent->Branch("WC_Vertex_X", WC_Vertex_X, "WC_Vertex_X[nParticles]/D");	
-	treeEvent->Branch("WC_Vertex_Y", WC_Vertex_Y, "WC_Vertex_Y[nParticles]/D");	
-	treeEvent->Branch("WC_Vertex_Z", WC_Vertex_Z, "WC_Vertex_Z[nParticles]/D");	
+	treeRawEvent->Branch("nParticles",&nParticles,"nParticles/I");
+	treeRawEvent->Branch("Px", Px, "Px[nParticles]/D");
+	treeRawEvent->Branch("Py", Py, "Py[nParticles]/D");
+	treeRawEvent->Branch("Pz", Pz, "Pz[nParticles]/D");
+	treeRawEvent->Branch("E",  E,  "E[nParticles]/D");	
+	treeRawEvent->Branch("time", time, "time[nParticles]/D");
+	treeRawEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/b");
+	treeRawEvent->Branch("Apparatus", Apparatus, "Apparatus[nParticles]/b");
+	treeRawEvent->Branch("d_E", d_E, "d_E[nParticles]/D");	
+	treeRawEvent->Branch("WC0_E", WC0_E, "WC0_E[nParticles]/D");	
+	treeRawEvent->Branch("WC1_E", WC1_E, "WC1_E[nParticles]/D");
+	treeRawEvent->Branch("WC_Vertex_X", WC_Vertex_X, "WC_Vertex_X[nParticles]/D");	
+	treeRawEvent->Branch("WC_Vertex_Y", WC_Vertex_Y, "WC_Vertex_Y[nParticles]/D");	
+	treeRawEvent->Branch("WC_Vertex_Z", WC_Vertex_Z, "WC_Vertex_Z[nParticles]/D");
 	
-	treeEvent->Branch("nNaI_Hits", &nNaI_Hits, "nNaI_Hits/I");
-	treeEvent->Branch("NaI_Hits", NaI_Hits, "NaI_Hits[nNaI_Hits]/I");
-	treeEvent->Branch("nPID_Hits", &nPID_Hits, "nPID_Hits/I");
-	treeEvent->Branch("PID_Hits", PID_Hits, "PID_Hits[nPID_Hits]/I");
-	treeEvent->Branch("nWC_Hits", &nWC_Hits, "nWC_Hits/I");
-	treeEvent->Branch("WC_Hits", WC_Hits, "WC_Hits[nWC_Hits]/I");	
-	treeEvent->Branch("nBaF2_PbWO4_Hits", &nBaF2_PbWO4_Hits, "nBaF2_PbWO4_Hits/I");
-	treeEvent->Branch("BaF2_PbWO4_Hits", BaF2_PbWO4_Hits, "BaF2_PbWO4_Hits[nBaF2_PbWO4_Hits]/I");
-	treeEvent->Branch("nVeto_Hits", &nVeto_Hits, "nVeto_Hits/I");
-	treeEvent->Branch("Veto_Hits", Veto_Hits, "Veto_Hits[nVeto_Hits]/I");
-	
-	treeEvent->Branch("ESum", &ESum, "ESum/D");
-	treeEvent->Branch("CBMult", &CBMult, "CBMult/I");
-	treeEvent->Branch("TAPSMult", &TAPSMult, "TAPSMult/I");
+	treeTagger->Branch("nTagged", &nTagged,"nTagged/I");
+	treeTagger->Branch("tagged_ch", tagged_ch, "tagged_ch[nTagged]/I");
+	treeTagger->Branch("tagged_t", tagged_t, "tagged_t[nTagged]/D");
+
+	treeTrigger->Branch("ESum", &ESum, "ESum/D");
+	treeTrigger->Branch("CBMult", &CBMult, "CBMult/I");
+	treeTrigger->Branch("TAPSMult", &TAPSMult, "TAPSMult/I");
+
+	treeDetectorHits->Branch("nNaI_Hits", &nNaI_Hits, "nNaI_Hits/I");
+	treeDetectorHits->Branch("NaI_Hits", NaI_Hits, "NaI_Hits[nNaI_Hits]/I");
+	treeDetectorHits->Branch("nPID_Hits", &nPID_Hits, "nPID_Hits/I");
+	treeDetectorHits->Branch("PID_Hits", PID_Hits, "PID_Hits[nPID_Hits]/I");
+	treeDetectorHits->Branch("nWC_Hits", &nWC_Hits, "nWC_Hits/I");
+	treeDetectorHits->Branch("WC_Hits", WC_Hits, "WC_Hits[nWC_Hits]/I");	
+	treeDetectorHits->Branch("nBaF2_PbWO4_Hits", &nBaF2_PbWO4_Hits, "nBaF2_PbWO4_Hits/I");
+	treeDetectorHits->Branch("BaF2_PbWO4_Hits", BaF2_PbWO4_Hits, "BaF2_PbWO4_Hits[nBaF2_PbWO4_Hits]/I");
+	treeDetectorHits->Branch("nVeto_Hits", &nVeto_Hits, "nVeto_Hits/I");
+	treeDetectorHits->Branch("Veto_Hits", Veto_Hits, "Veto_Hits[nVeto_Hits]/I");
 	
 	treeScaler->Branch("eventNumber", &eventNumber, "eventNumber/I");
 	treeScaler->Branch("eventID", &eventID, "eventID/I");
@@ -297,7 +305,7 @@ void    TA2GoAT::Reconstruct()
 	for(int i=0; i<nVeto_Hits; i++) { Veto_Hits[i] = fVeto->GetHits(i); }
 	
 
-	//Apply EndBuffer
+		//Apply EndBuffer
     	Px[nParticles] 		= EBufferEnd;
     	Py[nParticles] 		= EBufferEnd;
     	Pz[nParticles] 		= EBufferEnd;
@@ -307,16 +315,19 @@ void    TA2GoAT::Reconstruct()
     	WC1_E[nParticles] 	= EBufferEnd;
     	WC_Vertex_X[nParticles] = EBufferEnd;  
     	WC_Vertex_Y[nParticles] = EBufferEnd;    
-   	WC_Vertex_Z[nParticles] = EBufferEnd;    
-	d_E[nParticles] 	= EBufferEnd;    
+		WC_Vertex_Z[nParticles] = EBufferEnd;    
+		d_E[nParticles] 	= EBufferEnd;    
     	tagged_ch[nTagged] 	= EBufferEnd;
     	tagged_t[nTagged] 	= EBufferEnd;	
 	
-	//Fill Tree
-	treeEvent->Fill();
+		//Fill Trees
+		treeRawEvent->Fill();
+		treeTagger->Fill();
+		treeTrigger->Fill();
+		treeDetectorHits->Fill();
 
-	//increment event number
-	eventNumber++;	
+		//increment event number
+		eventNumber++;	
 }
 
 void    TA2GoAT::Finish()
@@ -327,17 +338,32 @@ void    TA2GoAT::Finish()
 	
 	file->cd();
 	
-	if(treeEvent) 
+	if(treeRawEvent) 
 	{
-		treeEvent->Write();	// Write	
-		delete treeEvent; 	// Close and delete in memory
+		treeRawEvent->Write();	// Write	
+		delete treeRawEvent; 	// Close and delete in memory
+	}
+	if(treeTagger) 
+	{
+		treeTagger->Write();	// Write	
+		delete treeTagger; 	// Close and delete in memory
 	}	
+	if(treeTrigger) 
+	{
+		treeTrigger->Write();	// Write	
+		delete treeTrigger; 	// Close and delete in memory
+	}		
+	if(treeDetectorHits) 
+	{
+		treeDetectorHits->Write();// Write	
+		delete treeDetectorHits;  // Close and delete in memory
+	}		
 	if(treeScaler) 
 	{
-		treeScaler->Write();// Write	
+		treeScaler->Write();	// Write	
 		delete treeScaler; 	// Close and delete in memory
-    	}
-    	if(file) 
+    }
+    if(file) 
 		delete file;		// Close and delete in memory
 
 	

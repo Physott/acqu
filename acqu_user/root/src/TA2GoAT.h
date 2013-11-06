@@ -28,8 +28,11 @@ class	TA2GoAT	: public TA2AccessSQL
 {
 private:
 	TFile*		file;			// outFile
-	TTree*		treeEvent;		// treeEvent
-	TTree*		treeScaler; 		// treeScaler
+	TTree*		treeRawEvent;		// Raw particle information (filled each event)
+	TTree*		treeTagger;		// Tagger information (filled each event)
+	TTree* 		treeTrigger;		// Trigger information (filled each event)
+	TTree* 		treeDetectorHits;	// Detector system hit patterns (filled each event)
+	TTree*		treeScaler; 		// Scaler read information (filled each scaler read)
 
     	char        	outputFolder[256];
     	char        	fileName[64];
