@@ -5,8 +5,8 @@ ClassImp(TA2GoAT)
 TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, Analysis),
                                                                     file(0),
                                                                     treeRawEvent(0),
-								    treeTagger(0),
-								    treeTrigger(0),
+																	treeTagger(0),
+																	treeTrigger(0),
                                                                     treeDetectorHits(0),
                                                                     treeScaler(0),
                                                                     nParticles(0),
@@ -31,8 +31,7 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     nPID_Hits(0),
                                                                     PID_Hits(0),
                                                                     nWC_Hits(0),
-                                                                    WC_Hits(0),                                                                                                    nBaF2_PbWO4_Hits(0),
-                                                                    BaF2_PbWO4_Hits(0),
+																	WC_Hits(0),                                                                                                    		    nBaF2_PbWO4_Hits(0),                                                                    					    BaF2_PbWO4_Hits(0),
                                                                     nVeto_Hits(0),
                                                                     Veto_Hits(0),
                                                                     ESum(0),
@@ -54,6 +53,8 @@ TA2GoAT::~TA2GoAT()
 		delete treeRawEvent;
 	if(treeTagger)
 		delete treeTagger;
+	if(treeTrigger)
+		delete treeTrigger;
 	if(treeDetectorHits)
 		delete treeDetectorHits;
 	if(treeScaler)
@@ -61,7 +62,6 @@ TA2GoAT::~TA2GoAT()
     	if(file)
 		delete file;
 }
-
 
 void    TA2GoAT::LoadVariable()
 {
@@ -110,30 +110,30 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 void    TA2GoAT::PostInit()
 {
     
-    	Px			= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	Py			= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	Pz			= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	E			= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	Px		= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	Py		= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	Pz		= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	clusterSize  = new UChar_t[TA2GoAT_MAX_PARTICLE];
+    	clusterSize  	= new UChar_t[TA2GoAT_MAX_PARTICLE];
     
     	tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
     	tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
     
     	Apparatus	= new UChar_t[TA2GoAT_MAX_PARTICLE];
-    	d_E			= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	d_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     	WC0_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     	WC1_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     
-    	WC_Vertex_X = new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC_Vertex_Y = new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC_Vertex_Z = new Double_t[TA2GoAT_MAX_PARTICLE];
+    	WC_Vertex_X 	= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	WC_Vertex_Y 	= new Double_t[TA2GoAT_MAX_PARTICLE];
+    	WC_Vertex_Z 	= new Double_t[TA2GoAT_MAX_PARTICLE];
     
-    	NaI_Hits		= new Int_t[TA2GoAT_MAX_HITS];  
-    	PID_Hits		= new Int_t[TA2GoAT_MAX_HITS];
-    	WC_Hits			= new Int_t[TA2GoAT_MAX_HITS];
+    	NaI_Hits	= new Int_t[TA2GoAT_MAX_HITS];  
+    	PID_Hits	= new Int_t[TA2GoAT_MAX_HITS];
+    	WC_Hits		= new Int_t[TA2GoAT_MAX_HITS];
     	BaF2_PbWO4_Hits	= new Int_t[TA2GoAT_MAX_HITS];
-    	Veto_Hits		= new Int_t[TA2GoAT_MAX_HITS];
+    	Veto_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     
     	printf("---------\n");
     	printf("Init Tree\n");
