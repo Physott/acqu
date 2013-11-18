@@ -27,24 +27,24 @@ static const Map_t RootTreeConfigKeys[] = {
 class	TA2GoAT	: public TA2AccessSQL
 {
 private:
-	TFile*		file;			// outFile
-	TTree*		treeRawEvent;		// Raw particle information (filled each event)
-	TTree*		treeTagger;		// Tagger information (filled each event)
-	TTree* 		treeTrigger;		// Trigger information (filled each event)
-	TTree* 		treeDetectorHits;	// Detector system hit patterns (filled each event)
-	TTree*		treeScaler; 		// Scaler read information (filled each scaler read)
+		TFile*		file;				// outFile
+		TTree*		treeRawEvent;		// Raw particle information (filled each event)
+		TTree*		treeTagger;			// Tagger information (filled each event)
+		TTree* 		treeTrigger;		// Trigger information (filled each event)
+		TTree* 		treeDetectorHits;	// Detector system hit patterns (filled each event)
+		TTree*		treeScaler; 		// Scaler read information (filled each scaler read)
 
-    	char        	outputFolder[256];
-    	char        	fileName[64];
+    	char        outputFolder[256];
+    	char        fileName[64];
     
     	//Particles    
     	Int_t		nParticles;		
     	Double_t*	Px;
     	Double_t*	Py;
-   	Double_t*	Pz;
+		Double_t*	Pz;
     	Double_t*	E;
     	Double_t*	time;
-    	UChar_t*      	clusterSize;
+    	UChar_t*    clusterSize;
     
     	//Tagger
     	Int_t		nTagged;
@@ -59,7 +59,7 @@ private:
     	Double_t*	WC0_E;
     	Double_t*	WC1_E;
 
-	//Wire Chamber vertex reconstruction
+		//Wire Chamber vertex reconstruction
     	Double_t* 	WC_Vertex_X;
     	Double_t* 	WC_Vertex_Y;
     	Double_t* 	WC_Vertex_Z;
@@ -76,20 +76,25 @@ private:
     	Int_t		nVeto_Hits;
     	Int_t*		Veto_Hits;
     
-    	//Trigger TBD
-    	Double_t 	ESum;
-    	Int_t 		CBMult; 	//or Detector Energies
-	Int_t		TAPSMult;
+    	//Trigger 
+    	Double_t 	ESum;	// or Detector Energies
+    	Int_t 		Mult; 	
+		UInt_t 		L2Pattern;
     
     	//Scalers
     	Int_t		eventNumber;
     	Int_t		eventID;    
+
+	protected:    	
+
+    	void MultiplicityMC();    //Generates the trigger for the MC
+    	void MultiplicityHW();    //Generates the trigger from hardware information
     
-public:
+	public:
 	TA2GoAT(const char*, TA2Analysis*);
 	~TA2GoAT();
 	
-	virtual void LoadVariable();            //Creates histograms
+	virtual void LoadVariable();            	//Creates histograms
     	virtual void SetConfig(Char_t*, Int_t); //Parses general information from configuration file
     	virtual void ParseMisc(char* line);     //Parses additional information from configuration file
     	virtual void Reconstruct();             //Event reconstruction

@@ -31,12 +31,13 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     nPID_Hits(0),
                                                                     PID_Hits(0),
                                                                     nWC_Hits(0),
-																	WC_Hits(0),                                                                                                    		    nBaF2_PbWO4_Hits(0),                                                                    					    BaF2_PbWO4_Hits(0),
+																	WC_Hits(0),
+																	nBaF2_PbWO4_Hits(0),
+																	BaF2_PbWO4_Hits(0),
                                                                     nVeto_Hits(0),
                                                                     Veto_Hits(0),
                                                                     ESum(0),
-                                                                    CBMult(0),
-                                                                    TAPSMult(0),
+                                                                    Mult(0),
                                                                     eventNumber(0),
                                                                     eventID(0)
 {
@@ -59,7 +60,7 @@ TA2GoAT::~TA2GoAT()
 		delete treeDetectorHits;
 	if(treeScaler)
 		delete treeScaler;
-    	if(file)
+    if(file)
 		delete file;
 }
 
@@ -69,19 +70,19 @@ void    TA2GoAT::LoadVariable()
    	TA2AccessSQL::LoadVariable();
 
     	TA2DataManager::LoadVariable("nParticles", 	&nParticles,	EISingleX);
-    	TA2DataManager::LoadVariable("Px", 			Px,		EDMultiX);
-    	TA2DataManager::LoadVariable("Py", 			Py,		EDMultiX);
-    	TA2DataManager::LoadVariable("Pz", 			Pz,		EDMultiX);
-    	TA2DataManager::LoadVariable("E", 			E,		EDMultiX);
-    	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
+    	TA2DataManager::LoadVariable("Px", 			Px,				EDMultiX);
+    	TA2DataManager::LoadVariable("Py", 			Py,				EDMultiX);
+    	TA2DataManager::LoadVariable("Pz", 			Pz,				EDMultiX);
+    	TA2DataManager::LoadVariable("E", 			E,				EDMultiX);
+    	TA2DataManager::LoadVariable("time", 		time,			EDMultiX);
 
-    	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
-    	TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,	EIMultiX);
-    	TA2DataManager::LoadVariable("taggedT", 	tagged_t,	EDMultiX);    
+    	TA2DataManager::LoadVariable("nTagged", 	&nTagged,		EISingleX);
+    	TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,		EIMultiX);
+    	TA2DataManager::LoadVariable("taggedT", 	tagged_t,		EDMultiX);    
 
-    	TA2DataManager::LoadVariable("dE", 		d_E,		EDMultiX);
-    	TA2DataManager::LoadVariable("WC0E", 		WC0_E,		EDMultiX);   
-    	TA2DataManager::LoadVariable("WC1E", 		WC1_E,		EDMultiX);
+    	TA2DataManager::LoadVariable("dE", 			d_E,			EDMultiX);
+    	TA2DataManager::LoadVariable("WC0E", 		WC0_E,			EDMultiX);   
+    	TA2DataManager::LoadVariable("WC1E", 		WC1_E,			EDMultiX);
         
     	return;
     
@@ -110,39 +111,39 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 void    TA2GoAT::PostInit()
 {
     
-    	Px		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	Py		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	Pz		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	E		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	clusterSize  	= new UChar_t[TA2GoAT_MAX_PARTICLE];
+   	Px		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Py		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Pz		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	E		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	clusterSize  	= new UChar_t[TA2GoAT_MAX_PARTICLE];
     
-    	tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
-    	tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
+   	tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
+   	tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
     
-    	Apparatus	= new UChar_t[TA2GoAT_MAX_PARTICLE];
-    	d_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC0_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC1_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Apparatus	= new UChar_t[TA2GoAT_MAX_PARTICLE];
+   	d_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	WC0_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	WC1_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     
-    	WC_Vertex_X 	= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC_Vertex_Y 	= new Double_t[TA2GoAT_MAX_PARTICLE];
-    	WC_Vertex_Z 	= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	WC_Vertex_X 	= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	WC_Vertex_Y 	= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	WC_Vertex_Z 	= new Double_t[TA2GoAT_MAX_PARTICLE];
     
-    	NaI_Hits	= new Int_t[TA2GoAT_MAX_HITS];  
-    	PID_Hits	= new Int_t[TA2GoAT_MAX_HITS];
-    	WC_Hits		= new Int_t[TA2GoAT_MAX_HITS];
-    	BaF2_PbWO4_Hits	= new Int_t[TA2GoAT_MAX_HITS];
-    	Veto_Hits	= new Int_t[TA2GoAT_MAX_HITS];
+   	NaI_Hits	= new Int_t[TA2GoAT_MAX_HITS];  
+   	PID_Hits	= new Int_t[TA2GoAT_MAX_HITS];
+   	WC_Hits		= new Int_t[TA2GoAT_MAX_HITS];
+   	BaF2_PbWO4_Hits	= new Int_t[TA2GoAT_MAX_HITS];
+   	Veto_Hits	= new Int_t[TA2GoAT_MAX_HITS];
     
-    	printf("---------\n");
-    	printf("Init Tree\n");
-    	printf("---------\n");
+   	printf("---------\n");
+   	printf("Init Tree\n");
+   	printf("---------\n");
     
-    	// Append input filename to output tree name.
-    	TString fullName;
-    	if(gAR->GetProcessType() == EMCProcess) fullName = gAR->GetTreeFileList(0);        
-    	else  fullName = gAR->GetFileName();
+   	// Append input filename to output tree name.
+   	TString fullName;
+   	if(gAR->GetProcessType() == EMCProcess) fullName = gAR->GetTreeFileList(0);        
+   	else  fullName = gAR->GetFileName();
 		
 	int length = fullName.Length();
 	int last = 0;
@@ -154,12 +155,12 @@ void    TA2GoAT::PostInit()
 		last += index+1; 
 	}
 	Char_t inFile[256], str[256];
-    	if(gAR->GetProcessType() == EMCProcess) 
-		sscanf( gAR->GetTreeFileList(0)+last, "%[^.].root\n", inFile);       
-    	else    
-		sscanf( gAR->GetFileName()+last, "%[^.].dat\n", inFile);	
+    if(gAR->GetProcessType() == EMCProcess) 
+	sscanf( gAR->GetTreeFileList(0)+last, "%[^.].root\n", inFile);       
+    else    
+	sscanf( gAR->GetFileName()+last, "%[^.].dat\n", inFile);	
 
-    	sprintf(str, "%s/%s_%s.root", outputFolder, fileName, inFile);        
+    sprintf(str, "%s/%s_%s.root", outputFolder, fileName, inFile);        
         
    	file		= new TFile(str,"RECREATE");
 	treeRawEvent	= new TTree("treeRawEvent", "treeRawEvent");
@@ -188,8 +189,7 @@ void    TA2GoAT::PostInit()
 	treeTagger->Branch("tagged_t", tagged_t, "tagged_t[nTagged]/D");
 
 	treeTrigger->Branch("ESum", &ESum, "ESum/D");
-	treeTrigger->Branch("CBMult", &CBMult, "CBMult/I");
-	treeTrigger->Branch("TAPSMult", &TAPSMult, "TAPSMult/I");
+	treeTrigger->Branch("Mult", &Mult, "Mult/I");
 
 	treeDetectorHits->Branch("nNaI_Hits", &nNaI_Hits, "nNaI_Hits/I");
 	treeDetectorHits->Branch("NaI_Hits", NaI_Hits, "NaI_Hits[nNaI_Hits]/I");
@@ -213,24 +213,19 @@ void    TA2GoAT::PostInit()
 	eventNumber	= 0;
 	
 	// Default SQL-physics initialisation
-    	TA2AccessSQL::PostInit();	
+    TA2AccessSQL::PostInit();	
 
 }
 
-
 void    TA2GoAT::Reconstruct()
 {
-	//Is Scaler Read
+	// Output scaler info on scaler read events
 	if(gAR->IsScalerRead())
 	{
 		eventID	= gAN->GetNDAQEvent();
-		
-		//for(int i=0; i<GetMaxScaler(); i++)
-		//	printf("Scaler%d: %d\n", i, fScaler[i]);
 		treeScaler->Fill();		
-		return;
 	}
-	
+
 	// Collect Tagger M0 Hits
 	nTagged	= fLadder->GetNhits();
 	for(int i=0; i<nTagged; i++)
@@ -251,7 +246,7 @@ void    TA2GoAT::Reconstruct()
 	}
 	
 	// Collect CB Hits
-    	nParticles	= fCB->GetNParticle();      
+    nParticles	= fCB->GetNParticle();      
 	for(int i=0; i<nParticles; i++)
 	{
 		Apparatus[i]	= (UChar_t)EAppCB;			
@@ -302,32 +297,36 @@ void    TA2GoAT::Reconstruct()
 						  { BaF2_PbWO4_Hits[i] = fBaF2PWO->GetHits(i); }
 
 	nVeto_Hits = fVeto->GetNhits();
-	for(int i=0; i<nVeto_Hits; i++) { Veto_Hits[i] = fVeto->GetHits(i); }
+	for(int i=0; i<nVeto_Hits; i++) { Veto_Hits[i] = fVeto->GetHits(i);}
 	
+	// Get Trigger information
+	ESum = fNaI->GetTotalEnergy();
+	if(gAR->GetProcessType() == EMCProcess) MultiplicityMC();
+	else MultiplicityHW();
 
-		//Apply EndBuffer
-    	Px[nParticles] 		= EBufferEnd;
-    	Py[nParticles] 		= EBufferEnd;
-    	Pz[nParticles] 		= EBufferEnd;
-    	E[nParticles] 		= EBufferEnd;
-    	time[nParticles] 	= EBufferEnd;
-    	WC0_E[nParticles] 	= EBufferEnd;
-    	WC1_E[nParticles] 	= EBufferEnd;
-    	WC_Vertex_X[nParticles] = EBufferEnd;  
-    	WC_Vertex_Y[nParticles] = EBufferEnd;    
-		WC_Vertex_Z[nParticles] = EBufferEnd;    
-		d_E[nParticles] 	= EBufferEnd;    
-    	tagged_ch[nTagged] 	= EBufferEnd;
-    	tagged_t[nTagged] 	= EBufferEnd;	
+	//Apply EndBuffer
+    Px[nParticles] 		= EBufferEnd;
+    Py[nParticles] 		= EBufferEnd;
+    Pz[nParticles] 		= EBufferEnd;
+    E[nParticles] 		= EBufferEnd;
+    time[nParticles] 	= EBufferEnd;
+    WC0_E[nParticles] 	= EBufferEnd;
+    WC1_E[nParticles] 	= EBufferEnd;
+    WC_Vertex_X[nParticles] = EBufferEnd;  
+    WC_Vertex_Y[nParticles] = EBufferEnd;    
+	WC_Vertex_Z[nParticles] = EBufferEnd;    
+	d_E[nParticles] 	= EBufferEnd;    
+    tagged_ch[nTagged] 	= EBufferEnd;
+    tagged_t[nTagged] 	= EBufferEnd;	
 	
-		//Fill Trees
-		treeRawEvent->Fill();
-		treeTagger->Fill();
-		treeTrigger->Fill();
-		treeDetectorHits->Fill();
+	//Fill Trees
+	treeRawEvent->Fill();
+	treeTagger->Fill();
+	treeTrigger->Fill();
+	treeDetectorHits->Fill();
 
-		//increment event number
-		eventNumber++;	
+	//increment event number
+	eventNumber++;	
 }
 
 void    TA2GoAT::Finish()
@@ -373,4 +372,50 @@ void    TA2GoAT::Finish()
 void    TA2GoAT::ParseMisc(char* line)
 {
 	TA2AccessSQL::ParseMisc(line);
+}
+
+void 	TA2GoAT::MultiplicityMC() 
+{
+		// really rough, just the basic idea 
+		// A good example is done in TA2BasePhysics but requires some extra work
+		// Also need some flag for new and old 
+		// Set some basic discriminator thresh for now
+		Double_t DiscTh = 5.0; 
+		Mult = 0;
+		
+		for (Int_t i = 0; i < 45; i++) 
+		{ 
+			Bool_t flag = kFALSE;
+			for (Int_t j = 0; j < 16; j++) 
+			{
+				if ((fNaI->GetEnergyAll(i*16 + j)) >= DiscTh) flag = kTRUE;
+			}
+			if (flag == kTRUE) Mult++;
+		}
+
+		if (fTAPS) {
+			for (Int_t i = 0; i < 6; i++) { 
+
+			Bool_t flag = kFALSE;
+			for (Int_t j = 12; j < 71; j++) {  
+				// really add some check of how many crystals are used, skip PbWO4s
+				if ((fBaF2PWO->GetEnergyAll(i*71 + j)) >= DiscTh) flag = kTRUE;
+			}
+			if (flag == kTRUE) Mult++; 		
+			}
+		}
+		
+		if (Mult > 4) Mult = 4;
+}
+	
+void 	TA2GoAT::MultiplicityHW() 
+{
+	Mult = 0;
+	
+	if(fADC) {L2Pattern = fADC[1] & 0xFF;} 
+	if (L2Pattern & 0x10) 	Mult++; // Doesn't work
+	if (L2Pattern & 0x20) 	Mult++;
+	if (L2Pattern & 0x40) 	Mult++;
+ 	if (L2Pattern & 0x80) 	Mult++;
+ 	
 }
