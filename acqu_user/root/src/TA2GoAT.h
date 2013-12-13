@@ -42,6 +42,8 @@ private:
     	Double_t*	Py;
 		Double_t*	Pz;
     	Double_t*	E;
+    	Double_t* 	Theta;
+    	Double_t*	Phi;
     	Double_t*	time;
     	UChar_t*    clusterSize;
     
