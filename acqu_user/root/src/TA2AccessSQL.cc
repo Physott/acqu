@@ -52,9 +52,11 @@ TA2AccessSQL::TA2AccessSQL(const char* name, TA2Analysis* analysis)	: TA2Physics
     fCB			= 0;   						// pointer to the Crystal Ball
     fNaI		= 0;       					// pointer to the NaI elements
 	fPID		= 0;           				// pointer to the PID
+	fMWPC 		= 0;				// pointer to the MWPC
     fTAPS		= 0;       					// pointer to TAPS
     fBaF2PWO	= 0;	       				// pointer to the BaF2 (or the BaF2/PWO) array
     fVeto		= 0;           				// pointer to the TAPS Vetos
+
 }
 
 
@@ -418,7 +420,7 @@ void TA2AccessSQL::PostInit()
 	TA2Physics::PostInit();
 	
 	LoadDetectors(fParent, 0);
-	printf("gain at begin:			%lf\n", fNaI->GetElement(10)->GetA1());
+	if(fNaI) printf("gain at begin:			%lf\n", fNaI->GetElement(10)->GetA1());
 	
 	if(fCaLibReader)
 	{
@@ -426,19 +428,22 @@ void TA2AccessSQL::PostInit()
         	fCaLibReader->Deconnect();
 	}
 	
-	if(CBEnergyPerRunCorrection)
+	if(fNaI)
 	{
-		for(int i=0; i<fNaI->GetNelement(); i++)
-			fNaI->GetElement(i)->SetA1(CBEnergyPerRunCorrectionFactor * (fNaI->GetElement(i)->GetA1()));
-	}
-	printf("gain after calib:		%lf\n", fNaI->GetElement(10)->GetA1());
+		if(CBEnergyPerRunCorrection)
+		{
+			for(int i=0; i<fNaI->GetNelement(); i++)
+				fNaI->GetElement(i)->SetA1(CBEnergyPerRunCorrectionFactor * (fNaI->GetElement(i)->GetA1()));
+		}
+		printf("gain after calib:		%lf\n", fNaI->GetElement(10)->GetA1());
 	
-	if(CBEnergyPerRunCorrection)
-	{
-		for(int i=0; i<fNaI->GetNelement(); i++)
-			fNaI->GetElement(i)->SetA1(CBEnergyPerRunCorrectionFactor * (fNaI->GetElement(i)->GetA1()));
+		if(CBEnergyPerRunCorrection)
+		{
+			for(int i=0; i<fNaI->GetNelement(); i++)
+				fNaI->GetElement(i)->SetA1(CBEnergyPerRunCorrectionFactor * (fNaI->GetElement(i)->GetA1()));
+		}
+		printf("gain after correction:	%lf\n", fNaI->GetElement(10)->GetA1());
 	}
-	printf("gain after correction:	%lf\n", fNaI->GetElement(10)->GetA1());
 }
 
 void TA2AccessSQL::LoadVariable()

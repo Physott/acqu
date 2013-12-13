@@ -44,4 +44,5 @@ Display: 1D taggedCh	352 0 352
 Display: 1D taggedT     200 -100 100
 Display: 1D dE		25 0 25 
 Display: 1D WC0E	500 0 500 
-Display: 1D WC1E	500 0 500 
+Display: 1D WC1E	500 0 500
+Display: 1D ESum	2000 0 2000

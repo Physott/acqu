@@ -4,7 +4,6 @@
 
 #include "TFile.h"
 #include "TTree.h"
-
 #include "TA2AccessSQL.h"
 
 #define TA2GoAT_MAX_TAGGER	1024

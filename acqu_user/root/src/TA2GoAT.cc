@@ -39,7 +39,7 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     ESum(0),
                                                                     Mult(0),
                                                                     eventNumber(0),
-                                                                    eventID(0)
+                                                                    eventID(0)														
 {
     	strcpy(outputFolder,"~");
     	strcpy(fileName,"RootTree");
@@ -83,7 +83,9 @@ void    TA2GoAT::LoadVariable()
     	TA2DataManager::LoadVariable("dE", 		d_E,		EDMultiX);
     	TA2DataManager::LoadVariable("WC0E", 		WC0_E,		EDMultiX);   
     	TA2DataManager::LoadVariable("WC1E", 		WC1_E,		EDMultiX);
-        
+
+	TA2DataManager::LoadVariable("ESum",		&ESum, 		EDSingleX);
+ 
     	return;
     
 }
@@ -220,6 +222,7 @@ void    TA2GoAT::PostInit()
 
 void    TA2GoAT::Reconstruct()
 {
+
 	// Output scaler info on scaler read events
 	if(gAR->IsScalerRead())
 	{
@@ -243,7 +246,7 @@ void    TA2GoAT::Reconstruct()
 			for(int i=0; i<fLadder->GetNhitsM(m); i++)
 			{
 				tagged_ch[nTagged+i]	= (fLadder->GetHitsM(m))[i];
-				tagged_t[nTagged+i]		= (fLadder->GetTimeORM(m))[i];
+				tagged_t[nTagged+i]	= (fLadder->GetTimeORM(m))[i];
 			}
 			nTagged	+= fLadder->GetNhitsM(m);
 		}
@@ -258,19 +261,24 @@ void    TA2GoAT::Reconstruct()
     		nParticles	= fCB->GetNParticle();      
 		for(int i=0; i<nParticles; i++)
 		{
+			TA2Particle part = fCB->GetParticles(i);
+			
+			part.SetParticleID(kRootino); // Set mass to 0 (rootino)
+			part.SetMass(0.0);
+			
 			Apparatus[i]	= (UChar_t)EAppCB;			
-			Px[i]		= fCB->GetParticles(i).GetPx();
-			Py[i]		= fCB->GetParticles(i).GetPy();
-			Pz[i]		= fCB->GetParticles(i).GetPz();
-			E[i]		= fCB->GetParticles(i).GetE();
-			time[i]		= fCB->GetParticles(i).GetTime();	
-			clusterSize[i]  = (UChar_t)fCB->GetParticles(i).GetClusterSize();
-			d_E[i]		= fCB->GetParticles(i).GetVetoEnergy();
-			WC0_E[i]	= fCB->GetParticles(i).GetEnergyMwpc0();
-		 	WC1_E[i]	= fCB->GetParticles(i).GetEnergyMwpc1();
-		 	WC_Vertex_X[i]  = fCB->GetParticles(i).GetPsVertex().X();
-	 		WC_Vertex_Y[i]  = fCB->GetParticles(i).GetPsVertex().Y();
-		 	WC_Vertex_Z[i]  = fCB->GetParticles(i).GetPsVertex().Z();
+			Px[i]			= part.GetPx();
+			Py[i]			= part.GetPy();
+			Pz[i]			= part.GetPz();
+			E[i]			= part.GetT();
+			time[i]			= part.GetTime();	
+			clusterSize[i]  = (UChar_t)part.GetClusterSize();
+			d_E[i]			= part.GetVetoEnergy();
+			WC0_E[i]		= part.GetEnergyMwpc0();
+		 	WC1_E[i]		= part.GetEnergyMwpc1();
+		 	WC_Vertex_X[i]  = part.GetPsVertex().X();
+	 		WC_Vertex_Y[i]  = part.GetPsVertex().Y();
+		 	WC_Vertex_Z[i]  = part.GetPsVertex().Z();
 		}
 	}
 
@@ -279,15 +287,20 @@ void    TA2GoAT::Reconstruct()
 		// Collect TAPS Hits
 		for(int i=0; i<fTAPS->GetNParticle(); i++)
 		{
+			TA2Particle part = fTAPS->GetParticles(i);
+			
+			part.SetParticleID(kRootino); // Set mass to 0 (rootino)
+			part.SetMass(0.0);				
+			
 			Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;		
-			Px[nParticles+i]		= fTAPS->GetParticles(i).GetPx();
-			Py[nParticles+i]		= fTAPS->GetParticles(i).GetPy();
-			Pz[nParticles+i]		= fTAPS->GetParticles(i).GetPz();
-			E[nParticles+i]			= fTAPS->GetParticles(i).GetE();
-			time[nParticles+i]		= fTAPS->GetParticles(i).GetTime();
-			clusterSize[nParticles+i]  	= (UChar_t)fTAPS->GetParticles(i).GetClusterSize();
-			d_E[nParticles+i]		= fTAPS->GetParticles(i).GetVetoEnergy();
-			WC0_E[nParticles+i]		= ENullFloat; 
+			Px[nParticles+i]			= part.GetPx();
+			Py[nParticles+i]			= part.GetPy();
+			Pz[nParticles+i]			= part.GetPz();
+			E[nParticles+i]				= part.GetT();	
+			time[nParticles+i]			= part.GetTime();
+			clusterSize[nParticles+i]  	= (UChar_t)part.GetClusterSize();
+			d_E[nParticles+i]			= part.GetVetoEnergy();
+			WC0_E[nParticles+i]			= ENullFloat; 
 	 		WC1_E[nParticles+i]    		= ENullFloat; 
 		 	WC_Vertex_X[nParticles+i]  	= ENullFloat; 
 		 	WC_Vertex_Y[nParticles+i]  	= ENullFloat; 
@@ -349,8 +362,8 @@ void    TA2GoAT::Reconstruct()
     	WC_Vertex_Y[nParticles] = EBufferEnd;    
 	WC_Vertex_Z[nParticles] = EBufferEnd;    
 	d_E[nParticles] 	= EBufferEnd;    
-    	tagged_ch[nTagged] 	= EBufferEnd;
-    	tagged_t[nTagged] 	= EBufferEnd;	
+    tagged_ch[nTagged] 	= EBufferEnd;
+    tagged_t[nTagged] 	= EBufferEnd;	
 	
 	//Fill Trees
 	treeRawEvent->Fill();
