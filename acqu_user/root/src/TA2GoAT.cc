@@ -3,17 +3,14 @@
 ClassImp(TA2GoAT)
 
 TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, Analysis),
-                                                                    file(0),
-                                                                    treeRawEvent(0),
-																	treeTagger(0),
-																	treeTrigger(0),
+															file(0),
+                                                            treeRawEvent(0),
+															treeTagger(0),
+															treeTrigger(0),
                                                                     treeDetectorHits(0),
                                                                     treeScaler(0),
                                                                     nParticles(0),
-                                                                    Px(0),
-                                                                    Py(0),
-                                                                    Pz(0),
-                                                                    E(0),
+                                                                    Ek(0),
 																	Theta(0),
 																	Phi(0),
                                                                     time(0),
@@ -72,13 +69,10 @@ void    TA2GoAT::LoadVariable()
    	TA2AccessSQL::LoadVariable();
 
     	TA2DataManager::LoadVariable("nParticles", 	&nParticles,	EISingleX);
-    	TA2DataManager::LoadVariable("Px", 		Px,		EDMultiX);
-    	TA2DataManager::LoadVariable("Py", 		Py,		EDMultiX);
-    	TA2DataManager::LoadVariable("Pz", 		Pz,		EDMultiX);
-    	TA2DataManager::LoadVariable("E", 		E,		EDMultiX);
-    	TA2DataManager::LoadVariable("Theta", 	Theta,	EDMultiX);   
-    	TA2DataManager::LoadVariable("Phi", 	Phi,	EDMultiX);     	 	
-    	TA2DataManager::LoadVariable("time", 	time,	EDMultiX);
+    	TA2DataManager::LoadVariable("Ek", 		Ek,		EDMultiX);
+    	TA2DataManager::LoadVariable("Theta", 		Theta,		EDMultiX);   
+    	TA2DataManager::LoadVariable("Phi", 		Phi,		EDMultiX);     	 	
+    	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
 
     	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
     	TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,	EIMultiX);
@@ -116,12 +110,9 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 
 void    TA2GoAT::PostInit()
 {
-    
-   	Px		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	Py		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	Pz		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	E		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	Theta	= new Double_t[TA2GoAT_MAX_PARTICLE];
+
+   	Ek		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Theta		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	Phi		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	clusterSize = new UChar_t[TA2GoAT_MAX_PARTICLE];
@@ -179,10 +170,7 @@ void    TA2GoAT::PostInit()
 	treeScaler	= new TTree("treeScaler", "treeScaler");
 	
 	treeRawEvent->Branch("nParticles",&nParticles,"nParticles/I");
-	treeRawEvent->Branch("Px", Px, "Px[nParticles]/D");
-	treeRawEvent->Branch("Py", Py, "Py[nParticles]/D");
-	treeRawEvent->Branch("Pz", Pz, "Pz[nParticles]/D");
-	treeRawEvent->Branch("E",  E,  "E[nParticles]/D");	
+	treeRawEvent->Branch("Ek",  Ek,  "Ek[nParticles]/D");	
 	treeRawEvent->Branch("Theta",  Theta,  "Theta[nParticles]/D");	
 	treeRawEvent->Branch("Phi",  Phi,  "Phi[nParticles]/D");	
 	treeRawEvent->Branch("time", time, "time[nParticles]/D");
@@ -275,10 +263,7 @@ void    TA2GoAT::Reconstruct()
 			part.SetMass(0.0);
 			
 			Apparatus[i]	= (UChar_t)EAppCB;			
-			Px[i]			= part.GetPx();
-			Py[i]			= part.GetPy();
-			Pz[i]			= part.GetPz();
-			E[i]			= part.GetT();
+			Ek[i]			= part.GetT();
 			Theta[i]		= part.GetThetaDg();
 			Phi[i]			= part.GetPhiDg();			
 			time[i]			= part.GetTime();	
@@ -303,10 +288,7 @@ void    TA2GoAT::Reconstruct()
 			part.SetMass(0.0);				
 			
 			Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;		
-			Px[nParticles+i]			= part.GetPx();
-			Py[nParticles+i]			= part.GetPy();
-			Pz[nParticles+i]			= part.GetPz();
-			E[nParticles+i]				= part.GetT();	
+			Ek[nParticles+i]			= part.GetT();	
 			Theta[nParticles+i]			= part.GetThetaDg();
 			Phi[nParticles+i]			= part.GetPhiDg();					
 			time[nParticles+i]			= part.GetTime();
@@ -363,10 +345,7 @@ void    TA2GoAT::Reconstruct()
 	else MultiplicityHW();
 
 	//Apply EndBuffer
-    	Px[nParticles] 		= EBufferEnd;
-    	Py[nParticles] 		= EBufferEnd;
-    	Pz[nParticles] 		= EBufferEnd;
-    	E[nParticles] 		= EBufferEnd;
+    	Ek[nParticles] 		= EBufferEnd;
     	Theta[nParticles]	= EBufferEnd;
     	Phi[nParticles]		= EBufferEnd;
     	time[nParticles] 	= EBufferEnd;

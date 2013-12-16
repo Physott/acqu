@@ -38,10 +38,7 @@ private:
     
     	//Particles    
     	Int_t		nParticles;		
-    	Double_t*	Px;
-    	Double_t*	Py;
-		Double_t*	Pz;
-    	Double_t*	E;
+    	Double_t*	Ek;
     	Double_t* 	Theta;
     	Double_t*	Phi;
     	Double_t*	time;
