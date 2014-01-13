@@ -46,6 +46,7 @@ private:
     
     	//Tagger
     	Int_t		nTagged;
+    	Double_t*	photonbeam_E;
     	Int_t*		tagged_ch;
     	Double_t*	tagged_t;
     

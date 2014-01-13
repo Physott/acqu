@@ -23,6 +23,7 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     WC_Vertex_Y(0),
                                                                     WC_Vertex_Z(0),
                                                                     nTagged(0),
+                                                                    photonbeam_E(0),
                                                                     tagged_ch(0),
                                                                     tagged_t(0),
                                                                     nNaI_Hits(0),
@@ -68,26 +69,26 @@ void    TA2GoAT::LoadVariable()
 	// Including histogram output for testing purposes (quick check of variables)
    	TA2AccessSQL::LoadVariable();
 
-    	TA2DataManager::LoadVariable("nParticles", 	&nParticles,	EISingleX);
-    	TA2DataManager::LoadVariable("Ek", 		Ek,		EDMultiX);
-    	TA2DataManager::LoadVariable("Theta", 		Theta,		EDMultiX);   
-    	TA2DataManager::LoadVariable("Phi", 		Phi,		EDMultiX);     	 	
-    	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
+	TA2DataManager::LoadVariable("nParticles", 	&nParticles,EISingleX);
+	TA2DataManager::LoadVariable("Ek", 			Ek,			EDMultiX);
+	TA2DataManager::LoadVariable("Theta", 		Theta,		EDMultiX);   
+	TA2DataManager::LoadVariable("Phi", 		Phi,		EDMultiX);     	 	
+	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
 
-    	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
-    	TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,	EIMultiX);
-    	TA2DataManager::LoadVariable("taggedT", 	tagged_t,	EDMultiX);    
+	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
+	TA2DataManager::LoadVariable("photonbeam_E",photonbeam_E,EDMultiX);
+	TA2DataManager::LoadVariable("taggedCh", 	tagged_ch,	EIMultiX);
+	TA2DataManager::LoadVariable("taggedT", 	tagged_t,	EDMultiX);    
 
-    	TA2DataManager::LoadVariable("dE", 		d_E,		EDMultiX);
-    	TA2DataManager::LoadVariable("WC0E", 		WC0_E,		EDMultiX);   
-    	TA2DataManager::LoadVariable("WC1E", 		WC1_E,		EDMultiX);
+	TA2DataManager::LoadVariable("dE", 			d_E,		EDMultiX);
+	TA2DataManager::LoadVariable("WC0E", 		WC0_E,		EDMultiX);   
+	TA2DataManager::LoadVariable("WC1E", 		WC1_E,		EDMultiX);
 
 	TA2DataManager::LoadVariable("ESum",		&ESum, 		EDSingleX);
  
-    	return;
+    return;
     
 }
-
 
 void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 {
@@ -95,12 +96,14 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
     	{
     	case EG_OUTPUT_FOLDER:
      	   strcpy(outputFolder,line);
-     	   while(outputFolder[strlen(outputFolder)-1]=='\n' || outputFolder[strlen(outputFolder)-1]=='\r')
+     	   while(outputFolder[strlen(outputFolder)-1]=='\n' 
+						|| outputFolder[strlen(outputFolder)-1]=='\r')
 			outputFolder[strlen(outputFolder)-1]='\0';
         return;
     	case EG_FILE_NAME:
         	strcpy(fileName,line);
-        	while(fileName[strlen(fileName)-1]=='\n' || fileName[strlen(fileName)-1]=='\r')
+        	while(fileName[strlen(fileName)-1]=='\n' 
+						|| fileName[strlen(fileName)-1]=='\r')
 			fileName[strlen(fileName)-1]='\0';
         return;
     	default:
@@ -117,11 +120,12 @@ void    TA2GoAT::PostInit()
    	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	clusterSize = new UChar_t[TA2GoAT_MAX_PARTICLE];
     
+   	photonbeam_E= new Double_t[TA2GoAT_MAX_TAGGER];
    	tagged_ch	= new Int_t[TA2GoAT_MAX_TAGGER];
    	tagged_t	= new Double_t[TA2GoAT_MAX_TAGGER];
     
    	Apparatus	= new UChar_t[TA2GoAT_MAX_PARTICLE];
-   	d_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	d_E			= new Double_t[TA2GoAT_MAX_PARTICLE];
    	WC0_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	WC1_E		= new Double_t[TA2GoAT_MAX_PARTICLE];
     
@@ -184,6 +188,7 @@ void    TA2GoAT::PostInit()
 	treeRawEvent->Branch("WC_Vertex_Z", WC_Vertex_Z, "WC_Vertex_Z[nParticles]/D");
 	
 	treeTagger->Branch("nTagged", &nTagged,"nTagged/I");
+	treeTagger->Branch("photonbeam_E", photonbeam_E, "photonbeam_E[nTagged]/D");
 	treeTagger->Branch("tagged_ch", tagged_ch, "tagged_ch[nTagged]/I");
 	treeTagger->Branch("tagged_t", tagged_t, "tagged_t[nTagged]/D");
 
@@ -226,14 +231,19 @@ void    TA2GoAT::Reconstruct()
 		treeScaler->Fill();		
 	}
 
-	if(fLadder)
+	if(fTagger && fLadder)
 	{
+        // Get the conversion of tagger channel to photon energy
+		Double_t electron_E = fTagger->GetBeamEnergy();
+        const Double_t* ChToE = fLadder->GetECalibration();		
+		
 		// Collect Tagger M0 Hits
 		nTagged	= fLadder->GetNhits();
 		for(int i=0; i<nTagged; i++)
 		{
 			tagged_ch[i]	= fLadder->GetHits(i);
-			tagged_t[i]	= (fLadder->GetTimeOR())[i];
+			tagged_t[i]		= (fLadder->GetTimeOR())[i];
+			photonbeam_E[i] = electron_E - ChToE[tagged_ch[i]];
 		}
 	
 		// Collect Tagger M+ Hits
@@ -241,20 +251,21 @@ void    TA2GoAT::Reconstruct()
 		{
 			for(int i=0; i<fLadder->GetNhitsM(m); i++)
 			{
-				tagged_ch[nTagged+i]	= (fLadder->GetHitsM(m))[i];
-				tagged_t[nTagged+i]	= (fLadder->GetTimeORM(m))[i];
+				tagged_ch[nTagged+i] 	= (fLadder->GetHitsM(m))[i];
+				tagged_t[nTagged+i]	 	= (fLadder->GetTimeORM(m))[i];
+				photonbeam_E[nTagged+i] = electron_E - ChToE[tagged_ch[nTagged+i]];
 			}
 			nTagged	+= fLadder->GetNhitsM(m);
 		}
 	}
 	else nTagged = 0;
-
+	
 	// Gather particle information
 	nParticles = 0;
 	if(fCB)
 	{
 		// Collect CB Hits
-    		nParticles	= fCB->GetNParticle();      
+    	nParticles	= fCB->GetNParticle();      
 		for(int i=0; i<nParticles; i++)
 		{
 			TA2Particle part = fCB->GetParticles(i);

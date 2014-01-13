@@ -29,7 +29,7 @@ Use-CaLib-Veto:     0       1
 
 #Use-CaLib-CBEnergyPerRun: 	data/CBEnergyCorrectionPerRun.txt
 RootTree-Output-Folder:         ~/
-RootTree-File-Name:		RootTreeFULL
+RootTree-File-Name:		Acqu
 
 Initialise:
 
