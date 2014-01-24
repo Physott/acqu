@@ -7,39 +7,40 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                             treeRawEvent(0),
 															treeTagger(0),
 															treeTrigger(0),
-                                                                    treeDetectorHits(0),
-                                                                    treeScaler(0),
-                                                                    nParticles(0),
-                                                                    Ek(0),
-																	Theta(0),
-																	Phi(0),
-                                                                    time(0),
-                                                                    clusterSize(0),
-                                                                    Apparatus(0),
-                                                                    d_E(0),
-                                                                    WC0_E(0),
-                                                                    WC1_E(0),
-                                                                    WC_Vertex_X(0),
-                                                                    WC_Vertex_Y(0),
-                                                                    WC_Vertex_Z(0),
-                                                                    nTagged(0),
-                                                                    photonbeam_E(0),
-                                                                    tagged_ch(0),
-                                                                    tagged_t(0),
-                                                                    nNaI_Hits(0),
-                                                                    NaI_Hits(0),
-                                                                    nPID_Hits(0),
-                                                                    PID_Hits(0),
-                                                                    nWC_Hits(0),
-																	WC_Hits(0),
-																	nBaF2_PbWO4_Hits(0),
-																	BaF2_PbWO4_Hits(0),
-                                                                    nVeto_Hits(0),
-                                                                    Veto_Hits(0),
-                                                                    ESum(0),
-                                                                    Mult(0),
-                                                                    eventNumber(0),
-                                                                    eventID(0)														
+                                                            treeDetectorHits(0),
+                                                            treeScaler(0),
+                                                            nParticles(0),
+                                                            Px(0),
+															Py(0),
+															Pz(0),
+															E(0),
+                                                            time(0),
+                                                            clusterSize(0),
+                                                            Apparatus(0),
+                                                            d_E(0),
+                                                            WC0_E(0),
+                                                            WC1_E(0),
+                                                            WC_Vertex_X(0),
+                                                            WC_Vertex_Y(0),
+                                                            WC_Vertex_Z(0),
+                                                            nTagged(0),
+                                                            photonbeam_E(0),
+                                                            tagged_ch(0),
+                                                            tagged_t(0),
+                                                            nNaI_Hits(0),
+                                                            NaI_Hits(0),
+                                                            nPID_Hits(0),
+                                                            PID_Hits(0),
+                                                            nWC_Hits(0),
+															WC_Hits(0),
+															nBaF2_PbWO4_Hits(0),
+															BaF2_PbWO4_Hits(0),
+                                                            nVeto_Hits(0),
+                                                            Veto_Hits(0),
+                                                            ESum(0),
+                                                            Mult(0),
+                                                            eventNumber(0),
+                                                            eventID(0)														
 {
     	strcpy(outputFolder,"~");
     	strcpy(fileName,"RootTree");
@@ -70,9 +71,10 @@ void    TA2GoAT::LoadVariable()
    	TA2AccessSQL::LoadVariable();
 
 	TA2DataManager::LoadVariable("nParticles", 	&nParticles,EISingleX);
-	TA2DataManager::LoadVariable("Ek", 			Ek,			EDMultiX);
-	TA2DataManager::LoadVariable("Theta", 		Theta,		EDMultiX);   
-	TA2DataManager::LoadVariable("Phi", 		Phi,		EDMultiX);     	 	
+	TA2DataManager::LoadVariable("Px", 			Px,			EDMultiX);
+	TA2DataManager::LoadVariable("Py", 			Py,			EDMultiX);   
+	TA2DataManager::LoadVariable("Pz", 			Pz,			EDMultiX);    
+	TA2DataManager::LoadVariable("E", 			E,			EDMultiX);     	 	
 	TA2DataManager::LoadVariable("time", 		time,		EDMultiX);
 
 	TA2DataManager::LoadVariable("nTagged", 	&nTagged,	EISingleX);
@@ -114,9 +116,10 @@ void    TA2GoAT::SetConfig(Char_t* line, Int_t key)
 void    TA2GoAT::PostInit()
 {
 
-   	Ek		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	Theta		= new Double_t[TA2GoAT_MAX_PARTICLE];
-   	Phi		= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Px			= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Py			= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	Pz			= new Double_t[TA2GoAT_MAX_PARTICLE];
+   	E			= new Double_t[TA2GoAT_MAX_PARTICLE];
    	time		= new Double_t[TA2GoAT_MAX_PARTICLE];
    	clusterSize = new UChar_t[TA2GoAT_MAX_PARTICLE];
     
@@ -174,9 +177,10 @@ void    TA2GoAT::PostInit()
 	treeScaler	= new TTree("treeScaler", "treeScaler");
 	
 	treeRawEvent->Branch("nParticles",&nParticles,"nParticles/I");
-	treeRawEvent->Branch("Ek",  Ek,  "Ek[nParticles]/D");	
-	treeRawEvent->Branch("Theta",  Theta,  "Theta[nParticles]/D");	
-	treeRawEvent->Branch("Phi",  Phi,  "Phi[nParticles]/D");	
+	treeRawEvent->Branch("Px",  Px,  "Px[nParticles]/D");	
+	treeRawEvent->Branch("Py",  Py,  "Py[nParticles]/D");	
+	treeRawEvent->Branch("Pz",  Pz,  "Pz[nParticles]/D");		
+	treeRawEvent->Branch("E",   E,   "E[nParticles]/D");	
 	treeRawEvent->Branch("time", time, "time[nParticles]/D");
 	treeRawEvent->Branch("clusterSize", clusterSize, "clusterSize[nParticles]/b");
 	treeRawEvent->Branch("Apparatus", Apparatus, "Apparatus[nParticles]/b");
@@ -271,12 +275,12 @@ void    TA2GoAT::Reconstruct()
 			TA2Particle part = fCB->GetParticles(i);
 			
 			part.SetParticleID(kRootino); // Set mass to 0 (rootino)
-			part.SetMass(0.0);
 			
 			Apparatus[i]	= (UChar_t)EAppCB;			
-			Ek[i]			= part.GetT();
-			Theta[i]		= part.GetThetaDg();
-			Phi[i]			= part.GetPhiDg();			
+			Px[i]			= part.GetPx();
+			Py[i]			= part.GetPy();
+			Pz[i]			= part.GetPz();	
+			E[i]			= part.GetE();			
 			time[i]			= part.GetTime();	
 			clusterSize[i]  = (UChar_t)part.GetClusterSize();
 			d_E[i]			= part.GetVetoEnergy();
@@ -296,12 +300,12 @@ void    TA2GoAT::Reconstruct()
 			TA2Particle part = fTAPS->GetParticles(i);
 			
 			part.SetParticleID(kRootino); // Set mass to 0 (rootino)
-			part.SetMass(0.0);				
 			
 			Apparatus[nParticles+i]		= (UChar_t)EAppTAPS;		
-			Ek[nParticles+i]			= part.GetT();	
-			Theta[nParticles+i]			= part.GetThetaDg();
-			Phi[nParticles+i]			= part.GetPhiDg();					
+			Px[nParticles+i]			= part.GetPx();
+			Py[nParticles+i]			= part.GetPy();
+			Pz[nParticles+i]			= part.GetPz();	
+			E[nParticles+i]				= part.GetE();						
 			time[nParticles+i]			= part.GetTime();
 			clusterSize[nParticles+i]  	= (UChar_t)part.GetClusterSize();
 			d_E[nParticles+i]			= part.GetVetoEnergy();
@@ -354,21 +358,22 @@ void    TA2GoAT::Reconstruct()
 	if(fNaI) ESum = fNaI->GetTotalEnergy();
 	if(gAR->GetProcessType() == EMCProcess) MultiplicityMC();
 	else MultiplicityHW();
-
+	
 	//Apply EndBuffer
-    	Ek[nParticles] 		= EBufferEnd;
-    	Theta[nParticles]	= EBufferEnd;
-    	Phi[nParticles]		= EBufferEnd;
-    	time[nParticles] 	= EBufferEnd;
-    	WC0_E[nParticles] 	= EBufferEnd;
-    	WC1_E[nParticles] 	= EBufferEnd;
-    	WC_Vertex_X[nParticles] = EBufferEnd;  
-    	WC_Vertex_Y[nParticles] = EBufferEnd;    
+    Px[nParticles] 		= EBufferEnd;
+    Py[nParticles]		= EBufferEnd;
+    Pz[nParticles]		= EBufferEnd;
+    E[nParticles]		= EBufferEnd;
+    time[nParticles] 	= EBufferEnd;
+    WC0_E[nParticles] 	= EBufferEnd;
+    WC1_E[nParticles] 	= EBufferEnd;
+    WC_Vertex_X[nParticles] = EBufferEnd;  
+    WC_Vertex_Y[nParticles] = EBufferEnd;    
 	WC_Vertex_Z[nParticles] = EBufferEnd;    
 	d_E[nParticles] 	= EBufferEnd;    
     tagged_ch[nTagged] 	= EBufferEnd;
     tagged_t[nTagged] 	= EBufferEnd;	
-	
+    
 	//Fill Trees
 	treeRawEvent->Fill();
 	treeTagger->Fill();
