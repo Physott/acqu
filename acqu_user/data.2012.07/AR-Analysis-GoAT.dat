@@ -29,8 +29,8 @@ Reconstruct:
 #Use-CaLib-CBEnergyPerRun:	data/CBEnergyCorrectionPerRun.txt
 
 
-RootTree-Output-Folder: /media/Elements/GoAT
-RootTree-File-Name:		Raw
+RootTree-Output-Folder: /home/ott/
+RootTree-File-Name:		Acqu
 
 Initialise:
 
