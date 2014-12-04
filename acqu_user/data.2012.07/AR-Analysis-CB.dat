@@ -46,7 +46,7 @@ Misc: PosShift +0.0 +0.0 +0.0
 ##
 ##
 #DeltaE-E cuts for PID/NaI
-Misc: PIDCuts 48
+#Misc: PIDCuts 48
 #Options are:
 #1. PID element this cut is used for
 #2. PDG ID of particle, if DeltaE-E is inside the cut region

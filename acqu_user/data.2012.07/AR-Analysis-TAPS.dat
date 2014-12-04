@@ -69,11 +69,11 @@ TAPS_TOF_TaggerTime:  0.0
 #Set distance between TAPS and target centre for correct TOF calculation.
 #Additional correction for longer flight path to outer rings is possible.
 TAPSTargetDistance:  141.2
-TAPSDoFlightTimeCorrection:  1
+TAPSDoFlightTimeCorrection:  0
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TAPSTimeshift: 1.0
+TAPSTimeshift: 0.0
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -82,7 +82,7 @@ TAPSTimeshift: 1.0
 #Important: Calibrate Veto & BaF2 first & check whether your cut-window is
 #set correctly.
 #                     Enable   Min.     Max.
-TAPSVetoBaF2TimeCut:  1        -7.0     +9.0
+TAPSVetoBaF2TimeCut:  0        -7.0     +9.0
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
