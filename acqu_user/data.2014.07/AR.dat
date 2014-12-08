@@ -6,7 +6,7 @@
 ## To use invoke for example... AcquRoot AR.dat
 ########################################################################
 # Use DirectIO mode (experimental)
-UseDirectIO:
+#UseDirectIO:
 ##
 ## Batch mode operation...redirect output directory for log files etc.
 BatchDir: logfiles/
