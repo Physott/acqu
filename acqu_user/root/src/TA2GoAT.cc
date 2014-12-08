@@ -9,6 +9,7 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     treeTrigger(0),
                                                                     treeDetectorHits(0),
                                                                     treeScaler(0),
+                                                                    treePizza(0),
                                                                     nParticles(0),
                                                                     Ek(0),
 																	Theta(0),
@@ -62,6 +63,8 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
     	strcpy(inputName,"");
     	strcpy(fileName,"Acqu");
 
+        std::cout << "AcquRoot version for Pizza Detector test. Do not use for other stuff." << std::endl;
+
     	AddCmdList(RootTreeConfigKeys);
 }
 
@@ -80,6 +83,8 @@ TA2GoAT::~TA2GoAT()
 		delete treeDetectorHits;
 	if(treeScaler)
 		delete treeScaler;
+    if(treePizza)
+        delete treePizza;
     if(file)
 		delete file;
 }
@@ -219,6 +224,7 @@ void    TA2GoAT::PostInit()
 	treeTagger	= new TTree("treeTagger","treeTagger");
 	treeTrigger	= new TTree("treeTrigger","treeTrigger");
 	treeDetectorHits = new TTree("treeDetectorHits", "treeDetectorHits");
+    treePizza = new TTree("treePizza", "treePizza");
 	
 	treeRawEvent->Branch("nParticles",&nParticles,"nParticles/I");
 	treeRawEvent->Branch("Ek",  Ek,  "Ek[nParticles]/D");	
@@ -263,6 +269,10 @@ void    TA2GoAT::PostInit()
 	treeDetectorHits->Branch("BaF2_PbWO4_Cluster", BaF2_PbWO4_Cluster, "BaF2_PbWO4_Cluster[nBaF2_PbWO4_Hits]/I");
 	treeDetectorHits->Branch("nVeto_Hits", &nVeto_Hits, "nVeto_Hits/I");
 	treeDetectorHits->Branch("Veto_Hits", Veto_Hits, "Veto_Hits[nVeto_Hits]/I");
+
+    treePizza->Branch("ADC_LG", Pizza_ADC_LG, "ADC_LG[6]/s");
+    treePizza->Branch("ADC_SG", Pizza_ADC_SG, "ADC_SG[6]/s");
+    treePizza->Branch("TDC", Pizza_TDC, "TDC[6]/s");
 
 	// Store Scalers for non-MC process
 	if (gAR->GetProcessType() != EMCProcess) 
@@ -452,6 +462,27 @@ void    TA2GoAT::Reconstruct()
 
 		}
 		nParticles += fTAPS->GetNParticle(); // update number of particles
+
+        Pizza_ADC_LG[0] = GetADC()[20002];
+        Pizza_ADC_LG[1] = GetADC()[20006];
+        Pizza_ADC_LG[2] = GetADC()[22002];
+        Pizza_ADC_LG[3] = GetADC()[22002];
+        Pizza_ADC_LG[4] = GetADC()[23002];
+        Pizza_ADC_LG[5] = GetADC()[23002];
+
+        Pizza_ADC_SG[0] = GetADC()[20003];
+        Pizza_ADC_SG[1] = GetADC()[20007];
+        Pizza_ADC_SG[2] = GetADC()[22003];
+        Pizza_ADC_SG[3] = GetADC()[22007];
+        Pizza_ADC_SG[4] = GetADC()[23003];
+        Pizza_ADC_SG[5] = GetADC()[23007];
+
+        Pizza_TDC[0] = GetADC()[20008];
+        Pizza_TDC[1] = GetADC()[20009];
+        Pizza_TDC[2] = GetADC()[22008];
+        Pizza_TDC[3] = GetADC()[22009];
+        Pizza_TDC[4] = GetADC()[23008];
+        Pizza_TDC[5] = GetADC()[23009];
 	}
 
 	UInt_t *clhits;
@@ -604,6 +635,7 @@ void    TA2GoAT::Reconstruct()
 	if(treeTagger)			treeTagger->Fill();
 	if(treeTrigger)  		treeTrigger->Fill();
 	if(treeDetectorHits)	treeDetectorHits->Fill();
+    if(treePizza)           treePizza->Fill();
 
 	//increment event number
 	eventNumber++;	
@@ -912,7 +944,12 @@ void    TA2GoAT::Finish()
 	{
 		treeScaler->Write();	// Write	
 		delete treeScaler; 	// Close and delete in memory
-    	}
+    }
+    if(treePizza)
+    {
+        treePizza->Write();	// Write
+        delete treePizza; 	// Close and delete in memory
+    }
 
 	WriteHistograms();
 	

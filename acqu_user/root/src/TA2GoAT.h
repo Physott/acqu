@@ -39,6 +39,7 @@ private:
 		TTree* 		treeTrigger;		// Trigger information (filled each event)
 		TTree* 		treeDetectorHits;	// Detector system hit patterns (filled each event)
 		TTree*		treeScaler; 		// Scaler read information (filled each scaler read)
+        TTree*		treePizza;          // tree for Pizza test
 
     	char        outputFolder[256];
     	char        inputName[64];
@@ -115,6 +116,11 @@ private:
     	//Scalers
     	Int_t		eventNumber;
     	Int_t		eventID;    
+
+        //Pizza
+        UShort_t    Pizza_ADC_LG[6];
+        UShort_t    Pizza_ADC_SG[6];
+        UShort_t    Pizza_TDC[6];
 
 		// Display histograms
 		TH2*		Check_CBdE_E;
