@@ -685,6 +685,8 @@ void TA2MyCaLib::PostInit()
     {
         fHCalib_TAPS_IM_Neut     = new TH2F("CaLib_TAPS_IM_Neut", "CaLib_TAPS_IM_Neut;2#gamma invariant mass [MeV];TAPS element", 
                                             500, 0, 1000, fNelemTAPS, 0, fNelemTAPS);
+        fHCalib_TAPS_IM_Neut_vs_Multiplicity     = new TH3F("CaLib_TAPS_IM_Neut_vs_Multiplicity", "CaLib_TAPS_IM_Neut_vs_Multiplicity;2#gamma invariant mass [MeV];TAPS element", 
+                                            500, 0, 1000, fNelemTAPS, 0, fNelemTAPS, 10, 0, 10);
         fHCalib_TAPS_IM_Neut_1CB_1TAPS = new TH2F("CaLib_TAPS_IM_Neut_1CB_1TAPS", "CaLib_TAPS_IM_Neut_1CB_1TAPS;2#gamma invariant mass [MeV];TAPS element", 
                                                   500, 0, 1000, fNelemTAPS, 0, fNelemTAPS);
         fHCalib_TAPS_IM_TAPS      = new TH2F("CaLib_TAPS_IM_TAPS", "CaLib_TAPS_IM_TAPS;2#gamma invariant mass [MeV];TAPS element", 
@@ -1532,6 +1534,7 @@ void TA2MyCaLib::ReconstructPhysics()
                 if (fPartTAPS[i]->GetVetoEnergy() == 0 && fPartCB[j]->GetPIDEnergy() == 0)
                 {
                     fHCalib_TAPS_IM_Neut->Fill(im, fPartTAPS[i]->GetCentralElement());
+                    fHCalib_TAPS_IM_Neut_vs_Multiplicity->Fill(im, fPartTAPS[i]->GetCentralElement(), fTAPSNCluster+fCBNCluster);
 
                     // fill invariant mass for exactly 1 cluster in CB and 1 cluster in TAPS
                     if (fNNeutral == 2) fHCalib_TAPS_IM_Neut_1CB_1TAPS->Fill(im, fPartTAPS[i]->GetCentralElement());
