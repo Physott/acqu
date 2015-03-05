@@ -7,7 +7,7 @@
 ########################################################################
 ##
 ## Batch mode operation...redirect output directory for log files etc.
-BatchDir: logfiles/
+BatchDir: /home/ott/out/
 ##
 ##        Tree Name     	# branches	Process Type
 Name:     RawEvent_AR_Save	3		Raw
@@ -17,7 +17,7 @@ Branch:	  RawEvent_Scalers	2097152
 Branch:	  Mk1_Header            2097152
 ##
 ## Directory to save any created ROOT files (include final / )
-#Directory: output/
+Directory: /home/ott/output/
 ##
 ## User-defined analysis class
 Analysis: TA2UserAnalysis
