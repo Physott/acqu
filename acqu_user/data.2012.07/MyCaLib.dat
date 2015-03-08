@@ -12,22 +12,20 @@ Reconstruct:
 #
 
 # General:      dbhost       			 dbname   dbuser      dbpass        calibration
-Use-CaLib:      a2calib.online.a2.kph    calib    calib       basel10    	ETAP_Aug_12
+Use-CaLib:      blaster 	CaLib_2004_01-2012_08	calib 		basel10		2012_08_EtaP_Ott 
 #
-# miscellaneous calibrations    # target position  (0=off/1=on)
-Use-CaLib-Misc:                 0
 # tagger calib:     time  (0=off/1=on)
-Use-CaLib-TAGG:     1
-# CB calib:         energy  time    timewalk    quadr. energy  (0=off/1=on)
-Use-CaLib-CB:       1       1       0           1
-# TAPS calib:       energy  time    quadr. energy   LED thr.  (0=off/1=on)
-Use-CaLib-TAPS:     0       1       0               0
-# PID calib:        phi     droop   energy  time  (0=off/1=on)
-Use-CaLib-PID:      1       0       0       1
-# Veto calib:       energy  time  (0=off/1=on)
-Use-CaLib-Veto:     0       1
+Use-CaLib-TAGG:     1       0
+# CB calib:         energy  time    timewalk    quadr. energy    led  (0=off/1=on)
+Use-CaLib-CB:       1       1       0           0                0 
+# TAPS calib:       energy  time    quadr. energy   LED thr.    CFD thr.  (0=off/1=on)
+Use-CaLib-TAPS:     1       1       0               0           0
+# PID calib:        phi     energy  time  (0=off/1=on)
+Use-CaLib-PID:      1       0       1
+# Veto calib:       energy  time    LED thr. (0=off/1=on)
+Use-CaLib-Veto:     0       1       0
 
-Use-CaLib-CBEnergyPerRun:	data/CBEnergyCorrectionPerRun.txt
+Use-CaLib-CBEnergyPerRun:	data/gain_vs_det_vs_runnr.dat
 
 #
 # TA2MyCaLib calibration configuration
@@ -48,10 +46,10 @@ CaLib-CB-Time: 1
 
 # CB time walk calibration
 #              on/off  pi0_min  pi0_max  prompt_min  prompt_max  bg1_min  bg1_max  bg2_min  bg2_max  mm_min  mm_max
-CaLib-CB-Walk: 1       100      160      -130        -118        -550     -200     -50     300      -100    100
+#CaLib-CB-Walk: 1       100      160      -130        -118        -550     -200     -50     300      -100    100
 
 # TAPS energy calibration
-#CaLib-TAPS-Energy: 1
+CaLib-TAPS-Energy: 1
 
 # TAPS quadratic energy correction
 #                on/off  pi0_min  pi0_max  eta_min  eta_max
