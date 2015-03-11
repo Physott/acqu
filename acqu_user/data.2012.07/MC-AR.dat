@@ -45,8 +45,8 @@ Branch:   emwpc         1024
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #ROOT file(s) (GEANT4 output) to be analysed. Add more lines for more files
 #
-TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_etap_pi0pi0eta_00.root
-#TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_pi0pi0pi0_6g_00.root
+TreeFile: $HOME/g4_sim_etap_pi0pi0eta_00.root
+#TreeFile: $HOME/g4_sim_pi0pi0pi0_6g_00.root
 #TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_pi0_gg_05.root
 #TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_pi0_gg_00.root
 #TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_eta_gg_00.root
@@ -58,7 +58,7 @@ TreeFile: $HOME/Simulation-Chain/g4_sim/g4_sim_etap_pi0pi0eta_00.root
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Directory to save any created ROOT files (include final '/')
-Directory:  $HOME/mc/
+Directory:  $HOME/
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,6 +73,6 @@ SetADC:  40000   640	 12
 #Class name for analysis class to be used in further processing
 Analysis:      TA2UserAnalysis
 #Configuration file for selected analysis class
-AnalysisSetup:  AR-Analysis.dat
+AnalysisSetup:  MC-AR-Analysis.dat
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
