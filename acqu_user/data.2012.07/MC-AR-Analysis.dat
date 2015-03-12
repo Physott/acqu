@@ -63,7 +63,7 @@ Reconstruct-Analysis:
 ## Specify physics analysis
 ##			Name	Class		Config File
 #Physics-Analysis:       MyCaLib     TA2MyCaLib     data/MC-MyCaLib.dat
-Physics-Analysis:        GoAT     	 TA2GoAT		data/AR-Analysis-GoAT.dat
+Physics-Analysis:        GoAT     	 TA2GoAT		data/MC-AR-Analysis-GoAT.dat
 #Physics-Analysis:       MyAnalysis  TA2MyAnalysis  data/Dec2012/MyAnalysis.dat
 ##
 ## Do some post initialisation...usually necessary

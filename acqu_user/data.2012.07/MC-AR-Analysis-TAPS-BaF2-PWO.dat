@@ -16,7 +16,7 @@ BitPattern: data/AR-Analysis-TAPS-TriggerPat.dat
 Energy-Resolution: 0.022 1.1 1
 #
 # Time resolution, apply gaus. smear (sigma in ns), Use to smear MC data (0/1 = off/on)
-Time-Resolution: 2.87 0
+Time-Resolution: 0.5 0
 #
 # Theta Resolution in Degrees
 Theta-Resolution: 2.5
